@@ -110,41 +110,28 @@ Open the Vite URL shown in the terminal, usually:
 http://localhost:5173
 ```
 
-## Testing
+## Development Checks
 
-Backend:
-
-```powershell
-.\.venv311\Scripts\python -m pytest
-```
-
-Frontend typecheck:
-
-```powershell
-cd web
-npm.cmd test
-```
-
-Production build:
-
-```powershell
-cd web
-npm.cmd run build
-```
-
-Evaluation smoke benchmark:
-
-```powershell
-.\.venv311\Scripts\python app.py evaluate smoke
-```
-
-Full local development check:
+Run the whole gate before pushing:
 
 ```powershell
 .\.venv311\Scripts\python scripts/check_all.py
 ```
 
-See [Development](docs/development.md) for CI, dependency, security-scan, and commit workflow details.
+That covers Python lint, workflow lint, Python tests, the deterministic evaluation
+smoke benchmark and baseline comparison, frontend typecheck, frontend tests, the
+production web build, and the repository security scan.
+
+Individual pieces:
+
+```powershell
+.\.venv311\Scripts\python -m pytest
+.\.venv311\Scripts\python app.py evaluate smoke
+cd web; npm.cmd run typecheck; npm.cmd test; npm.cmd run build
+```
+
+See [Development](docs/development.md) for CI behavior, markers, dependencies,
+the security scan, and the commit workflow.
 
 ## Running From The CLI
 
@@ -423,12 +410,11 @@ recipes for adding a template part, an operation, or an assembly feature live in
 
 Before handing off a milestone:
 
-- Run the backend tests.
-- Run the frontend typecheck.
-- Run the production web build.
+- Run `python scripts/check_all.py` and confirm every stage passes.
 - Confirm security scans are clean or explain expected policy-only matches.
 - Verify README line count moved in the intended direction.
 - Check `git status --short`.
+- Confirm CI is green on `main` after pushing.
 - Do not commit or push unless explicitly asked.
 
 ## Branding
