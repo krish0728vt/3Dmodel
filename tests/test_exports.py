@@ -9,7 +9,6 @@ from fastapi.testclient import TestClient
 
 from ai.schemas import (
     BoxSpec,
-    CreateBoxOperation,
     CreateSketchOperation,
     ExtrudeOperation,
     OperationPlan,

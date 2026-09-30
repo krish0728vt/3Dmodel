@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import platform
-import sys
 from collections import Counter
 from datetime import UTC, datetime
 from typing import Any

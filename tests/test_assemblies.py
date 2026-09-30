@@ -25,7 +25,6 @@ from assemblies.models import (
     AssemblyComponent,
     ComponentSourceType,
     MoveComponentEdit,
-    SetGroundedEdit,
     SetVisibilityEdit,
     Transform,
 )

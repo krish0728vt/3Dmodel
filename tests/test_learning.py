@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
 from ai.schemas import (
@@ -14,7 +12,6 @@ from cad.operation_validator import OperationValidationError, validate_operation
 from learning.classifier import classify_failure
 from learning.models import FailureCategory
 from learning.repair import (
-    PlanRepairProvider,
     create_regression_candidate,
     generate_with_repair,
     maybe_record_successful_pattern,

@@ -6,7 +6,7 @@ from evaluation.baselines import compare_to_baseline
 from evaluation.categories import BenchmarkCategory
 from evaluation.fixtures import load_cases
 from evaluation.metrics import calculate_metrics
-from evaluation.models import BenchmarkStatus, EvaluationReport, RegressionRecord
+from evaluation.models import BenchmarkStatus, EvaluationReport
 from evaluation.reporting import markdown_report, write_reports
 from evaluation.runner import evaluate_case
 

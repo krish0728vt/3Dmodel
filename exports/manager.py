@@ -63,7 +63,7 @@ def run_export(
             result = _export_single(format_name, request, context, output_dir, generated_at)
             _record(export_store, request, context, result)
             results.append(result)
-        except ExportError as exc:
+        except ExportError:
             raise
         except Exception as exc:
             raise ExportError(f"{format_name.value.upper()} export failed: {exc}") from exc

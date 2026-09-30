@@ -1,0 +1,35 @@
+# Deliberately conservative: real errors and dead code only.
+# The repository is not mass-formatted, and style rules beyond this
+# subset are intentionally left out so CI stays signal, not noise.
+target-version = "py311"
+line-length = 160
+
+exclude = [
+    ".venv",
+    ".venv311",
+    "data",
+    "outputs",
+    "test-results",
+    "web",
+]
+
+[lint]
+select = [
+    "E4",   # import shadowing / placement errors
+    "E7",   # statement-level errors
+    "E9",   # syntax and IO errors
+    "F",    # pyflakes: undefined names, unused imports, dead locals
+    "B004", # bare hasattr(__call__) misuse
+    "B006", # mutable default arguments
+    "B012", # break/return inside finally swallows exceptions
+]
+
+[format]
+# `ruff format` is available for new files but is not enforced in CI,
+# so existing code is not reformatted wholesale.
+quote-style = "double"
+
+[lint.per-file-ignores]
+# app.py deliberately quiets fontTools logging before importing CadQuery,
+# so module-level imports cannot all sit above that call.
+"app.py" = ["E402"]

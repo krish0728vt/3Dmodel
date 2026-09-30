@@ -4,7 +4,6 @@ import json
 import re
 from copy import deepcopy
 from pathlib import Path
-from typing import Any
 
 from pydantic import TypeAdapter
 
@@ -29,7 +28,6 @@ from assemblies.models import (
     SetGroundedEdit,
     SetTransformEdit,
     SetVisibilityEdit,
-    Transform,
 )
 from assemblies.store import AssemblyStore
 from assemblies.transforms import apply_transform, bbox_from_cadquery, boxes_overlap, merge_bounding_boxes, transform_bounding_box, transform_point

@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ai.schemas import OperationPlan, SupportedPartSpec
 from cad.generator import generate_step, generate_stl
 from projects.models import RevisionRecord
 from projects.serialization import model_from_json

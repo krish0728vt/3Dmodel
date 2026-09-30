@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import json
 import os
 import shutil
 import time
@@ -10,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Callable
 
-from pydantic import TypeAdapter, ValidationError
+from pydantic import TypeAdapter
 
 from ai.schemas import OperationPlan, SupportedDesignSpec
 from assemblies.manager import assembly_engineering, assembly_preview, initialize_revision
@@ -553,8 +552,8 @@ def _print_summary(report: EvaluationReport) -> None:
     print(f"Failed: {report.metrics.fail_count}")
     print(f"Unsupported: {report.metrics.unsupported_count}")
     print(f"Regressions: {len(report.regressions)}")
-    print(f"JSON: outputs/evaluation/latest.json")
-    print(f"Markdown: outputs/evaluation/latest.md")
+    print("JSON: outputs/evaluation/latest.json")
+    print("Markdown: outputs/evaluation/latest.md")
 
 
 if __name__ == "__main__":

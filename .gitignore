@@ -9,6 +9,10 @@ __pycache__/
 venv/
 env/
 *.egg-info/
+.coverage
+coverage.xml
+htmlcov/
+test-results/
 
 outputs/*
 !outputs/.gitkeep
@@ -20,3 +24,6 @@ web/*.tsbuildinfo
 web/**/*.tsbuildinfo
 web/vite.config.js
 web/vite.config.d.ts
+npm-debug.log*
+*.tmp
+*.temp
