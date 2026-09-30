@@ -27,3 +27,4 @@ web/vite.config.d.ts
 npm-debug.log*
 *.tmp
 *.temp
+.ci-tmp/

@@ -46,6 +46,7 @@ Or from PowerShell:
 The check runner executes:
 
 - Python lint (`ruff check .`)
+- workflow lint (`actionlint` over `.github/workflows`)
 - Python tests
 - deterministic evaluation smoke benchmark
 - evaluation baseline comparison
@@ -58,6 +59,7 @@ Target a group while iterating:
 
 ```powershell
 .\.venv311\Scripts\python scripts/check_all.py --only lint
+.\.venv311\Scripts\python scripts/check_all.py --only workflows
 .\.venv311\Scripts\python scripts/check_all.py --only python
 .\.venv311\Scripts\python scripts/check_all.py --only frontend
 .\.venv311\Scripts\python scripts/check_all.py --only evaluation
@@ -109,7 +111,7 @@ Jobs:
 - `python-tests`: Python 3.11, system CAD libraries, `pip install -r requirements.txt -r requirements-dev.txt`, `ruff check .`, `python -m pytest` (JUnit XML uploaded as an artifact)
 - `frontend-tests`: Node 22, `npm ci`, typecheck, Vitest, production build
 - `evaluation-smoke`: deterministic `python app.py evaluate smoke` and baseline compare
-- `security-checks`: lightweight repository security scan
+- `security-checks`: `actionlint` workflow validation and the repository security scan
 
 ### CadQuery In CI
 
@@ -150,6 +152,17 @@ Style rules beyond that are intentionally excluded so CI stays signal rather tha
 `app.py` carries a scoped `E402` ignore because it quiets `fontTools` logging before
 importing CadQuery. `ruff format` is available for new files but is **not** enforced in
 CI, so the repository is not mass-formatted.
+
+Workflow files are linted with `actionlint`, which catches invalid action inputs and
+context misuse that GitHub only reports by failing the run with zero jobs scheduled:
+
+```powershell
+.\.venv311\Scripts\python scripts/check_all.py --only workflows
+```
+
+Always run this before pushing a workflow change. Note that the `runner` context is
+unavailable in a job-level `env:` block; use `github.workspace` there, or set the
+variable on the individual step.
 
 ## Dependencies
 

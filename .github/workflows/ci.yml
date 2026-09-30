@@ -17,7 +17,7 @@ jobs:
     name: Python tests
     runs-on: ubuntu-latest
     env:
-      SHAH_LEARNING_DB_PATH: ${{ runner.temp }}/shah_ci/shah_learning.db
+      SHAH_LEARNING_DB_PATH: ${{ github.workspace }}/.ci-tmp/shah_learning.db
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Checkout
@@ -76,7 +76,7 @@ jobs:
     name: Evaluation smoke
     runs-on: ubuntu-latest
     env:
-      SHAH_LEARNING_DB_PATH: ${{ runner.temp }}/shah_ci/shah_learning.db
+      SHAH_LEARNING_DB_PATH: ${{ github.workspace }}/.ci-tmp/shah_learning.db
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Checkout
@@ -119,5 +119,9 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Install check tooling
+        run: python -m pip install actionlint-py
+      - name: Lint workflow definitions
+        run: python scripts/check_all.py --only workflows
       - name: Run repository security scan
         run: python scripts/security_check.py

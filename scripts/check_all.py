@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 import subprocess
 import sys
 from dataclasses import dataclass
@@ -24,13 +25,13 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--only",
         action="append",
-        choices=["lint", "python", "evaluation", "frontend", "security"],
+        choices=["lint", "workflows", "python", "evaluation", "frontend", "security"],
         help="Run only the selected group. May be repeated.",
     )
     parser.add_argument("--continue-on-error", action="store_true")
     args = parser.parse_args(argv)
 
-    selected = set(args.only or ["lint", "python", "evaluation", "frontend", "security"])
+    selected = set(args.only or ["lint", "workflows", "python", "evaluation", "frontend", "security"])
     checks = _checks(selected)
     failures: list[str] = []
     for check in checks:
@@ -60,6 +61,12 @@ def _checks(selected: set[str]) -> list[Check]:
     checks: list[Check] = []
     if "lint" in selected:
         checks.append(Check("Python lint (ruff)", [python, "-m", "ruff", "check", "."]))
+    if "workflows" in selected:
+        actionlint = _find_actionlint()
+        if actionlint is None:
+            print("SKIP: Workflow lint (actionlint not installed; pip install -r requirements-dev.txt)")
+        else:
+            checks.append(Check("Workflow lint (actionlint)", [actionlint, *_workflow_files()]))
     if "python" in selected:
         checks.append(Check("Python tests", [python, "-m", "pytest"]))
     if "evaluation" in selected:
@@ -72,6 +79,21 @@ def _checks(selected: set[str]) -> list[Check]:
     if "security" in selected:
         checks.append(Check("Security scan", [python, "scripts/security_check.py"]))
     return checks
+
+
+def _find_actionlint() -> str | None:
+    """actionlint ships as a binary next to the interpreter or on PATH."""
+    scripts_dir = Path(sys.executable).parent
+    for candidate in (scripts_dir / "actionlint.exe", scripts_dir / "actionlint"):
+        if candidate.exists():
+            return str(candidate)
+    return shutil.which("actionlint")
+
+
+def _workflow_files() -> list[str]:
+    workflows = ROOT / ".github" / "workflows"
+    found = sorted(workflows.glob("*.yml")) + sorted(workflows.glob("*.yaml"))
+    return [str(path) for path in found]
 
 
 if __name__ == "__main__":
