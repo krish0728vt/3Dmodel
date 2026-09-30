@@ -448,6 +448,10 @@ def main(argv: list[str] | None = None) -> int:
         return _export_cli(argv[1:])
     if argv and argv[0] == "assembly":
         return _assembly_cli(argv[1:])
+    if argv and argv[0] == "evaluate":
+        from evaluation.runner import main as evaluation_main
+
+        return evaluation_main(argv[1:])
 
     parser = argparse.ArgumentParser(description="SHAH INDUSTRIES AI CAD GENERATOR")
     parser.add_argument("--plan", type=Path, help="Load and run a JSON operation plan.")

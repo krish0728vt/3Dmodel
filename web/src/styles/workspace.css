@@ -832,6 +832,20 @@ input {
   gap: 7px;
 }
 
+.evaluation-panel {
+  align-content: start;
+}
+
+.stage-list {
+  display: grid;
+  gap: 5px;
+}
+
+.stage-list small {
+  color: #9fb3bb;
+  overflow-wrap: anywhere;
+}
+
 .design-intent-panel {
   display: grid;
   gap: 10px;

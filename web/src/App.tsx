@@ -7,7 +7,7 @@ import { Header } from "./components/Header";
 import { Inspector } from "./components/Inspector";
 import { PromptConsole } from "./components/PromptConsole";
 import { RevisionHistory } from "./components/RevisionHistory";
-import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EngineeringReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, MaterialSpec, PatternRecord, PreviewObject, ProjectDetail, ProjectSummary, RepairStrategyRecord, ResolvedDesign, RevisionPreview, RevisionSummary, SelectionState } from "./types/api";
+import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EngineeringReport, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, MaterialSpec, PatternRecord, PreviewObject, ProjectDetail, ProjectSummary, RepairStrategyRecord, ResolvedDesign, RevisionPreview, RevisionSummary, SelectionState } from "./types/api";
 import { CadViewer } from "./viewer/CadViewer";
 
 type ProjectStatusFilter = "active" | "archived" | "all";
@@ -43,6 +43,7 @@ export default function App() {
   const [assemblyPreview, setAssemblyPreview] = useState<AssemblyPreview | null>(null);
   const [assemblyEngineering, setAssemblyEngineering] = useState<AssemblyEngineeringSummary | null>(null);
   const [exportResult, setExportResult] = useState<ExportBatchResult | null>(null);
+  const [evaluationReport, setEvaluationReport] = useState<EvaluationReport | null>(null);
   const [previewModel, setPreviewModel] = useState<RevisionPreview | null>(null);
   const [selection, setSelection] = useState<SelectionState>({
     selectedOperationId: null,
@@ -117,7 +118,7 @@ export default function App() {
     try {
       await api.health();
       setBackendOnline(true);
-      const [projectList, assemblyList, stats, lessonList, patternList, repairStrategyList, failureList, capabilityMetricList, capabilityList, sourceList, materialList] = await Promise.all([
+      const [projectList, assemblyList, stats, lessonList, patternList, repairStrategyList, failureList, capabilityMetricList, capabilityList, sourceList, materialList, evaluation] = await Promise.all([
         api.projects({ search: projectSearch, status: projectStatusFilter, sort: projectSort }),
         api.assemblies(),
         api.learningStats(),
@@ -128,7 +129,8 @@ export default function App() {
         api.capabilityAnalytics(),
         api.capabilities(),
         api.capabilitySources(),
-        api.materials()
+        api.materials(),
+        api.evaluationLatest().catch(() => ({ available: false, report: null }))
       ]);
       setProjects(projectList);
       setAssemblies(assemblyList);
@@ -141,6 +143,7 @@ export default function App() {
       setCapabilities(capabilityList);
       setCapabilitySources(sourceList);
       setMaterials(materialList);
+      setEvaluationReport(evaluation.report);
       const nextProjectId = projectList.some((project) => project.project_id === projectId) ? projectId : projectList[0]?.project_id ?? null;
       if (nextProjectId) {
         await loadProject(nextProjectId, preferredSelectionId);
@@ -691,6 +694,7 @@ export default function App() {
           assemblyPreview={assemblyPreview}
           assemblyEngineering={assemblyEngineering}
           exportResult={exportResult}
+          evaluationReport={evaluationReport}
           learningStats={learningStats}
           resolvedDesign={resolvedDesign}
           lessons={lessons}

@@ -50,6 +50,7 @@ Detailed notes live in focused docs:
 - [API](docs/api.md)
 - [Assemblies](docs/assemblies.md)
 - [Exporting](docs/exporting.md)
+- [Evaluation](docs/evaluation.md)
 - [Projects](docs/projects.md)
 - [Parametrics](docs/parametrics.md)
 - [Learning Core](docs/learning-core.md)
@@ -128,6 +129,12 @@ cd web
 npm.cmd run build
 ```
 
+Evaluation smoke benchmark:
+
+```powershell
+.\.venv311\Scripts\python app.py evaluate smoke
+```
+
 ## Running From The CLI
 
 Generate a model:
@@ -179,6 +186,7 @@ The web app has five working regions:
 - Viewer: STL rendering, semantic object selection, camera tools, measurements, and bounding-box readouts.
 - Inspector: selection details, structured edits, design intent, assembly controls, engineering, learning, and capabilities.
 - Prompt console: create and edit models conversationally.
+- Evaluation panel: read-only summary of the latest deterministic benchmark report.
 
 The empty workspace uses the larger SHAH INDUSTRIES logo and example prompts.
 

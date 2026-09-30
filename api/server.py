@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import assemblies, capabilities, editing, engineering, exports, generation, health, learning, parametrics, preview, projects, revisions
+from api.routes import assemblies, capabilities, editing, engineering, evaluation, exports, generation, health, learning, parametrics, preview, projects, revisions
 
 
 def create_app() -> FastAPI:
@@ -27,6 +27,7 @@ def create_app() -> FastAPI:
     app.include_router(revisions.router)
     app.include_router(exports.router)
     app.include_router(engineering.router)
+    app.include_router(evaluation.router)
     app.include_router(learning.router)
     app.include_router(capabilities.router)
     app.include_router(parametrics.router)

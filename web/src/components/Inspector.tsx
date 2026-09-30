@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { assemblyDownloadUrl, exportDownloadUrl } from "../api/client";
-import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, PatternRecord, PreviewObject, ProjectDetail, RepairStrategyRecord, ResolvedDesign, RevisionPreview, SelectionState } from "../types/api";
+import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, PatternRecord, PreviewObject, ProjectDetail, RepairStrategyRecord, ResolvedDesign, RevisionPreview, SelectionState } from "../types/api";
 import type { EngineeringReport, MaterialSpec } from "../types/api";
 import { EngineeringPanel } from "./EngineeringPanel";
 import { operationDetails, operationDisplayName, operationKind, templateDetails } from "../utils/modelFormatting";
@@ -15,6 +15,7 @@ type InspectorProps = {
   assemblyPreview: AssemblyPreview | null;
   assemblyEngineering: AssemblyEngineeringSummary | null;
   exportResult: ExportBatchResult | null;
+  evaluationReport: EvaluationReport | null;
   learningStats: LearningStats | null;
   resolvedDesign: ResolvedDesign | null;
   lessons: LessonRecord[];
@@ -75,6 +76,7 @@ export function Inspector({
   assemblyPreview,
   assemblyEngineering,
   exportResult,
+  evaluationReport,
   learningStats,
   resolvedDesign,
   lessons,
@@ -223,6 +225,7 @@ export function Inspector({
         onRevalidatePattern={onRevalidatePattern}
         onDeprecatePattern={onDeprecatePattern}
       />
+      <EvaluationPanel report={evaluationReport} />
       <CapabilityManager
         capabilities={capabilities}
         sources={capabilitySources}
@@ -233,6 +236,73 @@ export function Inspector({
         onDisableCapability={onDisableCapability}
       />
     </aside>
+  );
+}
+
+function EvaluationPanel({ report }: { report: EvaluationReport | null }) {
+  const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
+  const failed = report?.results.filter((result) => result.overall_status === "fail") ?? [];
+  const selected = report?.results.find((result) => result.case_id === selectedCaseId) ?? failed[0] ?? report?.results[0] ?? null;
+
+  return (
+    <section className="system-section evaluation-panel">
+      <h3>Evaluation</h3>
+      {report ? (
+        <>
+          <div className="learning-stat-grid">
+            <Metric label="Cases" value={String(report.metrics.total_cases)} />
+            <Metric label="Passed" value={String(report.metrics.pass_count)} />
+            <Metric label="Failed" value={String(report.metrics.fail_count)} />
+            <Metric label="Regressions" value={String(report.regressions.length)} />
+          </div>
+          <div className="status-strip">
+            <span>Stages</span>
+            <small>Parser: {report.metrics.parse_success_rate}%</small>
+            <small>CAD: {report.metrics.cad_generation_success_rate}%</small>
+            <small>STEP: {report.metrics.step_export_success_rate}%</small>
+            <small>STL: {report.metrics.stl_export_success_rate}%</small>
+          </div>
+          <div className="learning-list">
+            <strong>Categories</strong>
+            {Object.entries(report.metrics.category).slice(0, 6).map(([category, data]) => (
+              <div className="learning-item" key={category}>
+                <span>{category}</span>
+                <small>{data.pass}/{data.total} pass / {data.success_rate}%</small>
+              </div>
+            ))}
+          </div>
+          <div className="learning-list">
+            <strong>{failed.length ? "Failed Cases" : "Case Detail"}</strong>
+            {(failed.length ? failed : report.results.slice(0, 3)).map((result) => (
+              <div className="learning-item" key={result.case_id}>
+                <span>{result.name}</span>
+                <small>{result.case_id} / {result.overall_status}</small>
+                <div className="mini-actions">
+                  <button type="button" onClick={() => setSelectedCaseId(result.case_id)}>Inspect</button>
+                </div>
+              </div>
+            ))}
+          </div>
+          {selected ? (
+            <div className="learning-detail">
+              <strong>{selected.name}</strong>
+              <dl>
+                <DetailRow label="Status" value={selected.overall_status} />
+                <DetailRow label="Category" value={selected.category} />
+                <DetailRow label="Failure" value={selected.failure_category ?? "none"} />
+              </dl>
+              <div className="stage-list">
+                {selected.stages.map((stage) => (
+                  <small key={stage.name}>{stage.success ? "PASS" : "FAIL"} / {stage.name}{stage.message ? ` / ${stage.message}` : ""}</small>
+                ))}
+              </div>
+            </div>
+          ) : null}
+        </>
+      ) : (
+        <div className="muted">No evaluation report found. Run python app.py evaluate smoke.</div>
+      )}
+    </section>
   );
 }
 

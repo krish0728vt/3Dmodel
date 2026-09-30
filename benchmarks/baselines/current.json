@@ -1,0 +1,2805 @@
+{
+  "benchmark_schema_version": "1.0",
+  "suite": "full",
+  "milestone": "17",
+  "generated_at": "2026-09-30T16:17:34.629395+00:00",
+  "deterministic": true,
+  "live_ai": false,
+  "case_count": 22,
+  "filters": {
+    "category": null,
+    "difficulty": null,
+    "case_id": null,
+    "smoke": false
+  },
+  "metrics": {
+    "total_cases": 22,
+    "pass_count": 20,
+    "fail_count": 0,
+    "unsupported_count": 1,
+    "skipped_count": 1,
+    "parse_success_rate": 100.0,
+    "schema_success_rate": 90.91,
+    "cad_generation_success_rate": 72.73,
+    "step_export_success_rate": 100.0,
+    "stl_export_success_rate": 100.0,
+    "repair_success_rate": 100.0,
+    "parametric_preservation_rate": 100.0,
+    "assembly_success_rate": 100.0,
+    "capability_success_rate": 100.0,
+    "category": {
+      "ambiguous_inputs": {
+        "total": 1,
+        "pass": 0,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 0.0
+      },
+      "assemblies": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "basic_primitives": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "boolean_operations": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "brackets": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "capabilities": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "enclosures": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "engineering_analysis": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "exports": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "holes": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "invalid_inputs": {
+        "total": 3,
+        "pass": 2,
+        "fail": 0,
+        "unsupported": 1,
+        "success_rate": 66.67
+      },
+      "lofts": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "mounting_parts": {
+        "total": 2,
+        "pass": 2,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "parametrics": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "patterns": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "shells": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "sketches": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "sweeps": {
+        "total": 1,
+        "pass": 1,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      }
+    },
+    "difficulty": {
+      "advanced": {
+        "total": 3,
+        "pass": 2,
+        "fail": 0,
+        "unsupported": 1,
+        "success_rate": 66.67
+      },
+      "complex": {
+        "total": 5,
+        "pass": 5,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      },
+      "medium": {
+        "total": 7,
+        "pass": 6,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 85.71
+      },
+      "simple": {
+        "total": 7,
+        "pass": 7,
+        "fail": 0,
+        "unsupported": 0,
+        "success_rate": 100.0
+      }
+    },
+    "failure_distribution": {
+      "expected_ambiguity": 1,
+      "cad_validation": 1,
+      "expected_unsupported": 1
+    },
+    "total_duration_ms": 10680,
+    "average_duration_ms": 485.45,
+    "slowest_cases": [
+      {
+        "case_id": "electronics_enclosure_posts",
+        "duration_ms": 2374,
+        "status": "pass"
+      },
+      {
+        "case_id": "capability_spur_gear_24",
+        "duration_ms": 1533,
+        "status": "pass"
+      },
+      {
+        "case_id": "pattern_slotted_bracket",
+        "duration_ms": 903,
+        "status": "pass"
+      },
+      {
+        "case_id": "assembly_translated_boxes",
+        "duration_ms": 837,
+        "status": "pass"
+      },
+      {
+        "case_id": "mounting_plate_corner_holes",
+        "duration_ms": 639,
+        "status": "pass"
+      }
+    ]
+  },
+  "regressions": [],
+  "results": [
+    {
+      "case_id": "ambiguous_make_cylinder_taller",
+      "name": "Ambiguous edit with two cylinders",
+      "category": "ambiguous_inputs",
+      "difficulty": "medium",
+      "mode": "edit",
+      "started_at": "2026-09-30T16:17:23.916858+00:00",
+      "duration_ms": 1,
+      "parse_success": true,
+      "schema_validation_success": false,
+      "parametric_resolution_success": false,
+      "cad_validation_success": false,
+      "cad_generation_success": false,
+      "solid_validation_success": false,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": false,
+      "engineering_analysis_success": false,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": "expected_ambiguity",
+      "failure_message": "Expected ambiguity: two cylinder targets exist and clarification is acceptable.",
+      "metrics": {
+        "expected_exports": []
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": "Cleanly classified as expected ambiguity."
+        }
+      ],
+      "overall_status": "skipped"
+    },
+    {
+      "case_id": "assembly_translated_boxes",
+      "name": "Translated two-component assembly",
+      "category": "assemblies",
+      "difficulty": "medium",
+      "mode": "assembly",
+      "started_at": "2026-09-30T16:17:23.928625+00:00",
+      "duration_ms": 837,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": false,
+      "cad_validation_success": false,
+      "cad_generation_success": false,
+      "solid_validation_success": false,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": false,
+      "engineering_analysis_success": false,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [],
+        "assembly": {
+          "component_count": 2,
+          "known_mass_g": 0.0,
+          "interference_count": 0,
+          "bbox": {
+            "xmin": -10.0,
+            "ymin": -10.0,
+            "zmin": -2.5,
+            "xmax": 35.0,
+            "ymax": 10.0,
+            "zmax": 2.5,
+            "xlen": 45.0,
+            "ylen": 20.0,
+            "zlen": 5.0
+          }
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": "Assembly fixture schema validated."
+        },
+        {
+          "name": "assembly_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "basic_cube_050",
+      "name": "50 mm cube",
+      "category": "basic_primitives",
+      "difficulty": "simple",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:24.766732+00:00",
+      "duration_ms": 117,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 124999.99999999999,
+          "surface_area_mm2": 15000.0,
+          "bounding_box": {
+            "min_x_mm": -25.0,
+            "min_y_mm": -25.0,
+            "min_z_mm": -25.0,
+            "max_x_mm": 25.0,
+            "max_y_mm": 25.0,
+            "max_z_mm": 25.0
+          },
+          "size": {
+            "x_mm": 50.0,
+            "y_mm": 50.0,
+            "z_mm": 50.0
+          },
+          "center_of_mass": {
+            "x_mm": 1.0995648835887552e-16,
+            "y_mm": -4.547473508864642e-17,
+            "z_mm": 4.656612873077393e-16
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\basic_cube_050\\basic_cube_050.step",
+        "stl_path": "outputs\\evaluation\\work\\basic_cube_050\\basic_cube_050.stl",
+        "engineering": {
+          "volume_mm3": 124999.99999999999,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 16,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 6,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 35,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 25,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 24,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "basic_cylinder_030x080",
+      "name": "30 x 80 cylinder",
+      "category": "basic_primitives",
+      "difficulty": "simple",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:24.884233+00:00",
+      "duration_ms": 162,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 56548.667764616286,
+          "surface_area_mm2": 8953.539062730912,
+          "bounding_box": {
+            "min_x_mm": -15.0,
+            "min_y_mm": -15.0,
+            "min_z_mm": 0.0,
+            "max_x_mm": 15.0,
+            "max_y_mm": 15.0,
+            "max_z_mm": 80.0
+          },
+          "size": {
+            "x_mm": 30.0,
+            "y_mm": 30.0,
+            "z_mm": 80.0
+          },
+          "center_of_mass": {
+            "x_mm": -2.3160092400488112e-15,
+            "y_mm": 1.395426983839974e-16,
+            "z_mm": 40.00000000000001
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\basic_cylinder_030x080\\basic_cylinder_030x080.step",
+        "stl_path": "outputs\\evaluation\\work\\basic_cylinder_030x080\\basic_cylinder_030x080.stl",
+        "engineering": {
+          "volume_mm3": 56548.667764616286,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 37,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 3,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 34,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 43,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 40,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "capability_spur_gear_24",
+      "name": "Local spur gear capability",
+      "category": "capabilities",
+      "difficulty": "advanced",
+      "mode": "capability",
+      "started_at": "2026-09-30T16:17:25.040619+00:00",
+      "duration_ms": 1533,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": false,
+      "cad_validation_success": false,
+      "cad_generation_success": false,
+      "solid_validation_success": false,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": false,
+      "engineering_analysis_success": false,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [],
+        "capability": {
+          "result_type": "geometry",
+          "step_path": "outputs\\capabilities\\spur_gear\\spur_gear_m1p0_t24_w5p0_b4p0.step",
+          "stl_path": "outputs\\capabilities\\spur_gear\\spur_gear_m1p0_t24_w5p0_b4p0.stl",
+          "metadata": {
+            "module_mm": 1.0,
+            "teeth": 24,
+            "thickness_mm": 5.0,
+            "bore_diameter_mm": 4.0,
+            "pitch_diameter_mm": 24.0,
+            "outside_diameter_mm": 26.0,
+            "root_diameter_mm": 21.5,
+            "pressure_angle_deg": 20.0,
+            "tooth_profile": "approximated_involute_layout"
+          },
+          "units": "mm"
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": "Capability fixture schema validated."
+        },
+        {
+          "name": "capability_invocation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "electronics_enclosure_posts",
+      "name": "PCB enclosure with posts",
+      "category": "enclosures",
+      "difficulty": "medium",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:26.580834+00:00",
+      "duration_ms": 2374,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 18350.022038129122,
+          "surface_area_mm2": 19004.800782651684,
+          "bounding_box": {
+            "min_x_mm": -37.0,
+            "min_y_mm": -24.5,
+            "min_z_mm": 0.0,
+            "max_x_mm": 37.0,
+            "max_y_mm": 24.5,
+            "max_z_mm": 24.0
+          },
+          "size": {
+            "x_mm": 74.0,
+            "y_mm": 49.0,
+            "z_mm": 24.0
+          },
+          "center_of_mass": {
+            "x_mm": 3.5190215952711503e-15,
+            "y_mm": 2.4781842220219366e-16,
+            "z_mm": 8.00249933394977
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\electronics_enclosure_posts\\electronics_enclosure_posts.step",
+        "stl_path": "outputs\\evaluation\\work\\electronics_enclosure_posts\\electronics_enclosure_posts.stl",
+        "engineering": {
+          "volume_mm3": 18350.022038129122,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 566,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 17,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 585,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 637,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 565,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "engineering_aluminum_cube",
+      "name": "Engineering mass check",
+      "category": "engineering_analysis",
+      "difficulty": "simple",
+      "mode": "engineering",
+      "started_at": "2026-09-30T16:17:28.943722+00:00",
+      "duration_ms": 30,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [],
+        "geometry": {
+          "volume_mm3": 7999.999999999998,
+          "surface_area_mm2": 2399.9999999999995,
+          "bounding_box": {
+            "min_x_mm": -10.0,
+            "min_y_mm": -10.0,
+            "min_z_mm": -10.0,
+            "max_x_mm": 10.0,
+            "max_y_mm": 10.0,
+            "max_z_mm": 10.0
+          },
+          "size": {
+            "x_mm": 20.0,
+            "y_mm": 20.0,
+            "z_mm": 20.0
+          },
+          "center_of_mass": {
+            "x_mm": 1.2212453270876725e-17,
+            "y_mm": 1.7763568394002508e-17,
+            "z_mm": 0.0
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "engineering": {
+          "volume_mm3": 7999.999999999998,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": 21.599999999999998
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 14,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 3,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 10,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "export_step_stl_plate",
+      "name": "STEP and STL export",
+      "category": "exports",
+      "difficulty": "simple",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:28.987542+00:00",
+      "duration_ms": 293,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 4796.56637061436,
+          "surface_area_mm2": 2951.415926535898,
+          "bounding_box": {
+            "min_x_mm": -20.0,
+            "min_y_mm": -15.0,
+            "min_z_mm": -2.0,
+            "max_x_mm": 20.0,
+            "max_y_mm": 15.0,
+            "max_z_mm": 2.0
+          },
+          "size": {
+            "x_mm": 40.0,
+            "y_mm": 30.0,
+            "z_mm": 4.0
+          },
+          "center_of_mass": {
+            "x_mm": 0.0,
+            "y_mm": 4.725528955381477e-16,
+            "z_mm": 1.724392178565439e-17
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\export_step_stl_plate\\export_step_stl_plate.step",
+        "stl_path": "outputs\\evaluation\\work\\export_step_stl_plate\\export_step_stl_plate.stl",
+        "engineering": {
+          "volume_mm3": 4796.56637061436,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 62,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 8,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 79,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 72,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 68,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "invalid_negative_thickness",
+      "name": "Invalid negative thickness",
+      "category": "invalid_inputs",
+      "difficulty": "simple",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:29.278503+00:00",
+      "duration_ms": 1,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": false,
+      "cad_generation_success": false,
+      "solid_validation_success": false,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": false,
+      "engineering_analysis_success": false,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": "cad_validation",
+      "failure_message": "Invalid mounting plate specification: thickness_mm must be greater than 0.",
+      "metrics": {
+        "expected_exports": []
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": false,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": "Invalid mounting plate specification: thickness_mm must be greater than 0."
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "invalid_oversized_hole_repair",
+      "name": "Oversized hole repair",
+      "category": "invalid_inputs",
+      "difficulty": "medium",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:29.278503+00:00",
+      "duration_ms": 59,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": false,
+      "cad_generation_success": false,
+      "solid_validation_success": false,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": false,
+      "engineering_analysis_success": false,
+      "repair_attempted": true,
+      "repair_success": true,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": []
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": false,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": "Invalid mounting plate specification: holes[1] intersects or extends beyond the left/right plate edge. holes[1] intersects or extends beyond the top/bottom plate edge."
+        },
+        {
+          "name": "repair",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 58,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "l_bracket_simple",
+      "name": "Simple L bracket",
+      "category": "brackets",
+      "difficulty": "medium",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:29.342418+00:00",
+      "duration_ms": 345,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 15840.000000000002,
+          "surface_area_mm2": 8928.0,
+          "bounding_box": {
+            "min_x_mm": -30.0,
+            "min_y_mm": -15.0,
+            "min_z_mm": 0.0,
+            "max_x_mm": 30.0,
+            "max_y_mm": 15.0,
+            "max_z_mm": 40.0
+          },
+          "size": {
+            "x_mm": 60.0,
+            "y_mm": 30.0,
+            "z_mm": 40.0
+          },
+          "center_of_mass": {
+            "x_mm": 4.1770739504773236e-16,
+            "y_mm": 7.09090909090909,
+            "z_mm": 12.90909090909091
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\l_bracket_simple\\l_bracket_simple.step",
+        "stl_path": "outputs\\evaluation\\work\\l_bracket_simple\\l_bracket_simple.stl",
+        "engineering": {
+          "volume_mm3": 15840.000000000002,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 79,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 5,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 93,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 82,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 82,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "loft_tapered_adapter",
+      "name": "Lofted tapered adapter",
+      "category": "lofts",
+      "difficulty": "complex",
+      "mode": "operation_plan",
+      "started_at": "2026-09-30T16:17:29.688457+00:00",
+      "duration_ms": 394,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 15335.160939722977,
+          "surface_area_mm2": 3540.987815359192,
+          "bounding_box": {
+            "min_x_mm": -17.0000001,
+            "min_y_mm": -17.0000001,
+            "min_z_mm": -1e-7,
+            "max_x_mm": 17.0000001,
+            "max_y_mm": 17.0000001,
+            "max_z_mm": 28.0000001
+          },
+          "size": {
+            "x_mm": 34.0000002,
+            "y_mm": 34.0000002,
+            "z_mm": 28.000000200000002
+          },
+          "center_of_mass": {
+            "x_mm": -1.6606184799585168e-15,
+            "y_mm": 8.106053386569368e-17,
+            "z_mm": 11.216061185468451
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\loft_tapered_adapter\\loft_tapered_adapter.step",
+        "stl_path": "outputs\\evaluation\\work\\loft_tapered_adapter\\loft_tapered_adapter.stl",
+        "engineering": {
+          "volume_mm3": 15335.160939722977,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 76,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 4,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 84,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 143,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 84,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "mounting_plate_corner_holes",
+      "name": "Mounting plate corner holes",
+      "category": "mounting_parts",
+      "difficulty": "medium",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:30.082930+00:00",
+      "duration_ms": 639,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 29590.132771373057,
+          "surface_area_mm2": 13733.044226980002,
+          "bounding_box": {
+            "min_x_mm": -50.0,
+            "min_y_mm": -30.0,
+            "min_z_mm": -2.5,
+            "max_x_mm": 50.0,
+            "max_y_mm": 30.0,
+            "max_z_mm": 2.5
+          },
+          "size": {
+            "x_mm": 100.0,
+            "y_mm": 60.0,
+            "z_mm": 5.0
+          },
+          "center_of_mass": {
+            "x_mm": 2.2130221257744033e-15,
+            "y_mm": 5.839919498571341e-16,
+            "z_mm": 1.1143452476586197e-17
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\mounting_plate_corner_holes\\mounting_plate_corner_holes.step",
+        "stl_path": "outputs\\evaluation\\work\\mounting_plate_corner_holes\\mounting_plate_corner_holes.stl",
+        "engineering": {
+          "volume_mm3": 29590.132771373057,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 129,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 13,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 149,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 204,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 138,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "mounting_plate_plain",
+      "name": "Plain mounting plate",
+      "category": "mounting_parts",
+      "difficulty": "simple",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:30.720107+00:00",
+      "duration_ms": 85,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 30000.0,
+          "surface_area_mm2": 13600.0,
+          "bounding_box": {
+            "min_x_mm": -50.0,
+            "min_y_mm": -30.0,
+            "min_z_mm": -2.5,
+            "max_x_mm": 50.0,
+            "max_y_mm": 30.0,
+            "max_z_mm": 2.5
+          },
+          "size": {
+            "x_mm": 100.0,
+            "y_mm": 60.0,
+            "z_mm": 5.0
+          },
+          "center_of_mass": {
+            "x_mm": 3.7007434154171886e-16,
+            "y_mm": -3.1263880373444406e-16,
+            "z_mm": 0.0
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\mounting_plate_plain\\mounting_plate_plain.step",
+        "stl_path": "outputs\\evaluation\\work\\mounting_plate_plain\\mounting_plate_plain.stl",
+        "engineering": {
+          "volume_mm3": 30000.0,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 14,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 4,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 24,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 20,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 19,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "operation_base_boss_hole",
+      "name": "Base boss with center hole",
+      "category": "boolean_operations",
+      "difficulty": "medium",
+      "mode": "operation_plan",
+      "started_at": "2026-09-30T16:17:30.799587+00:00",
+      "duration_ms": 606,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 30037.388528219388,
+          "surface_area_mm2": 11034.159144781564,
+          "bounding_box": {
+            "min_x_mm": -40.0,
+            "min_y_mm": -25.0,
+            "min_z_mm": 0.0,
+            "max_x_mm": 40.0,
+            "max_y_mm": 25.0,
+            "max_z_mm": 20.0
+          },
+          "size": {
+            "x_mm": 80.0,
+            "y_mm": 50.0,
+            "z_mm": 20.0
+          },
+          "center_of_mass": {
+            "x_mm": 8.780838695959181e-16,
+            "y_mm": -6.07898144665994e-17,
+            "z_mm": 5.888696786362847
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\operation_base_boss_hole\\operation_base_boss_hole.step",
+        "stl_path": "outputs\\evaluation\\work\\operation_base_boss_hole\\operation_base_boss_hole.stl",
+        "engineering": {
+          "volume_mm3": 30037.388528219388,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 134,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 6,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 155,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 169,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 138,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "parametric_plate_offsets",
+      "name": "Parametric plate edge offsets",
+      "category": "parametrics",
+      "difficulty": "advanced",
+      "mode": "parametric",
+      "started_at": "2026-09-30T16:17:31.403905+00:00",
+      "duration_ms": 636,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 35803.65045915064,
+          "surface_area_mm2": 16278.539816339744,
+          "bounding_box": {
+            "min_x_mm": -60.0,
+            "min_y_mm": -30.0,
+            "min_z_mm": -2.5,
+            "max_x_mm": 60.0,
+            "max_y_mm": 30.0,
+            "max_z_mm": 2.5
+          },
+          "size": {
+            "x_mm": 120.0,
+            "y_mm": 60.0,
+            "z_mm": 5.0
+          },
+          "center_of_mass": {
+            "x_mm": 4.953446494179864e-16,
+            "y_mm": 0.12064942661683069,
+            "z_mm": -3.79856016837586e-18
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\parametric_plate_offsets\\parametric_plate_offsets.step",
+        "stl_path": "outputs\\evaluation\\work\\parametric_plate_offsets\\parametric_plate_offsets.stl",
+        "engineering": {
+          "volume_mm3": 35803.65045915064,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 2,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 2,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 211,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 7,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 131,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 149,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 129,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "pattern_slotted_bracket",
+      "name": "Slotted bracket with patterned holes",
+      "category": "patterns",
+      "difficulty": "complex",
+      "mode": "operation_plan",
+      "started_at": "2026-09-30T16:17:32.047770+00:00",
+      "duration_ms": 903,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 13275.61065788307,
+          "surface_area_mm2": 6478.796447372309,
+          "bounding_box": {
+            "min_x_mm": -40.0,
+            "min_y_mm": -16.0,
+            "min_z_mm": -3.0,
+            "max_x_mm": 40.0,
+            "max_y_mm": 16.0,
+            "max_z_mm": 3.0
+          },
+          "size": {
+            "x_mm": 80.0,
+            "y_mm": 32.0,
+            "z_mm": 6.0
+          },
+          "center_of_mass": {
+            "x_mm": -7.707227681364534e-16,
+            "y_mm": -2.5552221187751977e-16,
+            "z_mm": -1.858757806628221e-17
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\pattern_slotted_bracket\\pattern_slotted_bracket.step",
+        "stl_path": "outputs\\evaluation\\work\\pattern_slotted_bracket\\pattern_slotted_bracket.stl",
+        "engineering": {
+          "volume_mm3": 13275.61065788307,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 185,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 9,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 218,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 233,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 253,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "shell_open_box",
+      "name": "Open-top shell",
+      "category": "shells",
+      "difficulty": "complex",
+      "mode": "operation_plan",
+      "started_at": "2026-09-30T16:17:32.959100+00:00",
+      "duration_ms": 556,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 20271.179848188513,
+          "surface_area_mm2": 20752.12379934266,
+          "bounding_box": {
+            "min_x_mm": -37.0,
+            "min_y_mm": -24.5,
+            "min_z_mm": -16.0,
+            "max_x_mm": 37.0,
+            "max_y_mm": 24.5,
+            "max_z_mm": 14.0
+          },
+          "size": {
+            "x_mm": 74.0,
+            "y_mm": 49.0,
+            "z_mm": 30.0
+          },
+          "center_of_mass": {
+            "x_mm": -5.558996358315992e-15,
+            "y_mm": -5.846651710081683e-16,
+            "z_mm": -5.203268930966877
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\shell_open_box\\shell_open_box.step",
+        "stl_path": "outputs\\evaluation\\work\\shell_open_box\\shell_open_box.stl",
+        "engineering": {
+          "volume_mm3": 20271.179848188505,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 103,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 84,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 115,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 111,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 132,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "sketch_pocketed_plate",
+      "name": "Pocketed sketch plate",
+      "category": "sketches",
+      "difficulty": "complex",
+      "mode": "operation_plan",
+      "started_at": "2026-09-30T16:17:33.514441+00:00",
+      "duration_ms": 376,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 23320.8,
+          "surface_area_mm2": 8453.199999999999,
+          "bounding_box": {
+            "min_x_mm": -35.0,
+            "min_y_mm": -22.5,
+            "min_z_mm": -4.0,
+            "max_x_mm": 35.0,
+            "max_y_mm": 22.5,
+            "max_z_mm": 4.0
+          },
+          "size": {
+            "x_mm": 70.0,
+            "y_mm": 45.0,
+            "z_mm": 8.0
+          },
+          "center_of_mass": {
+            "x_mm": -1.0845369060984978e-19,
+            "y_mm": -7.819567625758142e-17,
+            "z_mm": -0.2054800864464337
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\sketch_pocketed_plate\\sketch_pocketed_plate.step",
+        "stl_path": "outputs\\evaluation\\work\\sketch_pocketed_plate\\sketch_pocketed_plate.stl",
+        "engineering": {
+          "volume_mm3": 23320.8,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 78,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 6,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 97,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 88,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 101,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "spacer_020_008_010",
+      "name": "Spacer with center bore",
+      "category": "holes",
+      "difficulty": "simple",
+      "mode": "template",
+      "started_at": "2026-09-30T16:17:33.889326+00:00",
+      "duration_ms": 311,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 2638.937829015426,
+          "surface_area_mm2": 1407.4335088082273,
+          "bounding_box": {
+            "min_x_mm": -10.0,
+            "min_y_mm": -10.0,
+            "min_z_mm": 0.0,
+            "max_x_mm": 10.0,
+            "max_y_mm": 10.0,
+            "max_z_mm": 10.0
+          },
+          "size": {
+            "x_mm": 20.0,
+            "y_mm": 20.0,
+            "z_mm": 10.0
+          },
+          "center_of_mass": {
+            "x_mm": 2.1001757896647985e-16,
+            "y_mm": -4.570724459629796e-16,
+            "z_mm": 5.0
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\spacer_020_008_010\\spacer_020_008_010.step",
+        "stl_path": "outputs\\evaluation\\work\\spacer_020_008_010\\spacer_020_008_010.stl",
+        "engineering": {
+          "volume_mm3": 2638.937829015426,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 72,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 5,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 68,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 90,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 72,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "sweep_polyline_tube",
+      "name": "Swept tube",
+      "category": "sweeps",
+      "difficulty": "complex",
+      "mode": "operation_plan",
+      "started_at": "2026-09-30T16:17:34.202796+00:00",
+      "duration_ms": 421,
+      "parse_success": true,
+      "schema_validation_success": true,
+      "parametric_resolution_success": true,
+      "cad_validation_success": true,
+      "cad_generation_success": true,
+      "solid_validation_success": true,
+      "step_export_success": true,
+      "stl_export_success": true,
+      "expected_structure_match": true,
+      "engineering_analysis_success": true,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": null,
+      "failure_message": null,
+      "metrics": {
+        "expected_exports": [
+          "step",
+          "stl"
+        ],
+        "geometry": {
+          "volume_mm3": 3116.459912356926,
+          "surface_area_mm2": 1658.760921094739,
+          "bounding_box": {
+            "min_x_mm": 0.0,
+            "min_y_mm": -4.0,
+            "min_z_mm": -4.0,
+            "max_x_mm": 44.0,
+            "max_y_mm": 22.0,
+            "max_z_mm": 4.0
+          },
+          "size": {
+            "x_mm": 44.0,
+            "y_mm": 26.0,
+            "z_mm": 8.0
+          },
+          "center_of_mass": {
+            "x_mm": 27.19354838708033,
+            "y_mm": 3.8064516129088104,
+            "z_mm": 5.96304340311182e-13
+          },
+          "solid_count": 1,
+          "valid": true
+        },
+        "step_path": "outputs\\evaluation\\work\\sweep_polyline_tube\\sweep_polyline_tube.step",
+        "stl_path": "outputs\\evaluation\\work\\sweep_polyline_tube\\sweep_polyline_tube.stl",
+        "engineering": {
+          "volume_mm3": 3116.459912356926,
+          "warnings": [
+            "rule_set"
+          ],
+          "mass_g": null
+        }
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "schema_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "design_intent_resolution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "operation_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "cad_execution",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 85,
+          "message": null
+        },
+        {
+          "name": "solid_validation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 9,
+          "message": null
+        },
+        {
+          "name": "geometric_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "structural_expectations",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": null
+        },
+        {
+          "name": "step_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 111,
+          "message": null
+        },
+        {
+          "name": "stl_export",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 118,
+          "message": null
+        },
+        {
+          "name": "engineering_analysis",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 94,
+          "message": null
+        }
+      ],
+      "overall_status": "pass"
+    },
+    {
+      "case_id": "unsupported_jet_engine",
+      "name": "Unsupported jet engine assembly",
+      "category": "invalid_inputs",
+      "difficulty": "advanced",
+      "mode": "assembly",
+      "started_at": "2026-09-30T16:17:34.625858+00:00",
+      "duration_ms": 1,
+      "parse_success": true,
+      "schema_validation_success": false,
+      "parametric_resolution_success": false,
+      "cad_validation_success": false,
+      "cad_generation_success": false,
+      "solid_validation_success": false,
+      "step_export_success": false,
+      "stl_export_success": false,
+      "expected_structure_match": false,
+      "engineering_analysis_success": false,
+      "repair_attempted": false,
+      "repair_success": false,
+      "failure_category": "expected_unsupported",
+      "failure_message": "Cleanly unsupported in deterministic benchmark scope.",
+      "metrics": {
+        "expected_exports": []
+      },
+      "stages": [
+        {
+          "name": "prompt_interpretation",
+          "success": true,
+          "skipped": false,
+          "duration_ms": 0,
+          "message": "Cleanly classified as unsupported."
+        }
+      ],
+      "overall_status": "unsupported"
+    }
+  ]
+}

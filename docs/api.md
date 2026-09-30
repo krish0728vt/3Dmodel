@@ -55,3 +55,16 @@ Run the API:
 ## Learning And Capabilities
 
 See [Learning Core](learning-core.md) and [Capabilities](capabilities.md) for route details.
+
+## Evaluation
+
+Evaluation endpoints are read-only and inspect the latest CLI-generated deterministic report.
+
+| Method | Route | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/evaluation/latest` | Latest report summary and case results |
+| `GET` | `/api/evaluation/cases` | Benchmark case definitions |
+| `GET` | `/api/evaluation/cases/{case_id}` | Single benchmark case |
+| `GET` | `/api/evaluation/regressions` | Latest regression records |
+
+See [Evaluation](evaluation.md).

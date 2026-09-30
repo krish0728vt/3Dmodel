@@ -10,6 +10,7 @@ import type {
   EngineeringReport,
   ExportBatchResult,
   ExportFormat,
+  EvaluationReport,
   FailureAnalytics,
   GenerateResponse,
   HealthResponse,
@@ -44,6 +45,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<HealthResponse>("/api/health"),
+  evaluationLatest: () => request<{ available: boolean; message?: string; report: EvaluationReport | null }>("/api/evaluation/latest"),
+  evaluationCases: () => request<unknown[]>("/api/evaluation/cases"),
+  evaluationRegressions: () => request<unknown[]>("/api/evaluation/regressions"),
   projects: (options?: { search?: string; status?: "active" | "archived" | "all"; sort?: "recently_updated" | "recently_opened" | "name" | "created" }) => {
     const params = new URLSearchParams();
     if (options?.search) params.set("search", options.search);

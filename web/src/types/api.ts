@@ -413,3 +413,64 @@ export type SelectionState = {
   selectedMeshId: string | null;
   source: "viewer" | "design_tree" | "inspector" | null;
 };
+
+export type EvaluationStage = {
+  name: string;
+  success: boolean;
+  skipped: boolean;
+  duration_ms: number;
+  message: string | null;
+};
+
+export type EvaluationResult = {
+  case_id: string;
+  name: string;
+  category: string;
+  difficulty: string;
+  mode: string;
+  duration_ms: number;
+  failure_category: string | null;
+  failure_message: string | null;
+  metrics: Record<string, unknown>;
+  stages: EvaluationStage[];
+  overall_status: "pass" | "fail" | "unsupported" | "skipped";
+};
+
+export type EvaluationReport = {
+  suite: string;
+  milestone: string;
+  generated_at: string;
+  deterministic: boolean;
+  live_ai: boolean;
+  case_count: number;
+  metrics: {
+    total_cases: number;
+    pass_count: number;
+    fail_count: number;
+    unsupported_count: number;
+    skipped_count: number;
+    parse_success_rate: number;
+    schema_success_rate: number;
+    cad_generation_success_rate: number;
+    step_export_success_rate: number;
+    stl_export_success_rate: number;
+    repair_success_rate: number;
+    parametric_preservation_rate: number;
+    assembly_success_rate: number;
+    capability_success_rate: number;
+    category: Record<string, { total: number; pass: number; fail: number; unsupported: number; success_rate: number }>;
+    difficulty: Record<string, { total: number; pass: number; fail: number; unsupported: number; success_rate: number }>;
+    failure_distribution: Record<string, number>;
+    total_duration_ms: number;
+    average_duration_ms: number;
+    slowest_cases: Array<Record<string, unknown>>;
+  };
+  regressions: Array<{
+    case_id: string;
+    previous_status: string | null;
+    current_status: string;
+    regression_type: string;
+    message: string;
+  }>;
+  results: EvaluationResult[];
+};

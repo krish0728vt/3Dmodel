@@ -1,0 +1,369 @@
+{
+  "benchmark_schema_version": "1.0",
+  "cases": [
+    {
+      "case_id": "basic_cube_050",
+      "name": "50 mm cube",
+      "category": "basic_primitives",
+      "difficulty": "simple",
+      "prompt": "Create a 50 mm cube.",
+      "mode": "template",
+      "expected_part_type": "box",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {"part_type": "box", "width_mm": 50, "depth_mm": 50, "height_mm": 50},
+      "geometric_expectation": {"bbox": {"x": 50, "y": 50, "z": 50}, "volume_min_mm3": 124000, "volume_max_mm3": 126000, "solid_count": 1}
+    },
+    {
+      "case_id": "basic_cylinder_030x080",
+      "name": "30 x 80 cylinder",
+      "category": "basic_primitives",
+      "difficulty": "simple",
+      "prompt": "Create a cylinder 30 mm diameter and 80 mm tall.",
+      "mode": "template",
+      "expected_part_type": "cylinder",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {"part_type": "cylinder", "diameter_mm": 30, "height_mm": 80},
+      "geometric_expectation": {"bbox": {"x": 30, "y": 30, "z": 80}, "volume_min_mm3": 56000, "volume_max_mm3": 57000, "solid_count": 1}
+    },
+    {
+      "case_id": "spacer_020_008_010",
+      "name": "Spacer with center bore",
+      "category": "holes",
+      "difficulty": "simple",
+      "prompt": "Create a spacer 20 mm OD, 8 mm ID, 10 mm tall.",
+      "mode": "template",
+      "expected_part_type": "spacer",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {"part_type": "spacer", "outer_diameter_mm": 20, "inner_diameter_mm": 8, "height_mm": 10},
+      "geometric_expectation": {"bbox": {"x": 20, "y": 20, "z": 10}, "solid_count": 1}
+    },
+    {
+      "case_id": "mounting_plate_plain",
+      "name": "Plain mounting plate",
+      "category": "mounting_parts",
+      "difficulty": "simple",
+      "prompt": "Create a 100 x 60 x 5 mm mounting plate.",
+      "mode": "template",
+      "expected_part_type": "mounting_plate",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {"part_type": "mounting_plate", "width_mm": 100, "height_mm": 60, "thickness_mm": 5, "corner_radius_mm": 0, "holes": []},
+      "geometric_expectation": {"bbox": {"x": 100, "y": 60, "z": 5}, "volume_min_mm3": 29900, "volume_max_mm3": 30100, "solid_count": 1}
+    },
+    {
+      "case_id": "mounting_plate_corner_holes",
+      "name": "Mounting plate corner holes",
+      "category": "mounting_parts",
+      "difficulty": "medium",
+      "prompt": "Create a mounting plate with four 5 mm holes 8 mm from each corner.",
+      "mode": "template",
+      "expected_part_type": "mounting_plate",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "part_type": "mounting_plate",
+        "width_mm": 100,
+        "height_mm": 60,
+        "thickness_mm": 5,
+        "corner_radius_mm": 2,
+        "holes": [
+          {"diameter_mm": 5, "x_mm": -42, "y_mm": -22},
+          {"diameter_mm": 5, "x_mm": 42, "y_mm": -22},
+          {"diameter_mm": 5, "x_mm": -42, "y_mm": 22},
+          {"diameter_mm": 5, "x_mm": 42, "y_mm": 22}
+        ]
+      },
+      "geometric_expectation": {"bbox": {"x": 100, "y": 60, "z": 5}, "solid_count": 1}
+    },
+    {
+      "case_id": "electronics_enclosure_posts",
+      "name": "PCB enclosure with posts",
+      "category": "enclosures",
+      "difficulty": "medium",
+      "prompt": "Create an open-top electronics enclosure for a 70 x 45 mm PCB with 2 mm walls.",
+      "mode": "template",
+      "expected_part_type": "electronics_enclosure",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "part_type": "electronics_enclosure",
+        "internal_width_mm": 70,
+        "internal_depth_mm": 45,
+        "internal_height_mm": 22,
+        "wall_thickness_mm": 2,
+        "bottom_thickness_mm": 2,
+        "corner_radius_mm": 2,
+        "mounting_posts": [
+          {"x_mm": -25, "y_mm": -15, "outer_diameter_mm": 6, "hole_diameter_mm": 2.5, "height_mm": 8},
+          {"x_mm": 25, "y_mm": -15, "outer_diameter_mm": 6, "hole_diameter_mm": 2.5, "height_mm": 8},
+          {"x_mm": -25, "y_mm": 15, "outer_diameter_mm": 6, "hole_diameter_mm": 2.5, "height_mm": 8},
+          {"x_mm": 25, "y_mm": 15, "outer_diameter_mm": 6, "hole_diameter_mm": 2.5, "height_mm": 8}
+        ]
+      },
+      "geometric_expectation": {"bbox": {"x": 74, "y": 49, "z": 24}, "solid_count": 1}
+    },
+    {
+      "case_id": "l_bracket_simple",
+      "name": "Simple L bracket",
+      "category": "brackets",
+      "difficulty": "medium",
+      "prompt": "Create an L bracket 60 mm wide, 40 mm tall, 30 mm deep and 4 mm thick.",
+      "mode": "template",
+      "expected_part_type": "l_bracket",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {"part_type": "l_bracket", "width_mm": 60, "height_mm": 40, "leg_depth_mm": 30, "thickness_mm": 4, "corner_radius_mm": 0, "holes": []},
+      "geometric_expectation": {"bbox": {"x": 60, "y": 30, "z": 40}, "solid_count": 1}
+    },
+    {
+      "case_id": "operation_base_boss_hole",
+      "name": "Base boss with center hole",
+      "category": "boolean_operations",
+      "difficulty": "medium",
+      "prompt": "Create a base with a 30 mm diameter boss and a 6 mm center hole.",
+      "mode": "operation_plan",
+      "expected_operation_types": ["create_box", "create_cylinder", "boolean_union", "cut_hole"],
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "base_with_cylindrical_boss",
+        "operations": [
+          {"id": "base", "operation_type": "create_box", "width_mm": 80, "depth_mm": 50, "height_mm": 5, "center": [0, 0, 2.5]},
+          {"id": "boss", "operation_type": "create_cylinder", "diameter_mm": 30, "height_mm": 15, "center": [0, 0, 12.5], "axis": "z"},
+          {"id": "combined", "operation_type": "boolean_union", "target_id": "base", "tool_id": "boss"},
+          {"id": "boss_hole", "operation_type": "cut_hole", "target_id": "combined", "diameter_mm": 6, "position": [0, 0], "direction": "z"}
+        ],
+        "final_object_id": "boss_hole"
+      },
+      "structural_expectation": {"min_operation_count": 4},
+      "geometric_expectation": {"bbox": {"x": 80, "y": 50, "z": 20}, "solid_count": 1}
+    },
+    {
+      "case_id": "sketch_pocketed_plate",
+      "name": "Pocketed sketch plate",
+      "category": "sketches",
+      "difficulty": "complex",
+      "prompt": "Create a pocketed plate with rounded edges and countersunk mounting holes.",
+      "mode": "operation_plan",
+      "expected_operation_types": ["create_box", "create_sketch", "cut_extrude"],
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "pocketed_plate",
+        "operations": [
+          {"id": "base", "operation_type": "create_box", "width_mm": 70, "depth_mm": 45, "height_mm": 8},
+          {"id": "pocket_profile", "operation_type": "create_sketch", "sketch": {"id": "pocket_profile", "plane": "XY", "origin": [0, 0, 4.1], "closed": true, "entities": [{"entity_type": "rectangle", "width_mm": 36, "height_mm": 18}]}},
+          {"id": "pocket", "operation_type": "cut_extrude", "target_id": "base", "sketch_id": "pocket_profile", "distance_mm": 3, "extent_type": "blind", "direction": "negative"}
+        ],
+        "final_object_id": "pocket"
+      },
+      "geometric_expectation": {"bbox": {"x": 70, "y": 45, "z": 8}, "solid_count": 1}
+    },
+    {
+      "case_id": "pattern_slotted_bracket",
+      "name": "Slotted bracket with patterned holes",
+      "category": "patterns",
+      "difficulty": "complex",
+      "prompt": "Create a bracket with a slot and symmetric mounting holes.",
+      "mode": "operation_plan",
+      "expected_operation_types": ["create_box", "create_sketch", "cut_extrude", "rectangular_hole_pattern"],
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "slotted_bracket",
+        "operations": [
+          {"id": "base", "operation_type": "create_box", "width_mm": 80, "depth_mm": 32, "height_mm": 6},
+          {"id": "slot_profile", "operation_type": "create_sketch", "sketch": {"id": "slot_profile", "plane": "XY", "origin": [0, 0, 3.1], "closed": true, "entities": [{"entity_type": "slot", "length_mm": 42, "width_mm": 8}]}},
+          {"id": "slot", "operation_type": "cut_extrude", "target_id": "base", "sketch_id": "slot_profile", "extent_type": "through_all", "direction": "negative"},
+          {"id": "end_holes", "operation_type": "rectangular_hole_pattern", "target_id": "slot", "hole_diameter_mm": 4, "count_x": 2, "count_y": 1, "spacing_x_mm": 62, "spacing_y_mm": 1, "center": [0, 0]}
+        ],
+        "final_object_id": "end_holes"
+      },
+      "geometric_expectation": {"bbox": {"x": 80, "y": 32, "z": 6}, "solid_count": 1}
+    },
+    {
+      "case_id": "loft_tapered_adapter",
+      "name": "Lofted tapered adapter",
+      "category": "lofts",
+      "difficulty": "complex",
+      "prompt": "Create a tapered adapter using two loft profiles.",
+      "mode": "operation_plan",
+      "expected_operation_types": ["create_sketch", "loft"],
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "lofted_adapter",
+        "operations": [
+          {"id": "lower_profile", "operation_type": "create_sketch", "sketch": {"id": "lower_profile", "plane": "XY", "origin": [0, 0, 0], "closed": true, "entities": [{"entity_type": "circle", "diameter_mm": 34}]}},
+          {"id": "upper_profile", "operation_type": "create_sketch", "sketch": {"id": "upper_profile", "plane": "XY", "origin": [0, 0, 28], "closed": true, "entities": [{"entity_type": "circle", "diameter_mm": 18}]}},
+          {"id": "adapter_body", "operation_type": "loft", "sketch_ids": ["lower_profile", "upper_profile"], "ruled": false, "solid": true}
+        ],
+        "final_object_id": "adapter_body"
+      },
+      "geometric_expectation": {"bbox": {"x": 34, "y": 34, "z": 28}, "solid_count": 1}
+    },
+    {
+      "case_id": "sweep_polyline_tube",
+      "name": "Swept tube",
+      "category": "sweeps",
+      "difficulty": "complex",
+      "prompt": "Create a tube swept along a polyline path.",
+      "mode": "operation_plan",
+      "expected_operation_types": ["create_sketch", "sweep"],
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "swept_tube",
+        "operations": [
+          {"id": "tube_profile", "operation_type": "create_sketch", "sketch": {"id": "tube_profile", "plane": "YZ", "origin": [0, 0, 0], "closed": true, "entities": [{"entity_type": "circle", "diameter_mm": 8}]}},
+          {"id": "tube_path", "operation_type": "create_sketch", "sketch": {"id": "tube_path", "plane": "XY", "origin": [0, 0, 0], "closed": false, "entities": [{"entity_type": "polyline", "points": [[0, 0], [40, 0], [40, 22]], "closed": false}]}},
+          {"id": "tube", "operation_type": "sweep", "profile_sketch_id": "tube_profile", "path_sketch_id": "tube_path", "make_solid": true}
+        ],
+        "final_object_id": "tube"
+      },
+      "geometric_expectation": {"solid_count": 1}
+    },
+    {
+      "case_id": "shell_open_box",
+      "name": "Open-top shell",
+      "category": "shells",
+      "difficulty": "complex",
+      "prompt": "Create a hollow open top enclosure shell.",
+      "mode": "operation_plan",
+      "expected_operation_types": ["create_box", "shell"],
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "open_top_shell",
+        "operations": [
+          {"id": "outer_box", "operation_type": "create_box", "width_mm": 70, "depth_mm": 45, "height_mm": 28},
+          {"id": "open_shell", "operation_type": "shell", "target_id": "outer_box", "thickness_mm": 2, "remove_face_selector": "top_face"}
+        ],
+        "final_object_id": "open_shell"
+      },
+      "geometric_expectation": {"bbox": {"x": 74, "y": 49, "z": 30}, "solid_count": 1}
+    },
+    {
+      "case_id": "parametric_plate_offsets",
+      "name": "Parametric plate edge offsets",
+      "category": "parametrics",
+      "difficulty": "advanced",
+      "prompt": "Create a 100 x 60 mm plate with holes 8 mm from each edge, then make the plate 20 mm wider.",
+      "mode": "parametric",
+      "expected_operation_types": ["create_box", "through_hole"],
+      "expected_parameters": {"plate_width": 120, "hole_edge_offset": 8},
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {
+        "schema_version": "1.2",
+        "project_name": "parametric_mounting_plate_edited",
+        "parameters": [
+          {"parameter_id": "plate_width", "name": "Plate Width", "value": 120, "unit": "mm", "editable": true, "source": "manual", "role": "driving"},
+          {"parameter_id": "plate_depth", "name": "Plate Depth", "value": 60, "unit": "mm", "editable": true, "source": "manual", "role": "driving"},
+          {"parameter_id": "hole_edge_offset", "name": "Hole Edge Offset", "value": 8, "unit": "mm", "editable": true, "source": "manual", "role": "driving"}
+        ],
+        "relationships": [
+          {"relationship_id": "bind_plate_width", "relationship_type": "fixed", "target": "operations.base.width_mm", "value": {"expression_type": "parameter_ref", "parameter_id": "plate_width"}},
+          {"relationship_id": "bind_plate_depth", "relationship_type": "fixed", "target": "operations.base.depth_mm", "value": {"expression_type": "parameter_ref", "parameter_id": "plate_depth"}},
+          {"relationship_id": "hole_1_left", "relationship_type": "edge_offset", "target": "operations.hole_1.position.0", "reference_object": "base", "reference_edge": "left", "offset_mm": {"expression_type": "parameter_ref", "parameter_id": "hole_edge_offset"}, "axis": "x"},
+          {"relationship_id": "hole_1_bottom", "relationship_type": "edge_offset", "target": "operations.hole_1.position.1", "reference_object": "base", "reference_edge": "bottom", "offset_mm": {"expression_type": "parameter_ref", "parameter_id": "hole_edge_offset"}, "axis": "y"},
+          {"relationship_id": "hole_2_right", "relationship_type": "edge_offset", "target": "operations.hole_2.position.0", "reference_object": "base", "reference_edge": "right", "offset_mm": {"expression_type": "parameter_ref", "parameter_id": "hole_edge_offset"}, "axis": "x"},
+          {"relationship_id": "hole_2_bottom", "relationship_type": "edge_offset", "target": "operations.hole_2.position.1", "reference_object": "base", "reference_edge": "bottom", "offset_mm": {"expression_type": "parameter_ref", "parameter_id": "hole_edge_offset"}, "axis": "y"}
+        ],
+        "operations": [
+          {"id": "base", "operation_type": "create_box", "width_mm": 100, "depth_mm": 60, "height_mm": 5, "center": [0, 0, 0]},
+          {"id": "hole_1", "operation_type": "through_hole", "target_id": "base", "position": [-42, -22], "hole_diameter_mm": 5, "face_selector": "top_face"},
+          {"id": "hole_2", "operation_type": "through_hole", "target_id": "hole_1", "position": [42, -22], "hole_diameter_mm": 5, "face_selector": "top_face"}
+        ],
+        "final_object_id": "hole_2"
+      },
+      "geometric_expectation": {"bbox": {"x": 120, "y": 60, "z": 5}, "solid_count": 1}
+    },
+    {
+      "case_id": "engineering_aluminum_cube",
+      "name": "Engineering mass check",
+      "category": "engineering_analysis",
+      "difficulty": "simple",
+      "prompt": "Analyze a 20 mm aluminum cube.",
+      "mode": "engineering",
+      "expected_part_type": "box",
+      "fixture_spec": {"part_type": "box", "width_mm": 20, "depth_mm": 20, "height_mm": 20},
+      "engineering_expectation": {"material_id": "aluminum_6061", "mass_min_g": 20, "mass_max_g": 25, "display_units": "mm"},
+      "geometric_expectation": {"bbox": {"x": 20, "y": 20, "z": 20}, "solid_count": 1}
+    },
+    {
+      "case_id": "assembly_translated_boxes",
+      "name": "Translated two-component assembly",
+      "category": "assemblies",
+      "difficulty": "medium",
+      "prompt": "Create an assembly with two translated components.",
+      "mode": "assembly",
+      "assembly_fixture": {
+        "expect_interference": false,
+        "components": [
+          {"name": "Base", "spec": {"part_type": "box", "width_mm": 20, "depth_mm": 20, "height_mm": 5}, "transform": {"translation_x_mm": 0, "translation_y_mm": 0, "translation_z_mm": 0, "rotation_x_deg": 0, "rotation_y_deg": 0, "rotation_z_deg": 0}, "grounded": true},
+          {"name": "Offset", "spec": {"part_type": "box", "width_mm": 10, "depth_mm": 10, "height_mm": 5}, "transform": {"translation_x_mm": 30, "translation_y_mm": 0, "translation_z_mm": 0, "rotation_x_deg": 0, "rotation_y_deg": 0, "rotation_z_deg": 0}}
+        ]
+      }
+    },
+    {
+      "case_id": "capability_spur_gear_24",
+      "name": "Local spur gear capability",
+      "category": "capabilities",
+      "difficulty": "advanced",
+      "prompt": "Create a valid 24 tooth spur gear.",
+      "mode": "capability",
+      "expected_capabilities": ["local.spur_gear_generator"],
+      "capability_fixture": {"capability_id": "local.spur_gear_generator", "arguments": {"module_mm": 1, "teeth": 24, "thickness_mm": 5, "bore_diameter_mm": 4}, "expect_success": true, "enable_before_invoke": true}
+    },
+    {
+      "case_id": "export_step_stl_plate",
+      "name": "STEP and STL export",
+      "category": "exports",
+      "difficulty": "simple",
+      "prompt": "Export a simple plate to STEP and STL.",
+      "mode": "template",
+      "expected_part_type": "mounting_plate",
+      "expected_export_formats": ["step", "stl"],
+      "fixture_spec": {"part_type": "mounting_plate", "width_mm": 40, "height_mm": 30, "thickness_mm": 4, "corner_radius_mm": 1, "holes": []}
+    },
+    {
+      "case_id": "invalid_negative_thickness",
+      "name": "Invalid negative thickness",
+      "category": "invalid_inputs",
+      "difficulty": "simple",
+      "prompt": "Create a plate with negative thickness.",
+      "mode": "template",
+      "fixture_spec": {"part_type": "mounting_plate", "width_mm": 40, "height_mm": 30, "thickness_mm": -1, "corner_radius_mm": 0, "holes": []},
+      "expected_failure_category": "cad_validation"
+    },
+    {
+      "case_id": "invalid_oversized_hole_repair",
+      "name": "Oversized hole repair",
+      "category": "invalid_inputs",
+      "difficulty": "medium",
+      "prompt": "Create a small plate with an oversized hole, then repair by reducing the hole.",
+      "mode": "template",
+      "fixture_spec": {"part_type": "mounting_plate", "width_mm": 20, "height_mm": 20, "thickness_mm": 3, "corner_radius_mm": 0, "holes": [{"diameter_mm": 30, "x_mm": 0, "y_mm": 0}]},
+      "repair_fixture_spec": {"part_type": "mounting_plate", "width_mm": 20, "height_mm": 20, "thickness_mm": 3, "corner_radius_mm": 0, "holes": [{"diameter_mm": 6, "x_mm": 0, "y_mm": 0}]},
+      "expected_failure_category": "cad_validation"
+    },
+    {
+      "case_id": "ambiguous_make_cylinder_taller",
+      "name": "Ambiguous edit with two cylinders",
+      "category": "ambiguous_inputs",
+      "difficulty": "medium",
+      "prompt": "Make the cylinder taller.",
+      "mode": "edit",
+      "expected_status": "skipped",
+      "expected_failure_category": "expected_ambiguity",
+      "notes": "Expected ambiguity: two cylinder targets exist and clarification is acceptable."
+    },
+    {
+      "case_id": "unsupported_jet_engine",
+      "name": "Unsupported jet engine assembly",
+      "category": "invalid_inputs",
+      "difficulty": "advanced",
+      "prompt": "Create a full jet engine assembly.",
+      "mode": "assembly",
+      "expected_status": "unsupported",
+      "expected_failure_category": "expected_unsupported",
+      "notes": "Cleanly unsupported in deterministic benchmark scope."
+    }
+  ]
+}
