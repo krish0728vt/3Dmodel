@@ -1,0 +1,193 @@
+{
+  "schema_version": "1.2",
+  "project_name": "parametric_mounting_plate",
+  "units": "mm",
+  "parameters": [
+    {
+      "parameter_id": "plate_width",
+      "name": "Plate Width",
+      "value": 100,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "plate_depth",
+      "name": "Plate Depth",
+      "value": 60,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "hole_edge_offset",
+      "name": "Hole Edge Offset",
+      "value": 8,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "bind_plate_width",
+      "relationship_type": "fixed",
+      "target": "operations.base.width_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "plate_width"
+      }
+    },
+    {
+      "relationship_id": "bind_plate_depth",
+      "relationship_type": "fixed",
+      "target": "operations.base.depth_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "plate_depth"
+      }
+    },
+    {
+      "relationship_id": "hole_1_left",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_1.position.0",
+      "reference_object": "base",
+      "reference_edge": "left",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "x"
+    },
+    {
+      "relationship_id": "hole_1_bottom",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_1.position.1",
+      "reference_object": "base",
+      "reference_edge": "bottom",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "y"
+    },
+    {
+      "relationship_id": "hole_2_right",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_2.position.0",
+      "reference_object": "base",
+      "reference_edge": "right",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "x"
+    },
+    {
+      "relationship_id": "hole_2_bottom",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_2.position.1",
+      "reference_object": "base",
+      "reference_edge": "bottom",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "y"
+    },
+    {
+      "relationship_id": "hole_3_left",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_3.position.0",
+      "reference_object": "base",
+      "reference_edge": "left",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "x"
+    },
+    {
+      "relationship_id": "hole_3_top",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_3.position.1",
+      "reference_object": "base",
+      "reference_edge": "top",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "y"
+    },
+    {
+      "relationship_id": "hole_4_right",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_4.position.0",
+      "reference_object": "base",
+      "reference_edge": "right",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "x"
+    },
+    {
+      "relationship_id": "hole_4_top",
+      "relationship_type": "edge_offset",
+      "target": "operations.hole_4.position.1",
+      "reference_object": "base",
+      "reference_edge": "top",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "hole_edge_offset"
+      },
+      "axis": "y"
+    }
+  ],
+  "operations": [
+    {
+      "id": "base",
+      "operation_type": "create_box",
+      "width_mm": 100,
+      "depth_mm": 60,
+      "height_mm": 5,
+      "center": [0, 0, 0]
+    },
+    {
+      "id": "hole_1",
+      "operation_type": "through_hole",
+      "target_id": "base",
+      "position": [-42, -22],
+      "hole_diameter_mm": 5,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "hole_2",
+      "operation_type": "through_hole",
+      "target_id": "hole_1",
+      "position": [42, -22],
+      "hole_diameter_mm": 5,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "hole_3",
+      "operation_type": "through_hole",
+      "target_id": "hole_2",
+      "position": [-42, 22],
+      "hole_diameter_mm": 5,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "hole_4",
+      "operation_type": "through_hole",
+      "target_id": "hole_3",
+      "position": [42, 22],
+      "hole_diameter_mm": 5,
+      "face_selector": "top_face"
+    }
+  ],
+  "final_object_id": "hole_4"
+}

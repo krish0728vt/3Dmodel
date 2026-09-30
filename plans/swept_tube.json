@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.1",
+  "project_name": "swept_tube",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "tube_profile",
+      "label": "Tube circular profile",
+      "operation_type": "create_sketch",
+      "sketch": {
+        "id": "tube_profile",
+        "plane": "YZ",
+        "origin": [0, 0, 0],
+        "closed": true,
+        "entities": [
+          {
+            "entity_type": "circle",
+            "diameter_mm": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": "tube_path",
+      "label": "Bent tube path",
+      "operation_type": "create_sketch",
+      "sketch": {
+        "id": "tube_path",
+        "plane": "XY",
+        "origin": [0, 0, 0],
+        "closed": false,
+        "entities": [
+          {
+            "entity_type": "polyline",
+            "points": [[0, 0], [40, 0], [40, 22]],
+            "closed": false
+          }
+        ]
+      }
+    },
+    {
+      "id": "tube",
+      "label": "Swept tube body",
+      "operation_type": "sweep",
+      "profile_sketch_id": "tube_profile",
+      "path_sketch_id": "tube_path",
+      "make_solid": true
+    }
+  ],
+  "final_object_id": "tube"
+}

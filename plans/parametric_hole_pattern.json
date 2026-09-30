@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.2",
+  "project_name": "parametric_hole_pattern",
+  "units": "mm",
+  "parameters": [
+    {
+      "parameter_id": "plate_width",
+      "name": "Plate Width",
+      "value": 120,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "edge_inset",
+      "name": "Edge Inset",
+      "value": 10,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "bind_plate_width",
+      "relationship_type": "fixed",
+      "target": "operations.base.width_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "plate_width"
+      }
+    },
+    {
+      "relationship_id": "space_holes_across_width",
+      "relationship_type": "equal_spacing",
+      "target_ids": ["hole_1", "hole_2", "hole_3", "hole_4"],
+      "axis": "x",
+      "start": {
+        "expression_type": "add",
+        "left": {
+          "expression_type": "multiply",
+          "left": {
+            "expression_type": "parameter_ref",
+            "parameter_id": "plate_width"
+          },
+          "right": {
+            "expression_type": "literal",
+            "value": -0.5
+          }
+        },
+        "right": {
+          "expression_type": "parameter_ref",
+          "parameter_id": "edge_inset"
+        }
+      },
+      "end": {
+        "expression_type": "subtract",
+        "left": {
+          "expression_type": "multiply",
+          "left": {
+            "expression_type": "parameter_ref",
+            "parameter_id": "plate_width"
+          },
+          "right": {
+            "expression_type": "literal",
+            "value": 0.5
+          }
+        },
+        "right": {
+          "expression_type": "parameter_ref",
+          "parameter_id": "edge_inset"
+        }
+      }
+    }
+  ],
+  "operations": [
+    {
+      "id": "base",
+      "operation_type": "create_box",
+      "width_mm": 120,
+      "depth_mm": 40,
+      "height_mm": 5,
+      "center": [0, 0, 0]
+    },
+    {
+      "id": "hole_1",
+      "operation_type": "through_hole",
+      "target_id": "base",
+      "position": [-50, 0],
+      "hole_diameter_mm": 4,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "hole_2",
+      "operation_type": "through_hole",
+      "target_id": "hole_1",
+      "position": [-16.666667, 0],
+      "hole_diameter_mm": 4,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "hole_3",
+      "operation_type": "through_hole",
+      "target_id": "hole_2",
+      "position": [16.666667, 0],
+      "hole_diameter_mm": 4,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "hole_4",
+      "operation_type": "through_hole",
+      "target_id": "hole_3",
+      "position": [50, 0],
+      "hole_diameter_mm": 4,
+      "face_selector": "top_face"
+    }
+  ],
+  "final_object_id": "hole_4"
+}

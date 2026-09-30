@@ -5,15 +5,27 @@ from types import SimpleNamespace
 import pytest
 
 from ai.parser import MissingInformationError, UnsupportedPartError, parse_prompt
-from ai.schemas import BoxSpec, CylinderSpec, HoleSpec, MountingPlateSpec, PromptParseResponse
+from ai.schemas import (
+    BoxSpec,
+    CreateBoxOperation,
+    CreateCylinderOperation,
+    BooleanUnionOperation,
+    CylinderSpec,
+    HoleSpec,
+    MountingPlateSpec,
+    OperationPlan,
+    PromptParseResponse,
+)
 from cad.generator import build_mounting_plate
 
 
 class MockResponses:
     def __init__(self, parse_response: PromptParseResponse) -> None:
         self.parse_response = parse_response
+        self.last_input: object | None = None
 
-    def parse(self, **_: object) -> SimpleNamespace:
+    def parse(self, **kwargs: object) -> SimpleNamespace:
+        self.last_input = kwargs.get("input")
         return SimpleNamespace(output_parsed=self.parse_response)
 
 
@@ -80,13 +92,17 @@ def test_missing_required_dimensions_are_reported() -> None:
         parse_prompt("Make me a mounting plate.", client=client)
 
 
-def test_inches_are_rejected_for_this_milestone() -> None:
+def test_inches_are_normalized_before_structured_parser_request() -> None:
     client = MockClient(
         PromptParseResponse(status="success", message="Should not be used.", spec=sample_spec())
     )
 
-    with pytest.raises(MissingInformationError, match="millimeter"):
-        parse_prompt("Make a 4 inch by 2 inch plate.", client=client)
+    parse_prompt("Make a 4 inch by 2 inch plate.", client=client)
+
+    assert client.responses.last_input is not None
+    user_message = client.responses.last_input[1]["content"]
+    assert "101.6 mm" in user_message
+    assert "50.8 mm" in user_message
 
 
 def test_invalid_interpreted_geometry_is_reported() -> None:
@@ -141,3 +157,21 @@ def test_parser_dispatches_supported_part_types(
     parsed = parse_prompt(prompt, client=client)
 
     assert parsed.part_type == expected_part_type
+
+
+def test_parser_dispatches_operation_plan() -> None:
+    plan = OperationPlan(
+        project_name="base_with_boss",
+        operations=[
+            CreateBoxOperation(id="base", width_mm=80, depth_mm=50, height_mm=5),
+            CreateCylinderOperation(id="boss", diameter_mm=20, height_mm=15, center=(0, 0, 10)),
+            BooleanUnionOperation(id="combined", target_id="base", tool_id="boss"),
+        ],
+        final_object_id="combined",
+    )
+    client = MockClient(PromptParseResponse(status="success", message="Parsed.", spec=plan))
+
+    parsed = parse_prompt("Create a base plate with a cylindrical boss.", client=client)
+
+    assert isinstance(parsed, OperationPlan)
+    assert parsed.final_object_id == "combined"

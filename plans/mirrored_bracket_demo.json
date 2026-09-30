@@ -1,0 +1,28 @@
+{
+  "project_name": "mirrored_bracket_demo",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "half",
+      "operation_type": "create_box",
+      "width_mm": 30,
+      "depth_mm": 8,
+      "height_mm": 20,
+      "center": [15, 0, 10]
+    },
+    {
+      "id": "mirrored",
+      "operation_type": "mirror",
+      "target_id": "half",
+      "plane": "YZ"
+    },
+    {
+      "id": "softened",
+      "operation_type": "fillet",
+      "target_id": "mirrored",
+      "radius_mm": 1,
+      "edge_selector": "vertical_edges"
+    }
+  ],
+  "final_object_id": "softened"
+}

@@ -1,0 +1,14 @@
+{
+  "servers": [
+    {
+      "id": "example_server",
+      "name": "Example MCP Server",
+      "transport": "stdio",
+      "command": "example-mcp-server",
+      "args": [],
+      "enabled": false,
+      "trusted": false,
+      "notes": "Disabled example. Only explicitly configured and enabled MCP servers are contacted."
+    }
+  ]
+}

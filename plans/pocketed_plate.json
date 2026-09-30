@@ -1,0 +1,44 @@
+{
+  "schema_version": "1.1",
+  "project_name": "pocketed_plate",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "base",
+      "label": "Base plate",
+      "operation_type": "create_box",
+      "width_mm": 70,
+      "depth_mm": 45,
+      "height_mm": 8
+    },
+    {
+      "id": "pocket_profile",
+      "label": "Pocket profile",
+      "operation_type": "create_sketch",
+      "sketch": {
+        "id": "pocket_profile",
+        "plane": "XY",
+        "origin": [0, 0, 4.1],
+        "closed": true,
+        "entities": [
+          {
+            "entity_type": "rectangle",
+            "width_mm": 36,
+            "height_mm": 18
+          }
+        ]
+      }
+    },
+    {
+      "id": "pocket",
+      "label": "Blind center pocket",
+      "operation_type": "cut_extrude",
+      "target_id": "base",
+      "sketch_id": "pocket_profile",
+      "distance_mm": 3,
+      "extent_type": "blind",
+      "direction": "negative"
+    }
+  ],
+  "final_object_id": "pocket"
+}

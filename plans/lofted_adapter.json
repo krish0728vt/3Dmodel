@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.1",
+  "project_name": "lofted_adapter",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "lower_profile",
+      "label": "Lower circular profile",
+      "operation_type": "create_sketch",
+      "sketch": {
+        "id": "lower_profile",
+        "plane": "XY",
+        "origin": [0, 0, 0],
+        "closed": true,
+        "entities": [
+          {
+            "entity_type": "circle",
+            "diameter_mm": 34
+          }
+        ]
+      }
+    },
+    {
+      "id": "upper_profile",
+      "label": "Upper circular profile",
+      "operation_type": "create_sketch",
+      "sketch": {
+        "id": "upper_profile",
+        "plane": "XY",
+        "origin": [0, 0, 28],
+        "closed": true,
+        "entities": [
+          {
+            "entity_type": "circle",
+            "diameter_mm": 18
+          }
+        ]
+      }
+    },
+    {
+      "id": "adapter_body",
+      "label": "Lofted adapter body",
+      "operation_type": "loft",
+      "sketch_ids": ["lower_profile", "upper_profile"],
+      "ruled": false,
+      "solid": true
+    }
+  ],
+  "final_object_id": "adapter_body"
+}

@@ -1,0 +1,23 @@
+{
+  "project_name": "patterned_cylinders_demo",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "pin",
+      "operation_type": "create_cylinder",
+      "diameter_mm": 5,
+      "height_mm": 12,
+      "center": [-18, 0, 6],
+      "axis": "z"
+    },
+    {
+      "id": "pin_row",
+      "operation_type": "linear_pattern",
+      "target_id": "pin",
+      "direction": "x",
+      "spacing_mm": 12,
+      "count": 4
+    }
+  ],
+  "final_object_id": "pin_row"
+}

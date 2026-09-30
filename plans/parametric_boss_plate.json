@@ -1,0 +1,87 @@
+{
+  "schema_version": "1.2",
+  "project_name": "parametric_boss_plate",
+  "units": "mm",
+  "parameters": [
+    {
+      "parameter_id": "plate_width",
+      "name": "Plate Width",
+      "value": 90,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "boss_diameter",
+      "name": "Boss Diameter",
+      "value": 18,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "bind_plate_width",
+      "relationship_type": "fixed",
+      "target": "operations.base.width_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "plate_width"
+      }
+    },
+    {
+      "relationship_id": "bind_boss_diameter",
+      "relationship_type": "fixed",
+      "target": "operations.center_boss.diameter_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "boss_diameter"
+      }
+    },
+    {
+      "relationship_id": "center_boss_on_base",
+      "relationship_type": "centered",
+      "target_id": "center_boss",
+      "reference_id": "base",
+      "axes": "xy"
+    },
+    {
+      "relationship_id": "center_hole_on_boss",
+      "relationship_type": "centered",
+      "target_id": "center_hole",
+      "reference_id": "center_boss",
+      "axes": "xy"
+    }
+  ],
+  "operations": [
+    {
+      "id": "base",
+      "operation_type": "create_box",
+      "width_mm": 90,
+      "depth_mm": 55,
+      "height_mm": 6,
+      "center": [0, 0, 0]
+    },
+    {
+      "id": "center_boss",
+      "operation_type": "boss",
+      "target_id": "base",
+      "position": [0, 0],
+      "diameter_mm": 18,
+      "height_mm": 10,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "center_hole",
+      "operation_type": "through_hole",
+      "target_id": "center_boss",
+      "position": [0, 0],
+      "hole_diameter_mm": 6,
+      "face_selector": "top_face"
+    }
+  ],
+  "final_object_id": "center_hole"
+}

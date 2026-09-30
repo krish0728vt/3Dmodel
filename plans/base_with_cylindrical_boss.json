@@ -1,0 +1,37 @@
+{
+  "project_name": "base_with_cylindrical_boss",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "base",
+      "operation_type": "create_box",
+      "width_mm": 80,
+      "depth_mm": 50,
+      "height_mm": 5,
+      "center": [0, 0, 2.5]
+    },
+    {
+      "id": "boss",
+      "operation_type": "create_cylinder",
+      "diameter_mm": 20,
+      "height_mm": 15,
+      "center": [0, 0, 12.5],
+      "axis": "z"
+    },
+    {
+      "id": "combined",
+      "operation_type": "boolean_union",
+      "target_id": "base",
+      "tool_id": "boss"
+    },
+    {
+      "id": "boss_hole",
+      "operation_type": "cut_hole",
+      "target_id": "combined",
+      "diameter_mm": 6,
+      "position": [0, 0],
+      "direction": "z"
+    }
+  ],
+  "final_object_id": "boss_hole"
+}

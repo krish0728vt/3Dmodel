@@ -1,0 +1,225 @@
+{
+  "schema_version": "1.2",
+  "project_name": "parametric_enclosure",
+  "units": "mm",
+  "parameters": [
+    {
+      "parameter_id": "pcb_width",
+      "name": "PCB Width",
+      "value": 70,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "pcb_depth",
+      "name": "PCB Depth",
+      "value": 45,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "clearance",
+      "name": "PCB Clearance",
+      "value": 5,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "wall",
+      "name": "Wall Thickness",
+      "value": 2,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    },
+    {
+      "parameter_id": "outer_width",
+      "name": "Outer Width",
+      "value": 84,
+      "unit": "mm",
+      "editable": false,
+      "source": "relationship",
+      "role": "derived"
+    },
+    {
+      "parameter_id": "outer_depth",
+      "name": "Outer Depth",
+      "value": 59,
+      "unit": "mm",
+      "editable": false,
+      "source": "relationship",
+      "role": "derived"
+    },
+    {
+      "parameter_id": "post_inset",
+      "name": "Post Inset",
+      "value": 10,
+      "unit": "mm",
+      "editable": true,
+      "source": "manual",
+      "role": "driving"
+    }
+  ],
+  "relationships": [
+    {
+      "relationship_id": "derive_outer_width",
+      "relationship_type": "dependent_dimension",
+      "target_parameter": "outer_width",
+      "expression": {
+        "expression_type": "add",
+        "left": {
+          "expression_type": "parameter_ref",
+          "parameter_id": "pcb_width"
+        },
+        "right": {
+          "expression_type": "multiply",
+          "left": {
+            "expression_type": "add",
+            "left": {
+              "expression_type": "parameter_ref",
+              "parameter_id": "clearance"
+            },
+            "right": {
+              "expression_type": "parameter_ref",
+              "parameter_id": "wall"
+            }
+          },
+          "right": {
+            "expression_type": "literal",
+            "value": 2
+          }
+        }
+      }
+    },
+    {
+      "relationship_id": "derive_outer_depth",
+      "relationship_type": "dependent_dimension",
+      "target_parameter": "outer_depth",
+      "expression": {
+        "expression_type": "add",
+        "left": {
+          "expression_type": "parameter_ref",
+          "parameter_id": "pcb_depth"
+        },
+        "right": {
+          "expression_type": "multiply",
+          "left": {
+            "expression_type": "add",
+            "left": {
+              "expression_type": "parameter_ref",
+              "parameter_id": "clearance"
+            },
+            "right": {
+              "expression_type": "parameter_ref",
+              "parameter_id": "wall"
+            }
+          },
+          "right": {
+            "expression_type": "literal",
+            "value": 2
+          }
+        }
+      }
+    },
+    {
+      "relationship_id": "bind_outer_width",
+      "relationship_type": "fixed",
+      "target": "operations.outer.width_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "outer_width"
+      }
+    },
+    {
+      "relationship_id": "bind_outer_depth",
+      "relationship_type": "fixed",
+      "target": "operations.outer.depth_mm",
+      "value": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "outer_depth"
+      }
+    },
+    {
+      "relationship_id": "mount_1_left",
+      "relationship_type": "edge_offset",
+      "target": "operations.mount_1.position.0",
+      "reference_object": "outer",
+      "reference_edge": "left",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "post_inset"
+      },
+      "axis": "x"
+    },
+    {
+      "relationship_id": "mount_1_bottom",
+      "relationship_type": "edge_offset",
+      "target": "operations.mount_1.position.1",
+      "reference_object": "outer",
+      "reference_edge": "bottom",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "post_inset"
+      },
+      "axis": "y"
+    },
+    {
+      "relationship_id": "mount_2_right",
+      "relationship_type": "edge_offset",
+      "target": "operations.mount_2.position.0",
+      "reference_object": "outer",
+      "reference_edge": "right",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "post_inset"
+      },
+      "axis": "x"
+    },
+    {
+      "relationship_id": "mount_2_bottom",
+      "relationship_type": "edge_offset",
+      "target": "operations.mount_2.position.1",
+      "reference_object": "outer",
+      "reference_edge": "bottom",
+      "offset_mm": {
+        "expression_type": "parameter_ref",
+        "parameter_id": "post_inset"
+      },
+      "axis": "y"
+    }
+  ],
+  "operations": [
+    {
+      "id": "outer",
+      "operation_type": "create_box",
+      "width_mm": 84,
+      "depth_mm": 59,
+      "height_mm": 18,
+      "center": [0, 0, 0]
+    },
+    {
+      "id": "mount_1",
+      "operation_type": "through_hole",
+      "target_id": "outer",
+      "position": [-32, -19.5],
+      "hole_diameter_mm": 3,
+      "face_selector": "top_face"
+    },
+    {
+      "id": "mount_2",
+      "operation_type": "through_hole",
+      "target_id": "mount_1",
+      "position": [32, -19.5],
+      "hole_diameter_mm": 3,
+      "face_selector": "top_face"
+    }
+  ],
+  "final_object_id": "mount_2"
+}

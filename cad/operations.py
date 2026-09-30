@@ -81,3 +81,18 @@ def export_step(part: cq.Workplane, output_path: str | Path) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     cq.exporters.export(part, str(path))
     return path
+
+
+def export_stl(
+    part: cq.Workplane,
+    output_path: str | Path,
+    *,
+    tolerance: float = 0.1,
+    angular_tolerance: float = 0.1,
+) -> Path:
+    """Export a CadQuery part to STL for browser preview, creating the parent directory."""
+
+    path = Path(output_path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    cq.exporters.export(part, str(path), tolerance=tolerance, angularTolerance=angular_tolerance)
+    return path

@@ -1,0 +1,23 @@
+{
+  "project_name": "box_with_center_hole",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "base",
+      "operation_type": "create_box",
+      "width_mm": 60,
+      "depth_mm": 40,
+      "height_mm": 8,
+      "center": [0, 0, 0]
+    },
+    {
+      "id": "center_hole",
+      "operation_type": "cut_hole",
+      "target_id": "base",
+      "diameter_mm": 10,
+      "position": [0, 0],
+      "direction": "z"
+    }
+  ],
+  "final_object_id": "center_hole"
+}

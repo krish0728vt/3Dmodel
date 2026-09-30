@@ -1,0 +1,55 @@
+{
+  "schema_version": "1.1",
+  "project_name": "slotted_bracket",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "base",
+      "label": "Bracket base",
+      "operation_type": "create_box",
+      "width_mm": 80,
+      "depth_mm": 32,
+      "height_mm": 6
+    },
+    {
+      "id": "slot_profile",
+      "label": "Adjustment slot profile",
+      "operation_type": "create_sketch",
+      "sketch": {
+        "id": "slot_profile",
+        "plane": "XY",
+        "origin": [0, 0, 3.1],
+        "closed": true,
+        "entities": [
+          {
+            "entity_type": "slot",
+            "length_mm": 42,
+            "width_mm": 8
+          }
+        ]
+      }
+    },
+    {
+      "id": "slot",
+      "label": "Through adjustment slot",
+      "operation_type": "cut_extrude",
+      "target_id": "base",
+      "sketch_id": "slot_profile",
+      "extent_type": "through_all",
+      "direction": "negative"
+    },
+    {
+      "id": "end_holes",
+      "label": "End mounting holes",
+      "operation_type": "rectangular_hole_pattern",
+      "target_id": "slot",
+      "hole_diameter_mm": 4,
+      "count_x": 2,
+      "count_y": 1,
+      "spacing_x_mm": 62,
+      "spacing_y_mm": 1,
+      "center": [0, 0]
+    }
+  ],
+  "final_object_id": "end_holes"
+}

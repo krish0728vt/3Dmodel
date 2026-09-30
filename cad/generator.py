@@ -10,7 +10,9 @@ from ai.schemas import (
     ElectronicsEnclosureSpec,
     LBracketSpec,
     MountingPlateSpec,
+    OperationPlan,
     SpacerSpec,
+    SupportedDesignSpec,
     SupportedPartSpec,
 )
 from cad.operations import (
@@ -18,10 +20,13 @@ from cad.operations import (
     cut_through_holes,
     cylinder,
     export_step,
+    export_stl,
     rounded_box,
     rounded_rectangle_plate,
 )
 from cad.validator import validate_part
+from cad.operation_executor import execute_operation_plan
+from parametrics.resolver import resolved_model
 
 
 DEFAULT_OUTPUT_PATH = Path("outputs/model.step")
@@ -166,13 +171,32 @@ def build_electronics_enclosure(spec: ElectronicsEnclosureSpec) -> cq.Workplane:
 
 
 def generate_step(
-    spec: SupportedPartSpec,
+    spec: SupportedDesignSpec,
     output_path: str | Path = DEFAULT_OUTPUT_PATH,
 ) -> Path:
-    """Build and export a supported CAD part STEP file."""
+    """Build and export a supported template part or operation plan STEP file."""
 
-    part = generate_part(spec)
+    part = generate_workplane(spec)
     return export_step(part, output_path)
+
+
+def generate_stl(
+    spec: SupportedDesignSpec,
+    output_path: str | Path,
+) -> Path:
+    """Build and export a supported template part or operation plan STL preview file."""
+
+    part = generate_workplane(spec)
+    return export_stl(part, output_path)
+
+
+def generate_workplane(spec: SupportedDesignSpec) -> cq.Workplane:
+    """Build a supported template part or operation plan as a CadQuery workplane."""
+
+    spec = resolved_model(spec)
+    if isinstance(spec, OperationPlan):
+        return execute_operation_plan(spec).final_object
+    return generate_part(spec)
 
 
 def _as_single_solid(part: cq.Workplane) -> cq.Workplane:

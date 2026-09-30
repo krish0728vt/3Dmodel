@@ -12,3 +12,11 @@ env/
 
 outputs/*
 !outputs/.gitkeep
+data/
+tests/regressions/test_failure_*.py
+web/node_modules/
+web/dist/
+web/*.tsbuildinfo
+web/**/*.tsbuildinfo
+web/vite.config.js
+web/vite.config.d.ts

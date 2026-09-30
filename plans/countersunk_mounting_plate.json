@@ -1,0 +1,56 @@
+{
+  "schema_version": "1.1",
+  "project_name": "countersunk_mounting_plate",
+  "units": "mm",
+  "operations": [
+    {
+      "id": "base",
+      "label": "Mounting plate",
+      "operation_type": "create_box",
+      "width_mm": 90,
+      "depth_mm": 55,
+      "height_mm": 6
+    },
+    {
+      "id": "front_left_countersink",
+      "label": "Front-left countersink",
+      "operation_type": "countersink_hole",
+      "target_id": "base",
+      "position": [-34, -17],
+      "hole_diameter_mm": 4.5,
+      "countersink_diameter_mm": 9,
+      "angle_deg": 90
+    },
+    {
+      "id": "front_right_countersink",
+      "label": "Front-right countersink",
+      "operation_type": "countersink_hole",
+      "target_id": "front_left_countersink",
+      "position": [34, -17],
+      "hole_diameter_mm": 4.5,
+      "countersink_diameter_mm": 9,
+      "angle_deg": 90
+    },
+    {
+      "id": "rear_left_countersink",
+      "label": "Rear-left countersink",
+      "operation_type": "countersink_hole",
+      "target_id": "front_right_countersink",
+      "position": [-34, 17],
+      "hole_diameter_mm": 4.5,
+      "countersink_diameter_mm": 9,
+      "angle_deg": 90
+    },
+    {
+      "id": "rear_right_countersink",
+      "label": "Rear-right countersink",
+      "operation_type": "countersink_hole",
+      "target_id": "rear_left_countersink",
+      "position": [34, 17],
+      "hole_diameter_mm": 4.5,
+      "countersink_diameter_mm": 9,
+      "angle_deg": 90
+    }
+  ],
+  "final_object_id": "rear_right_countersink"
+}
