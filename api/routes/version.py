@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-import os
 import sys
 
 from fastapi import APIRouter
 
 from api.schemas import VersionResponse
+from config import openai_key_configured
 from shah_version import APP_VERSION, SCHEMA_VERSION, build_commit
 
 
@@ -25,7 +25,7 @@ def version() -> VersionResponse:
         build=build_commit(),
         python_version=f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         cad_engine=_cad_engine(),
-        ai_configured=bool(os.getenv("OPENAI_API_KEY")),
+        ai_configured=openai_key_configured(),
     )
 
 

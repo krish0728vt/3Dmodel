@@ -15,9 +15,7 @@ import sys
 from pathlib import Path
 
 from deployment import checks, paths
-from deployment.models import CheckStatus
 from deployment.processes import IS_WINDOWS
-from shah_version import SUPPORTED_PYTHON
 
 
 class SetupError(RuntimeError):
@@ -59,45 +57,6 @@ def ensure_env_file() -> str:
         return "skipped (.env.example missing)"
     shutil.copyfile(paths.ENV_EXAMPLE_PATH, paths.ENV_PATH)
     return "created from .env.example"
-
-
-def ensure_local_config_example() -> str:
-    """Make sure the example config exists so users can copy it."""
-    if paths.LOCAL_CONFIG_EXAMPLE_PATH.exists():
-        return "already present"
-    return "missing (expected in git)"
-
-
-def venv_python(venv_dir: Path = paths.VENV_DIR) -> Path:
-    """Interpreter path inside a venv, for the current platform."""
-    if IS_WINDOWS:
-        return venv_dir / "Scripts" / "python.exe"
-    return venv_dir / "bin" / "python"
-
-
-def create_virtualenv(venv_dir: Path = paths.VENV_DIR) -> str:
-    """Create the project venv if missing, using a real 3.11 interpreter.
-
-    `python` on PATH is not assumed to be 3.11: on Windows we go through the
-    `py` launcher, which can select the right version explicitly.
-    """
-    if venv_python(venv_dir).exists():
-        return "already present"
-    wanted = f"{SUPPORTED_PYTHON[0]}.{SUPPORTED_PYTHON[1]}"
-    if sys.version_info[:2] == SUPPORTED_PYTHON:
-        command = [sys.executable, "-m", "venv", str(venv_dir)]
-    elif IS_WINDOWS and shutil.which("py") is not None:
-        command = ["py", f"-{wanted}", "-m", "venv", str(venv_dir)]
-    else:
-        candidate = shutil.which(f"python{wanted}")
-        if candidate is None:
-            raise SetupError(
-                f"Python {wanted} was not found, so the environment cannot be created.\n"
-                f"  Install Python {wanted}, then run setup again."
-            )
-        command = [candidate, "-m", "venv", str(venv_dir)]
-    _run(command, cwd=paths.REPO_ROOT, label="Creating the virtual environment")
-    return "created"
 
 
 def install_python_dependencies(*, include_dev: bool = True) -> str:
@@ -261,10 +220,3 @@ def run_setup(
     return 0
 
 
-def summarize_statuses(statuses: list[CheckStatus]) -> CheckStatus:
-    """Worst status in a list, for callers that aggregate their own checks."""
-    if CheckStatus.FAIL in statuses:
-        return CheckStatus.FAIL
-    if CheckStatus.WARN in statuses:
-        return CheckStatus.WARN
-    return CheckStatus.PASS

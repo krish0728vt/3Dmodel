@@ -261,3 +261,44 @@ def test_doctor_can_skip_frontend_checks(monkeypatch, tmp_path):
 def test_doctor_can_skip_port_checks():
     names = {r.name for r in checks.run_doctor(include_ports=False).results}
     assert not any(name.startswith("Backend port") for name in names)
+
+
+def test_placeholder_api_key_counts_as_unconfigured(monkeypatch):
+    """A key left at the .env.example placeholder must not claim AI works.
+
+    Otherwise the app reports AI as available and then fails on the first
+    request with an auth error.
+    """
+    from config import openai_key_configured
+
+    # load_dotenv would otherwise re-read a real .env during the test.
+    monkeypatch.setattr("dotenv.load_dotenv", lambda *_a, **_k: False)
+
+    for placeholder in ("", "   ", "your_api_key_here", "YOUR-API-KEY-HERE", "changeme", "none"):
+        monkeypatch.setenv("OPENAI_API_KEY", placeholder)
+        assert openai_key_configured() is False, placeholder
+
+    monkeypatch.setenv("OPENAI_API_KEY", "a-non-placeholder-test-value")
+    assert openai_key_configured() is True
+
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    assert openai_key_configured() is False
+
+
+def test_doctor_warns_for_a_placeholder_key(monkeypatch):
+    monkeypatch.setattr("dotenv.load_dotenv", lambda *_a, **_k: False)
+    monkeypatch.setenv("OPENAI_API_KEY", "your_api_key_here")
+    assert checks.check_openai_key().status is CheckStatus.WARN
+
+
+def test_env_example_ships_a_blank_key():
+    """The example must not carry a value that looks configured."""
+    from deployment import paths
+
+    text = paths.ENV_EXAMPLE_PATH.read_text(encoding="utf-8")
+    line = next(
+        raw.strip()
+        for raw in text.splitlines()
+        if raw.strip().startswith("OPENAI_API_KEY=")
+    )
+    assert line == "OPENAI_API_KEY="

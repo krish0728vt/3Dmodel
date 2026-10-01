@@ -19,6 +19,7 @@ import zipfile
 from datetime import datetime
 from pathlib import Path
 
+from config import openai_key_configured
 from deployment import checks, paths
 from deployment.health import wait_for_backend, wait_for_frontend
 from deployment.models import (
@@ -292,7 +293,7 @@ def _run_session(
         print(f"Frontend: {'ONLINE' if dev else 'ONLINE (served by backend)'}")
         print(f"API: {api_url}/api/health")
         print(f"Web: {web_url}")
-        if not os.getenv("OPENAI_API_KEY"):
+        if not openai_key_configured():
             print()
             print("AI NOT CONFIGURED - natural-language prompts are unavailable.")
             print("  Manual CAD, projects, assemblies, exports, and evaluation work normally.")

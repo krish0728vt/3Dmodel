@@ -51,3 +51,33 @@ class ShahCadConfig:
 
 
 CONFIG = ShahCadConfig()
+
+
+# Values a user may leave in .env after copying the example. Treated as absent
+# so the app reports "not configured" instead of claiming AI is available and
+# then failing on the first request with an auth error.
+_PLACEHOLDER_KEYS = {
+    "",
+    "your_api_key_here",
+    "your-api-key-here",
+    "changeme",
+    "none",
+    "null",
+    "todo",
+}
+
+
+def openai_key_configured() -> bool:
+    """True when a usable OPENAI_API_KEY is set.
+
+    Loads `.env` first so this agrees with `ai.parser`, which does the same
+    before building a client. Blank and placeholder values count as absent.
+    """
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass
+    value = (os.getenv("OPENAI_API_KEY") or "").strip()
+    return value.lower() not in _PLACEHOLDER_KEYS

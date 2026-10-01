@@ -8,13 +8,13 @@ mutating separately in `bootstrap`.
 from __future__ import annotations
 
 import importlib.metadata
-import os
 import shutil
 import sqlite3
 import subprocess
 import sys
 from pathlib import Path
 
+from config import openai_key_configured
 from deployment import paths
 from deployment.models import CheckResult, CheckStatus, DoctorReport
 from deployment.ports import is_port_available
@@ -243,7 +243,7 @@ def check_port(label: str, port: int, host: str = "127.0.0.1") -> CheckResult:
 
 def check_openai_key() -> CheckResult:
     """Absence is a warning: deterministic CAD does not need a key."""
-    if os.getenv("OPENAI_API_KEY"):
+    if openai_key_configured():
         return _ok("OPENAI_API_KEY", "configured")
     return _warn(
         "OPENAI_API_KEY",

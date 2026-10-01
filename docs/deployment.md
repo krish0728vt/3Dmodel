@@ -149,13 +149,17 @@ relevant log with the reason, rather than a traceback.
 
 ### Secrets
 
-Secrets live in `.env` only, never in JSON config:
+Secrets live in `.env` only, never in JSON config. `setup` copies
+`.env.example`, which ships a deliberately blank key:
 
 ```
 OPENAI_API_KEY=
 ```
 
-The key is **optional**. Without it the app starts normally and reports:
+The key is **optional**. A blank value, or a leftover placeholder such as
+`your_api_key_here`, counts as not configured -- so the app never claims AI is
+available and then fails on the first request. Without a key the app starts
+normally and reports:
 
 ```
 AI NOT CONFIGURED - natural-language prompts are unavailable.
