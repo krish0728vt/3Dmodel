@@ -5,6 +5,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from deployment_safety import scan as scan_deployment_safety
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SKIP_DIRS = {
@@ -47,6 +49,7 @@ def main() -> int:
             findings.extend(_scan_frontend_secrets(path))
     findings.extend(_check_env_ignored())
     findings.extend(_check_tracked_secret_files())
+    findings.extend(scan_deployment_safety())
     if findings:
         print("Security check failed:")
         for finding in findings:

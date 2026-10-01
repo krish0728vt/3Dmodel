@@ -1226,3 +1226,64 @@ textarea:focus {
   justify-content: flex-end;
   gap: 8px;
 }
+
+/* System / About panel, anchored under the header actions. */
+.workspace-header {
+  position: relative;
+}
+
+.system-info-panel {
+  position: absolute;
+  top: 72px;
+  right: 18px;
+  z-index: 40;
+  width: 320px;
+  padding: 14px 16px;
+  border: 1px solid #252b30;
+  border-radius: 8px;
+  background: #15191d;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+}
+
+.system-info-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: #8fa0aa;
+}
+
+.system-info-rows {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.system-info-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12px;
+}
+
+.system-info-row dt {
+  color: #8fa0aa;
+}
+
+.system-info-row dd {
+  margin: 0;
+  color: #eef3f5;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  word-break: break-word;
+}
+
+.system-info-note {
+  margin: 12px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: #8fa0aa;
+}

@@ -4,6 +4,15 @@ export type HealthResponse = {
   route_count: number;
 };
 
+export type VersionResponse = {
+  app_version: string;
+  schema_version: string;
+  build: string | null;
+  python_version: string;
+  cad_engine: string;
+  ai_configured: boolean;
+};
+
 export type ProjectSummary = {
   project_id: string;
   name: string;

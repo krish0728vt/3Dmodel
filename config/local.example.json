@@ -1,0 +1,9 @@
+{
+  "_comment": "Copy to config/local.json to override launcher defaults. Machine-specific settings only - never put secrets here. Secrets belong in .env (see .env.example).",
+  "backend_host": "127.0.0.1",
+  "backend_port": 8000,
+  "frontend_port": 5173,
+  "open_browser": true,
+  "startup_timeout": 30,
+  "mode": "production"
+}

@@ -23,7 +23,8 @@ import type {
   ProjectDetail,
   ProjectSummary,
   ResolvedDesign,
-  RevisionSummary
+  RevisionSummary,
+  VersionResponse
 } from "../types/api";
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "";
@@ -45,6 +46,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<HealthResponse>("/api/health"),
+  version: () => request<VersionResponse>("/api/version"),
   evaluationLatest: () => request<{ available: boolean; message?: string; report: EvaluationReport | null }>("/api/evaluation/latest"),
   evaluationCases: () => request<unknown[]>("/api/evaluation/cases"),
   evaluationRegressions: () => request<unknown[]>("/api/evaluation/regressions"),

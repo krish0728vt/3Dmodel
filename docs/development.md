@@ -16,13 +16,19 @@ Python 3.11 is the supported runtime. The repository includes `.python-version` 
 
 ## Run
 
-API:
+Normally use the launcher, which orchestrates both servers and health checks:
+
+```powershell
+.\scripts\start.ps1 -Dev
+```
+
+See [Deployment](deployment.md) for modes, ports, logs, and diagnostics.
+
+To run a single server directly while debugging it:
 
 ```powershell
 .\.venv311\Scripts\python -m uvicorn api.server:app --reload
 ```
-
-Web:
 
 ```powershell
 cd web
@@ -47,6 +53,7 @@ The check runner executes:
 
 - Python lint (`ruff check .`)
 - workflow lint (`actionlint` over `.github/workflows`)
+- deployment CLI sanity (`app.py version`, `app.py doctor`; starts no servers)
 - Python tests
 - deterministic evaluation smoke benchmark
 - evaluation baseline comparison
@@ -60,6 +67,7 @@ Target a group while iterating:
 ```powershell
 .\.venv311\Scripts\python scripts/check_all.py --only lint
 .\.venv311\Scripts\python scripts/check_all.py --only workflows
+.\.venv311\Scripts\python scripts/check_all.py --only deployment
 .\.venv311\Scripts\python scripts/check_all.py --only python
 .\.venv311\Scripts\python scripts/check_all.py --only frontend
 .\.venv311\Scripts\python scripts/check_all.py --only evaluation
@@ -203,6 +211,16 @@ Reusable local scan:
 ```
 
 The scan checks source files for dynamic evaluation calls, process execution with shell interpretation, token-like private key patterns, and frontend secret markers. It intentionally avoids failing on documentation that names environment variables for setup guidance.
+
+`scripts/deployment_safety.py` adds checks that only matter for the code allowed
+to terminate processes and delete directories (`deployment/`, `scripts/`, the
+`.bat` launchers):
+
+- no killing processes by image name (`taskkill /IM`, `pkill`, `Stop-Process -Name`)
+- no recursive deletion of an absolute or environment-derived path
+- the launcher's `_CLEANABLE` list must not include `DATA_DIR`, `OUTPUTS_DIR`, or `BACKUPS_DIR`
+
+Run it alone with `python scripts/deployment_safety.py`.
 
 ## Deliberate Tooling Omissions
 

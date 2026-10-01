@@ -16,6 +16,19 @@ class HealthResponse(BaseModel):
     route_count: int
 
 
+class VersionResponse(BaseModel):
+    """Build identity for the About panel. Never carries environment secrets."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    app_version: str
+    schema_version: str
+    build: str | None = None
+    python_version: str
+    cad_engine: str
+    ai_configured: bool
+
+
 class GenerateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

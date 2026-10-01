@@ -452,6 +452,8 @@ def main(argv: list[str] | None = None) -> int:
         from evaluation.runner import main as evaluation_main
 
         return evaluation_main(argv[1:])
+    if argv and argv[0] in _DEPLOYMENT_COMMANDS:
+        return _deployment_cli(argv)
 
     parser = argparse.ArgumentParser(description="SHAH INDUSTRIES AI CAD GENERATOR")
     parser.add_argument("--plan", type=Path, help="Load and run a JSON operation plan.")
@@ -501,6 +503,128 @@ def _advanced_operation_mode() -> int:
 
     _print_success(plan, output_path)
     return 0
+
+
+_DEPLOYMENT_COMMANDS = frozenset(
+    {"serve", "setup", "doctor", "stop", "status", "version", "build", "clean", "backup"}
+)
+
+
+def _deployment_cli(argv: list[str]) -> int:
+    """Local deployment commands. Imported lazily so the CAD CLI stays fast."""
+    from deployment import bootstrap, checks, launcher
+    from shah_version import version_line
+
+    command = argv[0]
+    rest = argv[1:]
+
+    if command == "version":
+        from shah_version import APP_VERSION, SCHEMA_VERSION
+
+        print(version_line())
+        print(f"Python: {sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")
+        print(f"Schema: {SCHEMA_VERSION}")
+        _ = APP_VERSION
+        return 0
+
+    if command == "doctor":
+        parser = argparse.ArgumentParser(prog="app.py doctor")
+        parser.add_argument("--backend-port", type=int, default=8000)
+        parser.add_argument("--frontend-port", type=int, default=5173)
+        parser.add_argument("--host", default="127.0.0.1")
+        parser.add_argument("--json", action="store_true", help="Emit the report as JSON.")
+        parser.add_argument(
+            "--skip-frontend",
+            action="store_true",
+            help="Omit Node/npm/frontend checks (for backend-only environments).",
+        )
+        args = parser.parse_args(rest)
+        report = checks.run_doctor(
+            backend_port=args.backend_port,
+            frontend_port=args.frontend_port,
+            host=args.host,
+            include_frontend=not args.skip_frontend,
+        )
+        if args.json:
+            print(report.model_dump_json(indent=2))
+        else:
+            print(checks.format_report(report))
+        return report.exit_code
+
+    if command == "setup":
+        parser = argparse.ArgumentParser(prog="app.py setup")
+        parser.add_argument("--skip-python", action="store_true", help="Do not install Python packages.")
+        parser.add_argument("--skip-frontend", action="store_true", help="Do not install npm packages.")
+        parser.add_argument(
+            "--repair-frontend",
+            action="store_true",
+            help="Remove web/node_modules before installing (explicit repair).",
+        )
+        args = parser.parse_args(rest)
+        return bootstrap.run_setup(
+            install_python=not args.skip_python,
+            install_frontend=not args.skip_frontend,
+            repair_frontend=args.repair_frontend,
+        )
+
+    if command == "serve":
+        parser = argparse.ArgumentParser(prog="app.py serve")
+        mode = parser.add_mutually_exclusive_group()
+        mode.add_argument("--dev", action="store_true", help="FastAPI reload plus the Vite dev server.")
+        mode.add_argument(
+            "--production",
+            action="store_true",
+            help="Serve the built frontend from FastAPI on one port (default).",
+        )
+        parser.add_argument("--host", default=None, help="Bind address (default 127.0.0.1).")
+        parser.add_argument("--backend-port", type=int, default=None)
+        parser.add_argument("--frontend-port", type=int, default=None)
+        parser.add_argument("--build", action="store_true", help="Build the frontend before serving.")
+        parser.add_argument(
+            "--auto-port",
+            action="store_true",
+            help="Use the next free port when the requested one is busy.",
+        )
+        parser.add_argument("--timeout", type=int, default=None, help="Health-check timeout in seconds.")
+        browser = parser.add_mutually_exclusive_group()
+        browser.add_argument("--open", dest="open_browser", action="store_true", default=None)
+        browser.add_argument("--no-open", dest="open_browser", action="store_false", default=None)
+        args = parser.parse_args(rest)
+        launcher._install_sigterm_handler()
+        return launcher.serve(
+            dev=args.dev,
+            host=args.host,
+            backend_port=args.backend_port,
+            frontend_port=args.frontend_port,
+            open_browser=args.open_browser,
+            auto_port=args.auto_port,
+            build=args.build,
+            timeout=args.timeout,
+        )
+
+    if command == "stop":
+        return launcher.stop()
+
+    if command == "status":
+        return launcher.status()
+
+    if command == "build":
+        parser = argparse.ArgumentParser(prog="app.py build")
+        parser.add_argument("--tests", action="store_true", help="Also run the frontend test suite.")
+        parser.add_argument("--skip-typecheck", action="store_true")
+        args = parser.parse_args(rest)
+        return launcher.run_build(run_tests=args.tests, run_typecheck=not args.skip_typecheck)
+
+    if command == "clean":
+        parser = argparse.ArgumentParser(prog="app.py clean")
+        parser.add_argument("--yes", action="store_true", help="Actually remove the listed artifacts.")
+        args = parser.parse_args(rest)
+        return launcher.clean(yes=args.yes)
+
+    if command == "backup":
+        return launcher.backup()
+
+    return 1
 
 
 def _project_cli(argv: list[str]) -> int:

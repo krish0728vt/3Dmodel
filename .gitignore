@@ -28,3 +28,6 @@ npm-debug.log*
 *.tmp
 *.temp
 .ci-tmp/
+runtime/
+backups/
+config/local.json

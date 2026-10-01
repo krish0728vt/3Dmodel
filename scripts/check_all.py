@@ -25,13 +25,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--only",
         action="append",
-        choices=["lint", "workflows", "python", "evaluation", "frontend", "security"],
+        choices=["lint", "workflows", "deployment", "python", "evaluation", "frontend", "security"],
         help="Run only the selected group. May be repeated.",
     )
     parser.add_argument("--continue-on-error", action="store_true")
     args = parser.parse_args(argv)
 
-    selected = set(args.only or ["lint", "workflows", "python", "evaluation", "frontend", "security"])
+    selected = set(
+        args.only
+        or ["lint", "workflows", "deployment", "python", "evaluation", "frontend", "security"]
+    )
     checks = _checks(selected)
     failures: list[str] = []
     for check in checks:
@@ -67,6 +70,14 @@ def _checks(selected: set[str]) -> list[Check]:
             print("SKIP: Workflow lint (actionlint not installed; pip install -r requirements-dev.txt)")
         else:
             checks.append(Check("Workflow lint (actionlint)", [actionlint, *_workflow_files()]))
+    if "deployment" in selected:
+        # Fast, server-free sanity check of the launcher CLI surface.
+        checks.append(Check("Deployment CLI (version)", [python, "app.py", "version"]))
+        checks.append(
+            # --skip-frontend keeps this stage working in backend-only
+            # environments; the frontend has its own stage below.
+            Check("Deployment CLI (doctor)", [python, "app.py", "doctor", "--skip-frontend"])
+        )
     if "python" in selected:
         checks.append(Check("Python tests", [python, "-m", "pytest"]))
     if "evaluation" in selected:

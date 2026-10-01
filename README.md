@@ -57,6 +57,7 @@ Detailed notes live in focused docs:
 - [Parametrics](docs/parametrics.md)
 - [Learning Core](docs/learning-core.md)
 - [Capabilities](docs/capabilities.md)
+- [Deployment](docs/deployment.md)
 - [Development](docs/development.md)
 - [Workflows And Recipes](docs/workflows.md)
 
@@ -83,32 +84,35 @@ web/            React/Vite CAD workspace
 
 ## Quick Start
 
-Use Python 3.11 on Windows.
+Windows, Python 3.11:
 
 ```powershell
-.\.venv311\Scripts\Activate.ps1
-pip install -r requirements.txt
+.\scripts\setup.ps1
+.\scripts\start.ps1
 ```
 
-Run the API:
+`start.ps1` serves the app and the API from one URL, `http://127.0.0.1:8000`.
+
+Development mode, with hot reload on `http://127.0.0.1:5173`:
 
 ```powershell
-.\.venv311\Scripts\python -m uvicorn api.server:app --reload
+.\scripts\start.ps1 -Dev
 ```
 
-Run the web workspace:
+Diagnostics, stop, and status:
 
 ```powershell
-cd web
-npm.cmd install
-npm.cmd run dev
+.\scripts\doctor.ps1
+.\scripts\stop.ps1
+.\scripts\status.ps1
 ```
 
-Open the Vite URL shown in the terminal, usually:
+An `OPENAI_API_KEY` in `.env` is optional and only enables natural-language
+prompts. Manual CAD, projects, assemblies, exports, and evaluation work without
+one.
 
-```text
-http://localhost:5173
-```
+See [Deployment](docs/deployment.md) for ports, logs, backup, troubleshooting,
+and the packaging decisions.
 
 ## Development Checks
 
@@ -318,7 +322,7 @@ GLB and OBJ are intentionally deferred until a reliable local exporter is availa
 
 ## API Highlights
 
-Start the API:
+Start the API alone (the launcher usually does this for you):
 
 ```powershell
 .\.venv311\Scripts\python -m uvicorn api.server:app --reload
@@ -329,6 +333,7 @@ Important routes:
 | Method | Route | Purpose |
 | --- | --- | --- |
 | `GET` | `/api/health` | Backend status |
+| `GET` | `/api/version` | App version, build, CAD engine, AI availability |
 | `POST` | `/api/generate` | Generate and optionally save a project |
 | `GET` | `/api/projects` | List projects |
 | `GET` | `/api/projects/{id}` | Project detail and current model |
