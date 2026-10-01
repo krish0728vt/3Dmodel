@@ -68,6 +68,7 @@ Detailed notes live in focused docs:
 - [Learning Core](docs/learning-core.md)
 - [Capabilities](docs/capabilities.md)
 - [Release Candidate](docs/release-candidate.md)
+- [RC Validation](docs/rc-validation.md)
 - [Deployment](docs/deployment.md)
 - [Development](docs/development.md)
 - [Workflows And Recipes](docs/workflows.md)

@@ -3,6 +3,16 @@
 Written for someone evaluating whether this is fit to use, not for someone who
 followed its development.
 
+## Validation status
+
+Validated on 2026-10-01 against commit `6e4a7e3`. Every functional,
+deterministic and safety gate passed with no code change required, so no rc.2
+was produced. The one outstanding item is a manual visual review, which the
+validation environment could not perform.
+
+Full record, including the issue table and what a visual reviewer should check:
+[RC Validation](rc-validation.md).
+
 ## What SHAH INDUSTRIES does
 
 A local, single-user CAD workspace for mechanical parts. You describe a part in
@@ -33,8 +43,8 @@ MCP server, no browser.
 
 | Suite | Scope |
 | --- | --- |
-| Python tests | 273 tests across parsing, schemas, geometry, validation, projects, revisions, parametrics, engineering, assemblies, exports, capabilities, learning, the API, and local deployment |
-| Frontend tests | 73 Vitest tests over the pure presentation logic: prompt lifecycle, error mapping, loading and empty states, mode, interference wording, export availability, shortcuts, formatting, unit conversion |
+| Python tests | 312 tests across parsing, schemas, geometry, validation, projects, revisions, parametrics, engineering, assemblies, exports, capabilities, learning, the API, and local deployment |
+| Frontend tests | 71 Vitest tests over the pure presentation logic: prompt lifecycle, error mapping, loading and empty states, mode, interference wording, shortcuts, formatting, unit conversion |
 | Benchmark | 93 cases over 18 categories; a 28-case smoke subset runs in about 18 seconds |
 | Regression gate | Every benchmark case is compared against a committed baseline; a pass becoming a failure fails the build |
 | CI | Python tests, frontend tests and build, evaluation smoke, and security checks on every push and pull request |
