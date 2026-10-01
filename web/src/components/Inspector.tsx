@@ -2,12 +2,18 @@ import { useEffect, useMemo, useState } from "react";
 
 import { assemblyDownloadUrl, exportDownloadUrl } from "../api/client";
 import { emptyState, interferenceInfo } from "./uiState";
-import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, PatternRecord, PreviewObject, ProjectDetail, RepairStrategyRecord, ResolvedDesign, RevisionPreview, SelectionState } from "../types/api";
+import type { DetailLevel, InspectorTab, TabDefinition } from "./workspaceLayout";
+import type { AssemblyComponent, AssemblyComponentPreview, AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, PatternRecord, PreviewObject, ProjectDetail, RepairStrategyRecord, ResolvedDesign, RevisionPreview, SelectionState } from "../types/api";
 import type { EngineeringReport, MaterialSpec } from "../types/api";
 import { EngineeringPanel } from "./EngineeringPanel";
 import { operationDetails, operationDisplayName, operationKind, templateDetails } from "../utils/modelFormatting";
 
 type InspectorProps = {
+  /** Tabs that apply to the current mode and detail level. */
+  tabs: TabDefinition[];
+  activeTab: InspectorTab | null;
+  onTabChange: (tab: InspectorTab) => void;
+  detailLevel: DetailLevel;
   project: ProjectDetail | null;
   preview: RevisionPreview | null;
   selection: SelectionState;
@@ -69,6 +75,10 @@ type InspectorProps = {
 };
 
 export function Inspector({
+  tabs,
+  activeTab,
+  onTabChange,
+  detailLevel,
   project,
   preview,
   selection,
@@ -122,125 +132,163 @@ export function Inspector({
   const selectedOperation = operations.find((operation) => String(operation.id) === selection.selectedOperationId) ?? null;
   const selectedPreview = preview?.objects.find((object) => object.operation_id === selection.selectedOperationId) ?? null;
 
-  return (
-    <aside className="panel inspector-panel">
-      <div className="panel-title">Inspector</div>
-      {project ? (
-        <div className="inspector-stack">
-          <section>
-            <h3>{project.name}</h3>
-            <dl>
-              <dt>ID</dt>
-              <dd>{project.project_id}</dd>
-              <dt>Type</dt>
-              <dd>{project.model_type}</dd>
-              <dt>Revision</dt>
-              <dd>{project.current_revision}</dd>
-            </dl>
-          </section>
-          <SelectionInspector
-            selectedOperation={selectedOperation}
-            selectedPreview={selectedPreview}
-            templateModel={operations.length === 0 ? project.current_model : null}
-            onStructuredEdit={onStructuredEdit}
-          />
-          <DesignIntentPanel resolvedDesign={resolvedDesign} onUpdateDesignParameter={onUpdateDesignParameter} />
-          <AssemblyPanel
-            project={project}
-            assemblies={assemblies}
-            selectedAssembly={selectedAssembly}
-            preview={assemblyPreview}
-            engineering={assemblyEngineering}
-            onCreateFromProject={onCreateAssemblyFromProject}
-            onSelectAssembly={onSelectAssembly}
-            onAddProjectToAssembly={onAddProjectToAssembly}
-            onEditAssembly={onEditAssembly}
-            onRenameAssembly={onRenameAssembly}
-            onDuplicateAssembly={onDuplicateAssembly}
-            onArchiveAssembly={onArchiveAssembly}
-            onDeleteAssembly={onDeleteAssembly}
-          />
-          <ExportPanel project={project} selectedAssembly={selectedAssembly} exportResult={exportResult} onExport={onExport} />
-          <section>
-            <h3>Parameters</h3>
-            {operations.length > 0 ? (
-              <div className="feature-list">
-                {operations.map((operation) => (
-                  <button
-                    type="button"
-                    className={selection.selectedOperationId === String(operation.id) ? "feature-item active" : "feature-item"}
-                    key={String(operation.id)}
-                    onClick={() => onSelectOperation(String(operation.id))}
-                  >
-                    <div className="feature-heading">
-                      <strong>{operationDisplayName(operation)}</strong>
-                      <small>{operationKind(operation)}</small>
-                    </div>
-                    <dl>
-                      {operationDetails(operation).map(([key, value]) => (
-                        <div className="feature-row" key={key}>
-                          <dt>{key}</dt>
-                          <dd>{value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  </button>
-                ))}
-              </div>
-            ) : (
-              <dl>
-                {templateDetails(project.current_model ?? {}).map(([key, value]) => (
-                  <div className="feature-row" key={key}>
-                    <dt>{key}</dt>
-                    <dd>{value}</dd>
-                  </div>
-                ))}
-              </dl>
-            )}
-          </section>
+  if (!project) {
+    return (
+      <aside className="inspector-panel" aria-label="Inspector">
+        <div className="empty-inline">
+          <strong>Nothing selected</strong>
+          <small>Open a project or describe a part to begin.</small>
         </div>
-      ) : (
-        <div className="muted">Select or generate a project.</div>
-      )}
-      <section className="system-section">
-        <EngineeringPanel
-          report={engineeringReport}
-          materials={materials}
-          materialId={materialId}
-          process={process}
-          displayUnits={displayUnits}
-          onMaterialChange={onMaterialChange}
-          onProcessChange={onProcessChange}
-          onDisplayUnitsChange={onDisplayUnitsChange}
-        />
-      </section>
-      <LearningDashboard
-        stats={learningStats}
-        lessons={lessons}
-        patterns={patterns}
-        repairStrategies={repairStrategies}
-        failures={failureAnalytics}
-        capabilityAnalytics={capabilityAnalytics}
-        onRevalidateLesson={onRevalidateLesson}
-        onDeprecateLesson={onDeprecateLesson}
-        onRevalidatePattern={onRevalidatePattern}
-        onDeprecatePattern={onDeprecatePattern}
-      />
-      <EvaluationPanel report={evaluationReport} />
-      <CapabilityManager
-        capabilities={capabilities}
-        sources={capabilitySources}
-        onDiscoverCapabilities={onDiscoverCapabilities}
-        onTestCapability={onTestCapability}
-        onApproveCapability={onApproveCapability}
-        onEnableCapability={onEnableCapability}
-        onDisableCapability={onDisableCapability}
-      />
+      </aside>
+    );
+  }
+
+  return (
+    <aside className="inspector-panel" aria-label="Inspector">
+      <div className="inspector-tabs" role="tablist" aria-label="Inspector sections">
+        {tabs.map((tab) => (
+          <button
+            type="button"
+            key={tab.id}
+            role="tab"
+            id={`inspector-tab-${tab.id}`}
+            aria-selected={activeTab === tab.id}
+            aria-controls={`inspector-pane-${tab.id}`}
+            className={activeTab === tab.id ? "inspector-tab active" : "inspector-tab"}
+            onClick={() => onTabChange(tab.id)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      <div
+        className="inspector-body"
+        role="tabpanel"
+        id={`inspector-pane-${activeTab ?? "none"}`}
+        aria-labelledby={activeTab ? `inspector-tab-${activeTab}` : undefined}
+      >
+        {activeTab === "properties" ? (
+          <div className="inspector-stack">
+            <section>
+              <h3>{project.name}</h3>
+              <dl>
+                <div className="feature-row">
+                  <dt>Type</dt>
+                  <dd>{project.model_type}</dd>
+                </div>
+                <div className="feature-row">
+                  <dt>Revision</dt>
+                  <dd>{project.current_revision}</dd>
+                </div>
+                {detailLevel === "advanced" ? (
+                  <div className="feature-row">
+                    <dt>ID</dt>
+                    <dd className="mono">{project.project_id}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            </section>
+            <SelectionInspector
+              selectedOperation={selectedOperation}
+              selectedPreview={selectedPreview}
+              templateModel={operations.length === 0 ? project.current_model : null}
+              onStructuredEdit={onStructuredEdit}
+            />
+          </div>
+        ) : null}
+
+        {activeTab === "engineering" ? (
+          <div className="inspector-stack">
+            <EngineeringPanel
+              report={engineeringReport}
+              materials={materials}
+              materialId={materialId}
+              process={process}
+              displayUnits={displayUnits}
+              onMaterialChange={onMaterialChange}
+              onProcessChange={onProcessChange}
+              onDisplayUnitsChange={onDisplayUnitsChange}
+            />
+          </div>
+        ) : null}
+
+        {activeTab === "assembly" || activeTab === "component" ? (
+          <div className="inspector-stack">
+            <AssemblyPanel
+              project={project}
+              assemblies={assemblies}
+              selectedAssembly={selectedAssembly}
+              preview={assemblyPreview}
+              engineering={assemblyEngineering}
+              detailLevel={detailLevel}
+              onCreateFromProject={onCreateAssemblyFromProject}
+              onSelectAssembly={onSelectAssembly}
+              onAddProjectToAssembly={onAddProjectToAssembly}
+              onEditAssembly={onEditAssembly}
+              onRenameAssembly={onRenameAssembly}
+              onDuplicateAssembly={onDuplicateAssembly}
+              onArchiveAssembly={onArchiveAssembly}
+              onDeleteAssembly={onDeleteAssembly}
+            />
+          </div>
+        ) : null}
+
+        {activeTab === "parameters" ? (
+          <div className="inspector-stack">
+            <DesignIntentPanel
+              resolvedDesign={resolvedDesign}
+              onUpdateDesignParameter={onUpdateDesignParameter}
+            />
+            <section>
+              <h3>Features</h3>
+              {operations.length > 0 ? (
+                <div className="feature-list">
+                  {operations.map((operation) => (
+                    <button
+                      type="button"
+                      className={
+                        selection.selectedOperationId === String(operation.id)
+                          ? "feature-item active"
+                          : "feature-item"
+                      }
+                      key={String(operation.id)}
+                      onClick={() => onSelectOperation(String(operation.id))}
+                    >
+                      <div className="feature-heading">
+                        <strong>{operationDisplayName(operation)}</strong>
+                        <small>{operationKind(operation)}</small>
+                      </div>
+                      <dl>
+                        {operationDetails(operation).map(([key, value]) => (
+                          <div className="feature-row" key={key}>
+                            <dt>{key}</dt>
+                            <dd>{value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <dl>
+                  {templateDetails(project.current_model ?? {}).map(([key, value]) => (
+                    <div className="feature-row" key={key}>
+                      <dt>{key}</dt>
+                      <dd>{value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              )}
+            </section>
+          </div>
+        ) : null}
+      </div>
     </aside>
   );
 }
 
-function EvaluationPanel({ report }: { report: EvaluationReport | null }) {
+export function EvaluationPanel({ report }: { report: EvaluationReport | null }) {
   const [selectedCaseId, setSelectedCaseId] = useState<string | null>(null);
   const failed = report?.results.filter((result) => result.overall_status === "fail") ?? [];
   const selected = report?.results.find((result) => result.case_id === selectedCaseId) ?? failed[0] ?? report?.results[0] ?? null;
@@ -334,6 +382,7 @@ type AssemblyPanelProps = {
   selectedAssembly: AssemblyDetail | null;
   preview: AssemblyPreview | null;
   engineering: AssemblyEngineeringSummary | null;
+  detailLevel: DetailLevel;
   onCreateFromProject: () => void;
   onSelectAssembly: (assemblyId: string) => void;
   onAddProjectToAssembly: (assemblyId: string) => void;
@@ -344,12 +393,13 @@ type AssemblyPanelProps = {
   onDeleteAssembly: (assemblyId: string) => void;
 };
 
-function AssemblyPanel({
+export function AssemblyPanel({
   project,
   assemblies,
   selectedAssembly,
   preview,
   engineering,
+  detailLevel,
   onCreateFromProject,
   onSelectAssembly,
   onAddProjectToAssembly,
@@ -362,37 +412,6 @@ function AssemblyPanel({
   const current = selectedAssembly?.current_revision;
   const selectedAssemblyId = selectedAssembly?.assembly.assembly_id ?? "";
 
-  function nudge(componentId: string, axis: "x" | "y" | "z", amount: number) {
-    if (!selectedAssemblyId) {
-      return;
-    }
-    onEditAssembly(
-      selectedAssemblyId,
-      {
-        edit_type: "move_component",
-        component_id: componentId,
-        dx_mm: axis === "x" ? amount : 0,
-        dy_mm: axis === "y" ? amount : 0,
-        dz_mm: axis === "z" ? amount : 0
-      },
-      `Move ${componentId} ${amount} mm on ${axis.toUpperCase()}`
-    );
-  }
-
-  function rotate(componentId: string, amount: number) {
-    if (!selectedAssemblyId) {
-      return;
-    }
-    onEditAssembly(
-      selectedAssemblyId,
-      {
-        edit_type: "rotate_component",
-        component_id: componentId,
-        rz_deg: amount
-      },
-      `Rotate ${componentId} ${amount} degrees around Z`
-    );
-  }
 
   return (
     <section className="assembly-panel">
@@ -446,45 +465,49 @@ function AssemblyPanel({
             </button>
           </div>
           <div className="assembly-component-list">
-            {current.components.map((component) => {
-              const componentPreview = preview?.components.find((item) => item.component_id === component.component_id);
-              return (
-                <div className="assembly-component" key={component.component_id}>
-                  <div className="feature-heading">
-                    <strong>{component.name}</strong>
-                    <small>{component.visible ? "VISIBLE" : "HIDDEN"} / {component.grounded ? "GROUNDED" : "FREE"}</small>
-                  </div>
-                  <dl>
-                    <DetailRow label="Source" value={component.source_type} />
-                    <DetailRow label="X/Y/Z" value={`${formatNumber(component.transform.translation_x_mm)}, ${formatNumber(component.transform.translation_y_mm)}, ${formatNumber(component.transform.translation_z_mm)}`} />
-                    <DetailRow label="Rot Z" value={`${formatNumber(component.transform.rotation_z_deg)} deg`} />
-                    <DetailRow label="BBox" value={componentPreview?.bounding_box ? `${formatNumber(componentPreview.bounding_box.xlen)} x ${formatNumber(componentPreview.bounding_box.ylen)} x ${formatNumber(componentPreview.bounding_box.zlen)} mm` : "unavailable"} />
-                  </dl>
-                  <div className="assembly-controls">
-                    <button type="button" onClick={() => nudge(component.component_id, "x", -5)} title="Move X negative">X-</button>
-                    <button type="button" onClick={() => nudge(component.component_id, "x", 5)} title="Move X positive">X+</button>
-                    <button type="button" onClick={() => nudge(component.component_id, "y", -5)} title="Move Y negative">Y-</button>
-                    <button type="button" onClick={() => nudge(component.component_id, "y", 5)} title="Move Y positive">Y+</button>
-                    <button type="button" onClick={() => nudge(component.component_id, "z", 5)} title="Move Z positive">Z+</button>
-                    <button type="button" onClick={() => rotate(component.component_id, 15)} title="Rotate around Z">RZ</button>
-                    <button
-                      type="button"
-                      onClick={() => onEditAssembly(selectedAssemblyId, { edit_type: "set_visibility", component_id: component.component_id, visible: !component.visible }, `Toggle ${component.component_id} visibility`)}
-                      title="Toggle visibility"
-                    >
-                      {component.visible ? "Hide" : "Show"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onEditAssembly(selectedAssemblyId, { edit_type: "set_grounded", component_id: component.component_id, grounded: !component.grounded }, `Toggle ${component.component_id} grounded state`)}
-                      title="Toggle grounded state"
-                    >
-                      {component.grounded ? "Free" : "Ground"}
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {current.components.map((component) => (
+              <ComponentCard
+                key={component.component_id}
+                component={component}
+                componentPreview={preview?.components.find(
+                  (item) => item.component_id === component.component_id
+                )}
+                detailLevel={detailLevel}
+                onApplyTransform={(transform, label) =>
+                  onEditAssembly(
+                    selectedAssemblyId,
+                    {
+                      edit_type: "set_transform",
+                      component_id: component.component_id,
+                      transform
+                    },
+                    label
+                  )
+                }
+                onToggleVisibility={() =>
+                  onEditAssembly(
+                    selectedAssemblyId,
+                    {
+                      edit_type: "set_visibility",
+                      component_id: component.component_id,
+                      visible: !component.visible
+                    },
+                    `${component.visible ? "Hide" : "Show"} ${component.name}`
+                  )
+                }
+                onToggleGrounded={() =>
+                  onEditAssembly(
+                    selectedAssemblyId,
+                    {
+                      edit_type: "set_grounded",
+                      component_id: component.component_id,
+                      grounded: !component.grounded
+                    },
+                    `${component.grounded ? "Release" : "Ground"} ${component.name}`
+                  )
+                }
+              />
+            ))}
           </div>
           {engineering?.interferences.length ? (
             <div className="interference-list">
@@ -525,7 +548,7 @@ type ExportPanelProps = {
 
 const ALL_EXPORT_FORMATS: ExportFormat[] = ["step", "stl", "dxf", "glb", "obj"];
 
-function ExportPanel({ project, selectedAssembly, exportResult, onExport }: ExportPanelProps) {
+export function ExportPanel({ project, selectedAssembly, exportResult, onExport }: ExportPanelProps) {
   const [source, setSource] = useState<"project_revision" | "assembly_revision">("project_revision");
   const [formats, setFormats] = useState<ExportFormat[]>(["step", "stl"]);
   const [quality, setQuality] = useState<"draft" | "standard" | "high">("standard");
@@ -642,7 +665,7 @@ function ExportPanel({ project, selectedAssembly, exportResult, onExport }: Expo
   );
 }
 
-function DesignIntentPanel({ resolvedDesign, onUpdateDesignParameter }: DesignIntentPanelProps) {
+export function DesignIntentPanel({ resolvedDesign, onUpdateDesignParameter }: DesignIntentPanelProps) {
   const [draftValues, setDraftValues] = useState<Record<string, string>>({});
   const parameters = resolvedDesign?.parameters ?? [];
   const relationships = resolvedDesign?.relationships ?? [];
@@ -712,7 +735,7 @@ function DesignIntentPanel({ resolvedDesign, onUpdateDesignParameter }: DesignIn
   );
 }
 
-function LearningDashboard({
+export function LearningDashboard({
   stats,
   lessons,
   patterns,
@@ -886,7 +909,7 @@ type CapabilityManagerProps = {
   onDisableCapability: (capabilityId: string) => void;
 };
 
-function CapabilityManager({
+export function CapabilityManager({
   capabilities,
   sources,
   onDiscoverCapabilities,
@@ -988,7 +1011,7 @@ type SelectionInspectorProps = {
   onStructuredEdit: (instruction: string, edit: Record<string, unknown>) => void;
 };
 
-function SelectionInspector({ selectedOperation, selectedPreview, templateModel, onStructuredEdit }: SelectionInspectorProps) {
+export function SelectionInspector({ selectedOperation, selectedPreview, templateModel, onStructuredEdit }: SelectionInspectorProps) {
   const selectedModel = selectedOperation ?? (selectedPreview?.operation_id === "model" ? templateModel ?? null : null);
   const editableFields = useMemo(() => numericFields(selectedModel), [selectedModel]);
   const [values, setValues] = useState<Record<string, string>>({});
@@ -1076,4 +1099,177 @@ function numericFields(model: Record<string, unknown> | null): Array<[string, nu
   return Object.entries(model)
     .filter(([key, value]) => !["id"].includes(key) && typeof value === "number")
     .map(([key, value]) => [key, value as number]);
+}
+
+type ComponentCardProps = {
+  component: AssemblyComponent;
+  componentPreview: AssemblyComponentPreview | undefined;
+  detailLevel: DetailLevel;
+  onApplyTransform: (transform: Record<string, number>, label: string) => void;
+  onToggleVisibility: () => void;
+  onToggleGrounded: () => void;
+};
+
+/**
+ * One assembly component.
+ *
+ * The previous card exposed source, XYZ, rotation, bounding box and eight tiny
+ * nudge buttons at once. This shows the name, two toggles, and editable
+ * position and rotation fields with an explicit Apply; bounding box and source
+ * move behind the advanced detail level.
+ */
+function ComponentCard({
+  component,
+  componentPreview,
+  detailLevel,
+  onApplyTransform,
+  onToggleVisibility,
+  onToggleGrounded
+}: ComponentCardProps) {
+  const transform = component.transform;
+  const [draft, setDraft] = useState({
+    x: transform.translation_x_mm,
+    y: transform.translation_y_mm,
+    z: transform.translation_z_mm,
+    rx: transform.rotation_x_deg,
+    ry: transform.rotation_y_deg,
+    rz: transform.rotation_z_deg
+  });
+
+  // Re-sync when the stored transform changes, so a revision switch or an undo
+  // does not leave stale numbers in the fields.
+  useEffect(() => {
+    setDraft({
+      x: transform.translation_x_mm,
+      y: transform.translation_y_mm,
+      z: transform.translation_z_mm,
+      rx: transform.rotation_x_deg,
+      ry: transform.rotation_y_deg,
+      rz: transform.rotation_z_deg
+    });
+  }, [
+    transform.translation_x_mm,
+    transform.translation_y_mm,
+    transform.translation_z_mm,
+    transform.rotation_x_deg,
+    transform.rotation_y_deg,
+    transform.rotation_z_deg
+  ]);
+
+  const dirty =
+    draft.x !== transform.translation_x_mm ||
+    draft.y !== transform.translation_y_mm ||
+    draft.z !== transform.translation_z_mm ||
+    draft.rx !== transform.rotation_x_deg ||
+    draft.ry !== transform.rotation_y_deg ||
+    draft.rz !== transform.rotation_z_deg;
+
+  function apply() {
+    onApplyTransform(
+      {
+        translation_x_mm: draft.x,
+        translation_y_mm: draft.y,
+        translation_z_mm: draft.z,
+        rotation_x_deg: draft.rx,
+        rotation_y_deg: draft.ry,
+        rotation_z_deg: draft.rz
+      },
+      `Set ${component.name} transform`
+    );
+  }
+
+  function field(
+    key: keyof typeof draft,
+    label: string,
+    unit: string
+  ) {
+    return (
+      <label className="transform-field" key={key}>
+        <span>{label}</span>
+        <input
+          type="number"
+          step="0.5"
+          value={draft[key]}
+          aria-label={`${component.name} ${label} ${unit}`}
+          onChange={(event) =>
+            setDraft((current) => ({ ...current, [key]: Number(event.target.value) }))
+          }
+        />
+      </label>
+    );
+  }
+
+  return (
+    <div className="assembly-component">
+      <div className="component-head">
+        <strong>{component.name}</strong>
+        <div className="component-toggles">
+          <button
+            type="button"
+            className={component.visible ? "chip active" : "chip"}
+            aria-pressed={component.visible}
+            onClick={onToggleVisibility}
+            title={component.visible ? "Hide this component" : "Show this component"}
+          >
+            {component.visible ? "Visible" : "Hidden"}
+          </button>
+          <button
+            type="button"
+            className={component.grounded ? "chip active" : "chip"}
+            aria-pressed={component.grounded}
+            onClick={onToggleGrounded}
+            title={component.grounded ? "Release this component" : "Ground this component"}
+          >
+            {component.grounded ? "Grounded" : "Free"}
+          </button>
+        </div>
+      </div>
+
+      <div className="transform-group">
+        <div className="transform-label">Position (mm)</div>
+        <div className="transform-row">
+          {field("x", "X", "mm")}
+          {field("y", "Y", "mm")}
+          {field("z", "Z", "mm")}
+        </div>
+      </div>
+
+      <div className="transform-group">
+        <div className="transform-label">Rotation (deg)</div>
+        <div className="transform-row">
+          {field("rx", "X", "degrees")}
+          {field("ry", "Y", "degrees")}
+          {field("rz", "Z", "degrees")}
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className={dirty ? "tool-button primary compact" : "tool-button compact"}
+        onClick={apply}
+        disabled={!dirty}
+        title={dirty ? "Apply this transform" : "No changes to apply"}
+      >
+        Apply
+      </button>
+
+      {detailLevel === "advanced" ? (
+        <details className="component-advanced">
+          <summary>Advanced</summary>
+          <dl>
+            <DetailRow label="Component ID" value={component.component_id} />
+            <DetailRow label="Source" value={component.source_type} />
+            <DetailRow
+              label="Bounding box"
+              value={
+                componentPreview?.bounding_box
+                  ? `${formatNumber(componentPreview.bounding_box.xlen)} x ${formatNumber(componentPreview.bounding_box.ylen)} x ${formatNumber(componentPreview.bounding_box.zlen)} mm`
+                  : "unavailable"
+              }
+            />
+          </dl>
+        </details>
+      ) : null}
+    </div>
+  );
 }

@@ -30,8 +30,16 @@ def test_version_is_a_valid_release_candidate():
     assert re.fullmatch(r"\d+\.\d+\.\d+(?:-[0-9A-Za-z.]+)?", APP_VERSION), APP_VERSION
 
 
-def test_version_is_the_release_candidate():
-    assert APP_VERSION == "1.0.0-rc.1"
+def test_version_is_a_1_0_release_candidate():
+    """Assert the shape, not the exact number.
+
+    Pinning the literal meant this test had to be edited on every candidate
+    bump, which makes it a chore rather than a guard. What matters before the
+    final release is that the version is a 1.0.0 prerelease.
+    """
+    assert APP_VERSION.startswith("1.0.0-rc."), APP_VERSION
+    suffix = APP_VERSION.rsplit(".", 1)[-1]
+    assert suffix.isdigit() and int(suffix) >= 1, APP_VERSION
 
 
 def test_version_line_includes_the_name_and_version():

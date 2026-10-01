@@ -448,47 +448,134 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
   return (
     <section className="viewer-shell">
       <div className="viewer-toolbar">
-        <span className="viewer-status">{viewerStatus}</span>
-
         <div className="toolbar-group" role="group" aria-label="View">
           <span className="toolbar-group-label">VIEW</span>
-          <button type="button" className="icon-button" onClick={resetCamera} title={withShortcut("Fit model", "F")} aria-label="Fit model">
-            <Maximize2 size={16} />
-          </button>
-          <button type="button" className="icon-button" onClick={focusSelection} title="Focus the selected feature" aria-label="Focus selection">
-            <ScanSearch size={16} />
+          {(["iso", "top", "front", "right"] as ViewName[]).map((view) => (
+            <button
+              type="button"
+              key={view}
+              className="chip"
+              onClick={() => setView(view)}
+              title={withShortcut(
+                `${view.charAt(0).toUpperCase()}${view.slice(1)} view`,
+                VIEW_KEYS[view]
+              )}
+            >
+              {view.toUpperCase()}
+            </button>
+          ))}
+          <button
+            type="button"
+            className="chip"
+            onClick={resetCamera}
+            title={withShortcut("Fit model", "F")}
+          >
+            FIT
           </button>
         </div>
 
         <div className="toolbar-group" role="group" aria-label="Display">
           <span className="toolbar-group-label">DISPLAY</span>
-          <button type="button" className="tool-button compact" onClick={() => setViewerMode("solid")} title="Shaded solid" aria-pressed={viewerMode === "solid"}>
-            <View size={15} /> Solid
+          <button
+            type="button"
+            className={viewerMode === "solid" ? "chip active" : "chip"}
+            onClick={() => setViewerMode("solid")}
+            aria-pressed={viewerMode === "solid"}
+            title="Shaded solid"
+          >
+            SOLID
           </button>
-          <button type="button" className="tool-button compact" onClick={() => setViewerMode("wireframe")} title="Wireframe only" aria-pressed={viewerMode === "wireframe"}>
-            <RotateCcw size={15} /> Wire
+          <button
+            type="button"
+            className={viewerMode === "wireframe" ? "chip active" : "chip"}
+            onClick={() => setViewerMode("wireframe")}
+            aria-pressed={viewerMode === "wireframe"}
+            title="Wireframe only"
+          >
+            WIRE
           </button>
-          <button type="button" className="tool-button compact" onClick={() => setViewerMode("solid_edges")} title="Solid with semantic feature overlays" aria-pressed={viewerMode === "solid_edges"}>
-            <SquareDashed size={15} /> Edges
-          </button>
-          <button type="button" className="icon-button" onClick={() => setBboxVisible((value) => !value)} title="Toggle bounding box" aria-label="Toggle bounding box" aria-pressed={bboxVisible}>
-            <BoxSelect size={16} />
-          </button>
-          <button type="button" className="icon-button" onClick={() => setGridVisible((value) => !value)} title="Toggle ground grid" aria-label="Toggle grid" aria-pressed={gridVisible}>
-            <Grid3X3 size={16} />
-          </button>
-          <button type="button" className="icon-button" onClick={() => setAxesVisible((value) => !value)} title="Toggle axes" aria-label="Toggle axes" aria-pressed={axesVisible}>
-            {axesVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+          <button
+            type="button"
+            className={gridVisible ? "chip active" : "chip"}
+            onClick={() => setGridVisible((value) => !value)}
+            aria-pressed={gridVisible}
+            title="Toggle ground grid"
+          >
+            GRID
           </button>
         </div>
 
         <div className="toolbar-group" role="group" aria-label="Tools">
           <span className="toolbar-group-label">TOOLS</span>
-          <button type="button" className="icon-button" onClick={() => setMeasureEnabled((value) => !value)} title="Measure distance between two points" aria-label="Measure distance" aria-pressed={measureEnabled}>
-            <Ruler size={16} />
+          <button
+            type="button"
+            className={measureEnabled ? "chip active" : "chip"}
+            onClick={() => setMeasureEnabled((value) => !value)}
+            aria-pressed={measureEnabled}
+            title="Measure distance between two points"
+          >
+            MEASURE
           </button>
         </div>
+
+        <div className="toolbar-spacer" />
+
+        {/* Less-used controls stay available without crowding the bar. */}
+        <details className="toolbar-more">
+          <summary title="More view controls">MORE</summary>
+          <div className="toolbar-more-body">
+            <button
+              type="button"
+              className="chip"
+              onClick={focusSelection}
+              title="Focus the selected feature"
+            >
+              Focus selection
+            </button>
+            <button
+              type="button"
+              className={viewerMode === "solid_edges" ? "chip active" : "chip"}
+              onClick={() => setViewerMode("solid_edges")}
+              aria-pressed={viewerMode === "solid_edges"}
+              title="Solid with semantic feature overlays"
+            >
+              Semantic overlays
+            </button>
+            <button
+              type="button"
+              className={bboxVisible ? "chip active" : "chip"}
+              onClick={() => setBboxVisible((value) => !value)}
+              aria-pressed={bboxVisible}
+              title="Toggle bounding box"
+            >
+              Bounding box
+            </button>
+            <button
+              type="button"
+              className={axesVisible ? "chip active" : "chip"}
+              onClick={() => setAxesVisible((value) => !value)}
+              aria-pressed={axesVisible}
+              title="Toggle axes"
+            >
+              Axes
+            </button>
+            {(["bottom", "back", "left"] as ViewName[]).map((view) => (
+              <button
+                type="button"
+                key={view}
+                className="chip"
+                onClick={() => setView(view)}
+                title={`${view.charAt(0).toUpperCase()}${view.slice(1)} view`}
+              >
+                {view.toUpperCase()} view
+              </button>
+            ))}
+          </div>
+        </details>
+
+        <span className="viewer-status">{viewerStatus}</span>
       </div>
+
       <div
         className={measureEnabled ? "viewer-host measuring" : "viewer-host"}
         ref={hostRef}
@@ -500,18 +587,6 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
           <span className="axis-x">X</span>
           <span className="axis-y">Y</span>
           <span className="axis-z">Z</span>
-        </div>
-        <div className="view-shortcuts" aria-label="View shortcuts">
-          {(["iso", "top", "bottom", "front", "back", "left", "right"] as ViewName[]).map((view) => (
-            <button
-              type="button"
-              key={view}
-              onClick={() => setView(view)}
-              title={withShortcut(`${view.charAt(0).toUpperCase()}${view.slice(1)} view`, VIEW_KEYS[view])}
-            >
-              {view.toUpperCase()}
-            </button>
-          ))}
         </div>
         <div className="viewer-readout">
           <MousePointer2 size={14} />

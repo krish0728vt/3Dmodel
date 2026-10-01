@@ -94,11 +94,18 @@ textarea:focus-visible,
 }
 
 
+html,
 body {
   margin: 0;
+  /* The workspace owns its own scrolling; the page itself never scrolls. */
+  height: 100%;
+  overflow: hidden;
   min-width: 1180px;
-  min-height: 100vh;
   background: var(--bg-primary);
+}
+
+#root {
+  height: 100%;
 }
 
 button,
@@ -108,15 +115,19 @@ input {
   font: inherit;
 }
 
-.workspace {
-  min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(30, 38, 42, 0.35), rgba(13, 15, 17, 0) 280px),
-    var(--bg-primary);
+/* Three fixed bands: header, the working area, and the persistent prompt.
+   The middle band is the only one that flexes, and 1fr plus min-height:0 keeps
+   it from growing past the viewport. */
+.app-shell {
+  height: 100vh;
+  display: grid;
+  grid-template-rows: 52px minmax(0, 1fr) auto;
+  overflow: hidden;
+  background: var(--bg-primary);
 }
 
 .workspace-header {
-  height: 78px;
+  height: 52px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -234,26 +245,106 @@ input {
   background: var(--danger-surface);
 }
 
-.workspace-grid {
-  height: calc(100vh - 78px);
-  display: grid;
-  grid-template-columns: 292px minmax(520px, 1fr) 340px;
-  grid-template-rows: minmax(0, 1fr) 208px;
-  gap: 1px;
-  background: var(--bg-control);
-}
-
-.panel,
-.center-stage,
-.revision-panel,
-.prompt-console {
-  background: var(--bg-panel);
-}
-
-.panel {
+/* Design tree | viewer | inspector. The viewer takes all remaining width, so
+   it holds roughly 70% of the working area at 1920 and stays dominant at
+   1366. Collapsing either rail hands its width straight to the viewer. */
+.workspace-main {
   min-height: 0;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr) 312px;
+  gap: 1px;
+  background: var(--border-subtle);
   overflow: hidden;
-  padding: var(--space-4);
+}
+
+.workspace-main.tree-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr) 312px;
+}
+
+.workspace-main.inspector-collapsed {
+  grid-template-columns: 248px minmax(0, 1fr) 0;
+}
+
+.workspace-main.tree-collapsed.inspector-collapsed {
+  grid-template-columns: 0 minmax(0, 1fr) 0;
+}
+
+.tree-panel,
+.inspector-wrap,
+.stage {
+  min-width: 0;
+  min-height: 0;
+  background: var(--bg-panel);
+  overflow: hidden;
+}
+
+/* Each rail is a header plus its own scroll region. */
+.tree-panel,
+.inspector-wrap {
+  display: grid;
+  grid-template-rows: 34px minmax(0, 1fr);
+}
+
+.workspace-main.tree-collapsed .tree-panel,
+.workspace-main.inspector-collapsed .inspector-wrap {
+  display: none;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.tree-body,
+.inspector-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-2);
+}
+
+.inspector-panel {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+}
+
+/* Collapsed-rail restore handles, pinned inside the stage edge. */
+.rail-expand {
+  position: absolute;
+  top: var(--space-2);
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--border-default);
+  background: var(--bg-panel-raised);
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.rail-expand:hover {
+  border-color: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+.rail-left {
+  left: var(--space-2);
+}
+
+.rail-right {
+  right: var(--space-2);
+}
+
+.stage {
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
 }
 
 .panel-title {
@@ -1769,4 +1860,520 @@ textarea:focus {
 
 .empty-inline strong {
   color: var(--text-secondary);
+}
+
+
+/* ---------------------------------------------------------------------------
+   RC2 workspace simplification
+   --------------------------------------------------------------------------- */
+
+.inspector-tabs {
+  display: flex;
+  gap: 1px;
+  padding: var(--space-1) var(--space-2) 0;
+  background: var(--bg-panel);
+  overflow-x: auto;
+}
+
+.inspector-tab {
+  flex: none;
+  height: 26px;
+  padding: 0 var(--space-2);
+  border: 1px solid transparent;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inspector-tab:hover {
+  color: var(--text-secondary);
+}
+
+.inspector-tab.active {
+  border-bottom-color: var(--accent);
+  color: var(--text-primary);
+}
+
+/* Header context */
+
+.header-title {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text-primary);
+  font-size: 13px;
+}
+
+.detail-toggle {
+  display: flex;
+  gap: 1px;
+}
+
+.chip {
+  height: 24px;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--border-default);
+  background: var(--bg-control);
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  border-color: var(--accent-dim);
+  color: var(--text-secondary);
+}
+
+.chip.active {
+  border-color: var(--accent-dim);
+  background: var(--accent-surface);
+  color: var(--accent-text);
+}
+
+/* Persistent prompt bar */
+
+.prompt-bar {
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--border-default);
+  background: var(--bg-panel-raised);
+  /* Bounded so a long error or clarification scrolls internally instead of
+     pushing the viewer off screen. */
+  max-height: 42vh;
+  overflow-y: auto;
+}
+
+.prompt-row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+.prompt-state {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--control-height-lg);
+  flex: none;
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.prompt-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--control-height-lg);
+  max-height: 120px;
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  resize: vertical;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.prompt-input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.prompt-bar .send-button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  height: var(--control-height-lg);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--accent-dim);
+  background: var(--accent-surface);
+  color: var(--accent-text);
+  cursor: pointer;
+}
+
+.prompt-bar .send-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.prompt-unconfigured {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2);
+  border: 1px solid var(--warning-border);
+  background: var(--warning-surface);
+  font-size: 11px;
+}
+
+.prompt-unconfigured > div {
+  display: grid;
+  gap: 2px;
+  flex: 1 1 auto;
+}
+
+.prompt-unconfigured strong {
+  color: var(--warning-text);
+  letter-spacing: 0.08em;
+  font-size: 10px;
+}
+
+.prompt-unconfigured span {
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+
+.prompt-reason {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.prompt-examples {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.prompt-examples button {
+  width: 100%;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  text-align: left;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.prompt-examples button:hover {
+  border-color: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+/* Drawers */
+
+.drawer-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(5, 7, 9, 0.6);
+}
+
+.drawer {
+  position: absolute;
+  display: grid;
+  grid-template-rows: 40px minmax(0, 1fr);
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6);
+}
+
+.drawer-left {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: min(420px, 90vw);
+}
+
+.drawer-right {
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: min(460px, 92vw);
+}
+
+.drawer-bottom {
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: min(52vh, 420px);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.drawer-header h2 {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.drawer-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.drawer-body {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3);
+}
+
+.drawer-section {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+/* First run */
+
+.first-run {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding: var(--space-5);
+  overflow-y: auto;
+  text-align: center;
+}
+
+.first-run-logo {
+  max-width: 260px;
+  height: auto;
+}
+
+.first-run-question {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.first-run-hint {
+  margin: 0;
+  max-width: 520px;
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.first-run-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.first-run-examples {
+  width: min(560px, 100%);
+}
+
+.first-run-examples h2 {
+  margin: 0 0 var(--space-2);
+  color: var(--text-muted);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.first-run-examples ul {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.first-run-examples button {
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-panel);
+  color: var(--text-secondary);
+  text-align: left;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.first-run-examples button:hover:not(:disabled) {
+  border-color: var(--accent-dim);
+  color: var(--text-primary);
+}
+
+.first-run-examples button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Simplified component card */
+
+.component-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.component-toggles {
+  display: flex;
+  gap: var(--space-1);
+}
+
+.transform-group {
+  display: grid;
+  gap: var(--space-1);
+  margin-top: var(--space-2);
+}
+
+.transform-label {
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.transform-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.transform-field {
+  display: grid;
+  gap: 2px;
+}
+
+.transform-field span {
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+.transform-field input {
+  width: 100%;
+  min-width: 0;
+  height: var(--control-height-sm);
+  padding: 0 var(--space-1);
+  border: 1px solid var(--border-default);
+  background: var(--bg-sunken);
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.component-advanced {
+  margin-top: var(--space-2);
+  border-top: 1px solid var(--border-subtle);
+  padding-top: var(--space-2);
+}
+
+.component-advanced summary {
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+/* Viewer toolbar: MORE */
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.toolbar-more {
+  position: relative;
+  flex: none;
+}
+
+.toolbar-more summary {
+  height: 24px;
+  padding: 0 var(--space-2);
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid var(--border-default);
+  background: var(--bg-control);
+  color: var(--text-muted);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.toolbar-more[open] summary {
+  border-color: var(--accent-dim);
+  color: var(--accent-text);
+}
+
+.toolbar-more-body {
+  position: absolute;
+  top: 28px;
+  right: 0;
+  z-index: 20;
+  display: grid;
+  gap: var(--space-1);
+  min-width: 190px;
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  background: var(--bg-panel-raised);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+}
+
+/* Toasts float rather than hold layout space. */
+
+.toast-stack {
+  position: fixed;
+  right: var(--space-3);
+  bottom: 96px;
+  z-index: 50;
+  display: grid;
+  gap: var(--space-1);
+  max-width: 320px;
+  pointer-events: none;
+}
+
+.toast-stack > div {
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--border-default);
+  background: var(--bg-panel-raised);
+  color: var(--text-secondary);
+  font-size: 11px;
+}
+
+.project-thumb-fallback {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  background: var(--bg-control);
+  color: var(--text-muted);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.revision-current {
+  color: var(--accent-text);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+
+.mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+}
+
+.project-actions .danger:hover {
+  border-color: var(--danger-border);
+  color: var(--danger-text);
 }

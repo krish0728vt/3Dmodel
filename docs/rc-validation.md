@@ -8,13 +8,17 @@
 | Starting commit | `6e4a7e3` |
 | Starting tag | `v1.0.0-rc.1` |
 | Version under test | 1.0.0-rc.1 |
-| Code changes required | **none** |
-| Release blockers | **none** |
-| Decision | **READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK** |
+| Candidate now | **v1.0.0-rc.2** |
+| Release blockers | 1 found, 1 fixed |
+| Decision | **RC2 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC2** |
 
-RC1 was tagged without a validation pass having been run; this document is that
-pass. No defect found during it required a code change, so **no rc.2 was
-produced** and `v1.0.0-rc.1` remains the candidate.
+RC1 was tagged without a validation pass having been run; the first part of this
+document is that pass. Every functional, deterministic and safety gate passed.
+
+The manual visual review was then **performed by the maintainer** and found a
+release-quality usability defect in the CAD workspace. That is recorded below
+and was fixed, producing **v1.0.0-rc.2**. `v1.0.0-rc.1` and commit `6e4a7e3`
+were left untouched.
 
 ## Environment
 
@@ -246,54 +250,127 @@ Not a substitute for a visual check, but a checkable fact: the workspace grid is
 at 1366×768**. Vertically, 768 − 78 header − 208 bottom row − 1 gap leaves 481px
 for the viewer row.
 
-## Visual Review — NOT PERFORMED
+## Visual Review - PERFORMED (rc.1)
 
-This was the one area RC1 flagged as unverified, and **it remains unverified.**
+The maintainer carried out the manual review that this environment could not,
+and it found what the automated gates structurally could not: the product
+worked, but the workspace did not read as one.
 
-No browser automation is available in this environment: no Playwright,
-Puppeteer, Selenium, chromedriver, Chrome or Edge binary, and no such package in
-`web/node_modules`. Installing Playwright would pull browser binaries and change
-the dependency set during a release-validation pass, which is out of scope.
+### Finding: CAD workspace too crowded to navigate - HIGH
 
-Reading CSS and counting ARIA attributes is not a visual check. The following
-have therefore **not** been verified at 1920×1080, 1440×900 or 1366×768:
+Observed in rc.1:
 
-- vertical clipping or text truncation inside panels
-- real tab order and focus-ring visibility on screen
-- modal positioning and backdrop behaviour
-- panel collisions, overflow or scrollbar behaviour in practice
-- legibility of small labels, and spacing consistency as seen
-- the 3D viewer rendering, selection highlight and hover behaviour
-- empty, loading and error states as they actually appear
+- Too much information visible simultaneously.
+- The project browser held a permanent full-height left column while editing.
+- Revision history held a permanent horizontal band of roughly 20-25% of the
+  screen.
+- The assembly inspector was extremely dense.
+- **The design assistant was pushed below the visible fold**, in a 340x208 px
+  cell in the bottom-right corner. The user had to scroll to reach the primary
+  input.
+- A browser-level vertical scrollbar existed in the main workspace.
+- The interface read as a developer or debug workspace rather than a CAD
+  product; there was no obvious place to start.
 
-### What a reviewer should do
+Root causes, both confirmed in the stylesheet:
 
-Start the app and walk the list above at the three widths:
+1. `body` and `.workspace` used `min-height: 100vh` rather than a fixed height,
+   so content could push the document past the viewport. That is what produced
+   the page scrollbar.
+2. The grid was `292px | centre | 340px` over rows `1fr | 208px`, with the
+   design tree spanning both rows. The prompt therefore landed in the
+   bottom-right cell, the smallest region on screen, for the most important
+   interaction in the product.
 
-```powershell
-.\scripts\start.ps1
-```
+Severity **HIGH**: no data is at risk and no geometry is wrong, but the primary
+workflow was not discoverable, which is a release-quality problem for a v1.0.
 
-Then open `http://127.0.0.1:8000` and check: landing page, project browser,
-part workspace, assembly workspace, design tree, inspector, viewer toolbar,
-prompt console, revision history, export panel, evaluation panel, system/about
-dialog, confirmation and rename dialogs, empty states, an error state, and a
-loading state.
+### Fix: rc.2 workspace simplification
 
-Record the outcome in this file, then promotion to v1.0.0 can proceed.
+| Area | rc.1 | rc.2 |
+| --- | --- | --- |
+| Shell | `min-height: 100vh`, page scrolls | `height: 100vh`, `overflow: hidden`; three-row grid |
+| Prompt | bottom-right 340x208 cell, below the fold | dedicated shell row, always visible |
+| Project browser | permanent full-height column | drawer behind **Open** |
+| Revision history | permanent horizontal band | drawer behind **History** |
+| Inspector | every subsystem stacked | tabs, filtered by mode |
+| Learning / Evaluation / Capabilities / System | in the editing inspector | **Tools** drawer |
+| Export | header buttons plus a full inspector panel | **Export** drawer |
+| Assembly component | source, XYZ, rotation, bbox, 8 micro buttons | name, 2 toggles, labelled fields, Apply |
+| Header | 78 px technical strip | 52 px: identity, context, status, 5 entries |
+| Detail level | everything, always | Simple by default, Advanced on request |
+| Status lines | permanent boxes | floating toasts |
+
+Scrolling is now internal to each rail, drawer and the prompt bar. Either side
+rail collapses to hand its width to the viewer.
+
+### Measured outcome
+
+Computed from the shipped CSS track sizes, and confirmed against the served
+bundle (41 of 42 shell assertions passed on the first run; the one miss was the
+check itself looking in the main bundle for toolbar labels that live in the
+lazy-loaded viewer chunk, verified separately):
+
+| Resolution | Work area height | Viewer share of width |
+| --- | --- | --- |
+| 1920x1080 | 978 px | 71% |
+| 1440x900 | 798 px | 61% |
+| 1366x768 | 666 px | 59% |
+
+Header 52 px plus prompt 50 px is a fixed 102 px of vertical chrome, so at the
+narrowest target 666 px remains for the tree, viewer and inspector, none of
+which can push the page taller than the viewport.
+
+### AI not configured
+
+`OPENAI_API_KEY` is not set in this environment, and the review screenshot
+showed `AI ASSISTANT NOT CONFIGURED`. That is not hidden. In rc.2 the prompt box
+stays usable but **SEND is disabled**, the notice names the variable, and a
+Setup help action opens system information. A user can no longer send a request
+that cannot work and then receive a generic parser failure.
+
+**Manual AI prompt test: NOT TESTED - OPENAI_API_KEY NOT CONFIGURED.** The
+suggested prompt was not run against a live provider. The equivalent
+deterministic path was exercised instead: the same 100 x 60 x 5 mm plate with
+four corner holes was generated through `POST /api/generate` with a structured
+spec, and project load, history, preview, STEP download and revision restore all
+returned 200.
+
+## Visual Review - rc.2 NOT YET PERFORMED
+
+The redesign has not itself been through a browser-based review. No browser
+automation is available here (no Playwright, Puppeteer, Selenium, chromedriver
+or browser binary), and installing one would change the dependency set during a
+release-validation pass.
+
+What is verified for rc.2: the new markup and CSS are present in the served
+bundle, the layout arithmetic above, the full workflow over the API, and 101
+frontend tests covering prompt gating, Enter versus Shift+Enter, tab filtering
+and drawer exclusivity.
+
+What a reviewer should confirm at 1920x1080, 1440x900 and 1366x768:
+
+- no browser-level scrollbar during ordinary editing
+- header, viewer, prompt input, design tree and inspector all visible at once
+- drawers open over the workspace without shifting it
+- collapsing each rail enlarges the viewer
+- the disabled SEND state and its notice read clearly
+- tab switching in the inspector, and Simple versus Advanced
+- the assembly component card at a realistic component count
 
 ## Issues
 
 | Issue | Severity | Reproducible | Fixed | Release blocking |
 | --- | ---: | ---: | ---: | ---: |
-| Visual review not performed (no browser tooling available) | — (evidence gap, not a defect) | n/a | No | **Gates promotion** |
+| **CAD workspace too crowded; prompt input below the fold; page-level scrollbar** | **HIGH** | Yes | **Yes (rc.2)** | Was blocking; resolved |
+| rc.2 redesign not yet visually reviewed | - (evidence gap, not a defect) | n/a | No | **Gates promotion** |
 | `docs/release-candidate.md` claimed 273 Python and 73 frontend tests; actual counts are 312 and 71 | MEDIUM (misleading docs) | Yes | **Yes** | No |
 | `unknown part type` surfaces a raw pydantic `union_tag_invalid` string with a `422:` prefix embedded in the message | LOW | Yes | No | No |
 | No LICENSE configured | — (documented) | n/a | No | No |
 
-Nothing of BLOCKER or HIGH severity was found. One MEDIUM documentation
-inaccuracy was found and corrected; it was documentation only and required no
-code change, so RC1 stands as the candidate.
+The automated and functional passes found nothing of BLOCKER or HIGH severity.
+The manual visual review found one HIGH usability defect, which was fixed in
+rc.2. One MEDIUM documentation inaccuracy was also found and corrected.
 
 ### The documentation inaccuracy
 
@@ -321,7 +398,7 @@ the README limitations.
 
 ## Decision
 
-**READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK**
+**RC2 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC2**
 
 Every functional, deterministic and safety gate passes, on evidence rather than
 assumption: 90/90 real-world design checks, 50/50 workflow checks, 83/83
@@ -329,6 +406,10 @@ export/lifecycle/capability/learning checks, 37/37 API checks, 27/27 fresh
 environment and backup checks, and 13/13 automated release stages with 0
 benchmark regressions.
 
-The single outstanding item is the manual visual review, which cannot be done
-here. Promotion should wait until a human has walked the UI at the three target
-resolutions and recorded the result above.
+The manual visual review of rc.1 found a HIGH usability defect, which is fixed
+in rc.2. Because the visible product experience changed materially, another
+validation cycle is appropriate rather than promoting straight to v1.0.0.
+
+All gates were re-run against the redesign: 312 Python tests, 101 frontend tests
+(up from 71), 93 benchmark cases with 0 regressions, 13/13 release stages, npm
+audit clean. The outstanding item is a browser-based review of rc.2 itself.

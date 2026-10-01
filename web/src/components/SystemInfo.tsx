@@ -120,3 +120,56 @@ export function SystemInfo({ backendOnline }: SystemInfoProps) {
     </>
   );
 }
+
+/**
+ * System information as a plain panel, for the Tools drawer.
+ *
+ * Shares `systemInfoRows` with the header popup so the two can never disagree,
+ * and like the popup it reports only whether AI is configured, never a key.
+ */
+export function SystemPanel({ backendOnline }: { backendOnline: boolean }) {
+  const [version, setVersion] = useState<VersionResponse | null>(null);
+
+  useEffect(() => {
+    if (!backendOnline) {
+      return;
+    }
+    let cancelled = false;
+    api
+      .version()
+      .then((payload) => {
+        if (!cancelled) {
+          setVersion(payload);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setVersion(null);
+        }
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [backendOnline]);
+
+  const rows = systemInfoRows(version, backendOnline, import.meta.env.MODE ?? "unknown");
+
+  return (
+    <section>
+      <h3>System</h3>
+      <dl className="system-info-rows">
+        {rows.map((row) => (
+          <div key={row.label} className="system-info-row">
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+      {version !== null && !version.ai_configured ? (
+        <p className="system-info-note">
+          Manual CAD, projects, assemblies, exports, and evaluation work without an API key.
+        </p>
+      ) : null}
+    </section>
+  );
+}

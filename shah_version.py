@@ -14,7 +14,7 @@ from pathlib import Path
 
 APP_NAME = "SHAH INDUSTRIES"
 APP_TAGLINE = "Local Engineering Workspace"
-APP_VERSION = "1.0.0-rc.1"
+APP_VERSION = "1.0.0-rc.2"
 
 # Bumped when a persisted store layout changes in a way readers must know about.
 SCHEMA_VERSION = "1"

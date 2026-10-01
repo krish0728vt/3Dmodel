@@ -1,5 +1,72 @@
 # Changelog
 
+## v1.0.0-rc.2
+
+Workspace simplification. The manual visual review of rc.1 found the CAD
+workspace too crowded to navigate: the prompt input sat in a 340x208 px cell in
+the bottom-right corner below the fold, the project browser held a permanent
+full-height column, revision history held a permanent horizontal band, and the
+inspector stacked every subsystem at once. The product worked but did not read
+as one. Functionality is unchanged; the interface was reorganised.
+
+### Added
+
+- **Persistent prompt bar.** The design assistant is now a dedicated row of the
+  application shell, always visible and never inside a scrolling panel. Enter
+  submits, Shift+Enter inserts a newline, Ctrl+K focuses it.
+- **Drawers** for Projects, Revision History, Export and Tools. They overlay the
+  workspace rather than taking a grid track, so opening one never shrinks the
+  viewer.
+- **Simple and Advanced detail levels**, defaulting to Simple. Advanced exposes
+  parameters, relationships, component identifiers and bounding boxes. Nothing
+  was removed.
+- **Collapsible side rails.** Either rail collapses to hand its width straight
+  to the viewer.
+- **Inspector tabs**, filtered by mode: a part never shows component transform
+  controls and an assembly never shows part parameters.
+- `api.restoreRevision`, so the History drawer can restore a revision through
+  the endpoint the backend already exposed.
+
+### Improved
+
+- **The page no longer scrolls.** `html, body` are `height: 100%` with
+  `overflow: hidden`, and the shell is a 100vh three-row grid. Each rail, drawer
+  and the prompt bar scroll internally instead. The previous
+  `min-height: 100vh` let content push the document past the viewport, which is
+  what produced the browser scrollbar.
+- **Viewer dominance:** 71% of the window width at 1920, 61% at 1440, 59% at
+  1366, and more when a rail is collapsed.
+- **AI-not-configured is honest and actionable.** The box stays usable but SEND
+  is disabled, the notice names `OPENAI_API_KEY`, and a Setup help action opens
+  system information. A request that cannot work can no longer be sent only to
+  fail with a generic parser error.
+- **Assembly component card** replaced source, XYZ, rotation, bounding box and
+  eight micro nudge buttons with a name, two toggles, labelled position and
+  rotation fields, and an explicit Apply that is disabled until something
+  changes. Identifier, source and bounding box moved behind Advanced.
+- **Header** reduced from 78 px to 52 px and from a technical control strip to
+  identity, context, status and five entry points. The permanent STEP and STL
+  download buttons moved into the Export drawer.
+- **Viewer toolbar** compacted to VIEW / DISPLAY / TOOLS with the less-used
+  controls under MORE.
+- **First run** asks one question, offers three ways to start, and lists the
+  example prompts, pointing at the persistent bar rather than duplicating it.
+- Status lines became floating toasts instead of permanent boxes.
+- Frontend tests grew from 71 to 101, covering prompt gating in the configured,
+  unconfigured, busy and offline states, Enter versus Shift+Enter, tab
+  filtering, tab fallback when a mode changes, and drawer exclusivity.
+
+### Fixed
+
+- Superseded `PromptConsole` and `RevisionHistory` components removed after
+  their functionality moved to `PromptBar` and `HistoryDrawer`.
+
+### Known Limitations
+
+Unchanged from rc.1, and still recorded in `docs/release-candidate.md`. The
+rc.2 redesign has not itself been through a browser-based visual review; see
+`docs/rc-validation.md`.
+
 ## v1.0.0-rc.1
 
 First release candidate. SHAH INDUSTRIES is a local, AI-assisted parametric CAD

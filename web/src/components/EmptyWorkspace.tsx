@@ -15,6 +15,13 @@ export const EXAMPLE_PROMPTS = [
   "Create a 30 mm diameter spacer with an 8 mm center hole."
 ] as const;
 
+/**
+ * First run.
+ *
+ * One question, three ways to start, and the example prompts. The real prompt
+ * input is the persistent bar at the bottom of the workspace, so this screen
+ * points at it rather than duplicating it.
+ */
 export function EmptyWorkspace({
   onExample,
   onNewPart,
@@ -24,50 +31,53 @@ export function EmptyWorkspace({
   aiConfigured
 }: EmptyWorkspaceProps) {
   return (
-    <section className="empty-workspace" aria-label="Getting started">
-      <img src="/shah-industries-logo.png" alt="SHAH INDUSTRIES" />
-      <p className="empty-tagline">AI-ASSISTED PARAMETRIC ENGINEERING</p>
+    <section className="first-run" aria-label="Getting started">
+      <img className="first-run-logo" src="/shah-industries-logo.png" alt="SHAH INDUSTRIES" />
+      <h1 className="first-run-question">What do you want to build?</h1>
+      <p className="first-run-hint">
+        {aiConfigured
+          ? "Describe a part in the bar below, or start from one of these."
+          : "Natural-language prompts need an API key. Start from a manual part or open an existing project."}
+      </p>
 
-      <div className="empty-block">
-        <h2 className="empty-heading">Start with</h2>
-        <div className="empty-actions">
-          <button type="button" className="tool-button primary" onClick={onNewPart}>
-            Create a part
-          </button>
-          <button type="button" className="tool-button" onClick={onNewAssembly}>
-            Create an assembly
-          </button>
-          <button
-            type="button"
-            className={hasProjects ? "tool-button" : "tool-button disabled"}
-            onClick={onOpenProjects}
-            disabled={!hasProjects}
-            title={hasProjects ? "Browse saved projects" : "No saved projects yet"}
-          >
-            Open project
-          </button>
-        </div>
+      <div className="first-run-actions">
+        <button type="button" className="tool-button primary" onClick={onNewPart}>
+          New part
+        </button>
+        <button type="button" className="tool-button" onClick={onNewAssembly}>
+          New assembly
+        </button>
+        <button
+          type="button"
+          className={hasProjects ? "tool-button" : "tool-button disabled"}
+          onClick={onOpenProjects}
+          disabled={!hasProjects}
+          title={hasProjects ? "Browse saved projects" : "No saved projects yet"}
+        >
+          Open project
+        </button>
       </div>
 
-      <div className="empty-block">
-        <h2 className="empty-heading">
-          {aiConfigured ? "Example prompts" : "Example prompts (need an API key)"}
-        </h2>
-        <ul className="empty-examples">
+      <div className="first-run-examples">
+        <h2>Example prompts</h2>
+        <ul>
           {EXAMPLE_PROMPTS.map((example) => (
             <li key={example}>
-              <button type="button" onClick={() => onExample(example)}>
+              <button
+                type="button"
+                onClick={() => onExample(example)}
+                disabled={!aiConfigured}
+                title={
+                  aiConfigured
+                    ? "Use this prompt"
+                    : "Needs OPENAI_API_KEY; see the notice in the prompt bar"
+                }
+              >
                 {example}
               </button>
             </li>
           ))}
         </ul>
-        {aiConfigured ? null : (
-          <p className="empty-note">
-            These use natural-language parsing. Without an API key, build parts from the
-            manual and operation-plan tools instead.
-          </p>
-        )}
       </div>
     </section>
   );

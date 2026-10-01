@@ -1,12 +1,25 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
-import { X } from "lucide-react";
+import { ChevronLeft, ChevronRight, PanelLeft, PanelRight, X } from "lucide-react";
 
 import { api, stepUrl, stlUrl } from "./api/client";
 import { DesignTree } from "./components/DesignTree";
 import { EmptyWorkspace } from "./components/EmptyWorkspace";
 import { Header } from "./components/Header";
 import { Inspector } from "./components/Inspector";
-import { PromptConsole } from "./components/PromptConsole";
+import { PromptBar } from "./components/PromptBar";
+import { ProjectsDrawer } from "./components/ProjectsDrawer";
+import { HistoryDrawer } from "./components/HistoryDrawer";
+import { ExportDrawer } from "./components/ExportDrawer";
+import { ToolsDrawer } from "./components/ToolsDrawer";
+import {
+  DEFAULT_DETAIL_LEVEL,
+  resolveInspectorTab,
+  toggleDrawer,
+  type DetailLevel,
+  type DrawerName,
+  type InspectorTab
+} from "./components/workspaceLayout";
+import { inspectorTabs } from "./components/workspaceLayout";
 import { inferCategory, presentError, type PresentedError } from "./components/errorPresentation";
 import type { PromptState } from "./components/promptState";
 import { isTextEntryTarget, viewShortcutFor, shortcutGroups, type ViewShortcut } from "./components/shortcuts";
@@ -17,7 +30,6 @@ import { loadingLabel, workspaceMode } from "./components/uiState";
 const CadViewer = lazy(() =>
   import("./viewer/CadViewer").then((module) => ({ default: module.CadViewer }))
 );
-import { RevisionHistory } from "./components/RevisionHistory";
 import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EngineeringReport, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, MaterialSpec, PatternRecord, PreviewObject, ProjectDetail, ProjectSummary, RepairStrategyRecord, ResolvedDesign, RevisionPreview, RevisionSummary, SelectionState } from "./types/api";
 
 type ProjectStatusFilter = "active" | "archived" | "all";
@@ -77,6 +89,12 @@ export default function App() {
   // land a slower earlier response after a newer one; each async step checks it
   // is still the active request before writing state.
   const loadTokenRef = useRef(0);
+  const [detailLevel, setDetailLevel] = useState<DetailLevel>(DEFAULT_DETAIL_LEVEL);
+  const [openDrawer, setOpenDrawer] = useState<DrawerName | null>(null);
+  const [toolsTab, setToolsTab] = useState<"evaluation" | "learning" | "capabilities" | "system">("evaluation");
+  const [requestedTab, setRequestedTab] = useState<InspectorTab | null>(null);
+  const [treeCollapsed, setTreeCollapsed] = useState(false);
+  const [inspectorCollapsed, setInspectorCollapsed] = useState(false);
   const [renameDialog, setRenameDialog] = useState<{
     title: string;
     label: string;
@@ -94,6 +112,10 @@ export default function App() {
 
   const title = useMemo(() => selectedProject?.name ?? "New Workspace", [selectedProject]);
   const mode = workspaceMode(selectedProject !== null, selectedAssembly !== null);
+  const tabs = inspectorTabs(mode, detailLevel);
+  const activeTab = resolveInspectorTab(requestedTab, mode, detailLevel);
+  const canUndo = (currentRevision ?? 0) > 1;
+  const canRedo = revisions.some((item) => item.revision_number > (currentRevision ?? 0));
 
   useEffect(() => {
     refreshWorkspace();
@@ -161,6 +183,7 @@ export default function App() {
       const isTyping = isTextEntryTarget(target);
       if (event.key === "Escape") {
         setShowShortcuts(false);
+        setOpenDrawer(null);
         setConfirmDialog(null);
         setRenameDialog(null);
         setPromptError(null);
@@ -570,6 +593,19 @@ export default function App() {
     }
   }
 
+  async function restoreRevision(revisionNumber: number) {
+    if (!selectedProjectId) {
+      return;
+    }
+    try {
+      const revision = await api.restoreRevision(selectedProjectId, revisionNumber);
+      setLog((lines) => [`Restored REV ${revision.revision_number}`, ...lines].slice(0, 6));
+      await refreshWorkspace(selectedProjectId);
+    } catch (error) {
+      setLog((lines) => [`Restore failed: ${messageFrom(error)}`, ...lines].slice(0, 6));
+    }
+  }
+
   async function redo() {
     if (!selectedProjectId) {
       return;
@@ -783,47 +819,58 @@ export default function App() {
   }
 
   return (
-    <div className="workspace">
+    <div className="app-shell">
       <Header
         backendOnline={backendOnline}
-        selectedProjectId={selectedProjectId}
+        hasProject={selectedProject !== null}
         title={title}
         revision={currentRevision}
-        status={selectedProject?.status ?? null}
         mode={mode}
+        detailLevel={detailLevel}
+        onDetailLevelChange={setDetailLevel}
+        onOpenProjects={() => setOpenDrawer((current) => toggleDrawer(current, "projects"))}
+        onOpenHistory={() => setOpenDrawer((current) => toggleDrawer(current, "history"))}
+        onOpenExport={() => setOpenDrawer((current) => toggleDrawer(current, "export"))}
+        onOpenTools={() => setOpenDrawer((current) => toggleDrawer(current, "tools"))}
         onRefresh={() => refreshWorkspace()}
-        stepHref={stepHref}
-        stlHref={stlHref}
       />
-      <div className="toast-stack" aria-live="polite">
-        {log.slice(0, 2).map((line) => (
-          <div key={line}>{line}</div>
-        ))}
-      </div>
-      <main className="workspace-grid">
-        <DesignTree
-          projects={projects}
-          selectedProject={selectedProject}
-          selectedOperationId={selection.selectedOperationId}
-          previewObjects={previewModel?.objects ?? []}
-          onSelectProject={(projectId) => loadProject(projectId)}
-          onSelectOperation={(operationId) => selectOperation(operationId, "design_tree")}
-          onRenameProject={renameProject}
-          onDuplicateProject={duplicateProject}
-          onArchiveProject={toggleArchiveProject}
-          onDeleteProject={confirmDeleteProject}
-          search={projectSearch}
-          statusFilter={projectStatusFilter}
-          sort={projectSort}
-          onSearchChange={setProjectSearch}
-          onStatusFilterChange={setProjectStatusFilter}
-          onSortChange={setProjectSort}
-        />
-        <section className="center-stage">
-          <div className="stage-title">
-            <span>{title}</span>
-            <small>{currentRevision ? `REV ${currentRevision}` : "No active revision"}</small>
+
+      <main className={`workspace-main${treeCollapsed ? " tree-collapsed" : ""}${inspectorCollapsed ? " inspector-collapsed" : ""}`}>
+        <aside className="tree-panel" aria-label="Design tree">
+          <div className="panel-head">
+            <span className="panel-title">Design Tree</span>
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => setTreeCollapsed(true)}
+              title="Collapse the design tree"
+              aria-label="Collapse design tree"
+            >
+              <ChevronLeft size={15} />
+            </button>
           </div>
+          <DesignTree
+            selectedProject={selectedProject}
+            selectedOperationId={selection.selectedOperationId}
+            previewObjects={previewModel?.objects ?? []}
+            onSelectOperation={(operationId) => selectOperation(operationId, "design_tree")}
+            detailLevel={detailLevel}
+          />
+        </aside>
+
+        {treeCollapsed ? (
+          <button
+            type="button"
+            className="rail-expand rail-left"
+            onClick={() => setTreeCollapsed(false)}
+            title="Show the design tree"
+            aria-label="Show design tree"
+          >
+            <PanelLeft size={16} />
+          </button>
+        ) : null}
+
+        <section className="stage">
           {selectedProject ? (
             <Suspense fallback={<div className="viewer-loading">{loadingLabel("model")}</div>}>
               <CadViewer
@@ -840,24 +887,175 @@ export default function App() {
               onExample={setPrompt}
               onNewPart={() => focusPrompt()}
               onNewAssembly={() => createAssemblyFromSelectedProject()}
-              onOpenProjects={() => setProjectStatusFilter("all")}
+              onOpenProjects={() => setOpenDrawer("projects")}
               hasProjects={projects.length > 0}
               aiConfigured={aiConfigured}
             />
           )}
         </section>
-        <Inspector
+
+        {inspectorCollapsed ? (
+          <button
+            type="button"
+            className="rail-expand rail-right"
+            onClick={() => setInspectorCollapsed(false)}
+            title="Show the inspector"
+            aria-label="Show inspector"
+          >
+            <PanelRight size={16} />
+          </button>
+        ) : null}
+
+        <div className="inspector-wrap">
+          <div className="panel-head">
+            <button
+              type="button"
+              className="icon-button"
+              onClick={() => setInspectorCollapsed(true)}
+              title="Collapse the inspector"
+              aria-label="Collapse inspector"
+            >
+              <ChevronRight size={15} />
+            </button>
+            <span className="panel-title">Inspector</span>
+          </div>
+          <Inspector
+            tabs={tabs}
+            activeTab={activeTab}
+            onTabChange={setRequestedTab}
+            detailLevel={detailLevel}
+            project={selectedProject}
+            preview={previewModel}
+            selection={selection}
+            assemblies={assemblies}
+            selectedAssembly={selectedAssembly}
+            assemblyPreview={assemblyPreview}
+            assemblyEngineering={assemblyEngineering}
+            exportResult={exportResult}
+            evaluationReport={evaluationReport}
+            learningStats={learningStats}
+            resolvedDesign={resolvedDesign}
+            lessons={lessons}
+            patterns={patterns}
+            repairStrategies={repairStrategies}
+            failureAnalytics={failureAnalytics}
+            capabilityAnalytics={capabilityAnalytics}
+            capabilities={capabilities}
+            capabilitySources={capabilitySources}
+            engineeringReport={engineeringReport}
+            materials={materials}
+            materialId={materialId}
+            process={process}
+            displayUnits={displayUnits}
+            onMaterialChange={changeMaterial}
+            onProcessChange={changeProcess}
+            onDisplayUnitsChange={changeDisplayUnits}
+            onSelectOperation={(operationId) => selectOperation(operationId, "inspector")}
+            onStructuredEdit={submitStructuredEdit}
+            onUpdateDesignParameter={updateDesignParameter}
+            onCreateAssemblyFromProject={createAssemblyFromSelectedProject}
+            onSelectAssembly={loadAssembly}
+            onAddProjectToAssembly={addSelectedProjectToAssembly}
+            onEditAssembly={editAssembly}
+            onRenameAssembly={renameAssembly}
+            onDuplicateAssembly={duplicateAssembly}
+            onArchiveAssembly={toggleArchiveAssembly}
+            onDeleteAssembly={confirmDeleteAssembly}
+            onExport={runExport}
+            onDiscoverCapabilities={(sourceId) => runCapabilityAction(() => api.discoverCapabilities(sourceId))}
+            onTestCapability={(capabilityId) => runCapabilityAction(() => api.testCapability(capabilityId))}
+            onApproveCapability={(capabilityId) => runCapabilityAction(() => api.approveCapability(capabilityId))}
+            onEnableCapability={(capabilityId) => runCapabilityAction(() => api.enableCapability(capabilityId))}
+            onDisableCapability={(capabilityId) => runCapabilityAction(() => api.disableCapability(capabilityId))}
+            onRevalidateLesson={(lessonId) => runLearningAction(() => api.revalidateLesson(lessonId))}
+            onDeprecateLesson={(lessonId) => runLearningAction(() => api.deprecateLesson(lessonId))}
+            onRevalidatePattern={(patternId) => runLearningAction(() => api.revalidatePattern(patternId))}
+            onDeprecatePattern={(patternId) => runLearningAction(() => api.deprecatePattern(patternId))}
+          />
+        </div>
+      </main>
+
+      <PromptBar
+        prompt={prompt}
+        state={promptState}
+        aiConfigured={aiConfigured}
+        backendOnline={backendOnline}
+        selectedProjectId={selectedProjectId}
+        error={promptError}
+        clarification={clarification}
+        onPromptChange={setPrompt}
+        onSubmit={runPrompt}
+        onDismissError={() => {
+          setPromptError(null);
+          setPromptState("ready");
+        }}
+        onChooseClarification={(option) => {
+          setPrompt(option);
+          setClarification(null);
+          setPromptState("ready");
+          focusPrompt();
+        }}
+        onSetupHelp={() => {
+          setToolsTab("system");
+          setOpenDrawer("tools");
+        }}
+      />
+
+      <div className="toast-stack" aria-live="polite">
+        {log.slice(0, 2).map((line) => (
+          <div key={line}>{line}</div>
+        ))}
+      </div>
+
+      {openDrawer === "projects" ? (
+        <ProjectsDrawer
+          projects={projects}
+          selectedProject={selectedProject}
+          search={projectSearch}
+          statusFilter={projectStatusFilter}
+          sort={projectSort}
+          onSearchChange={setProjectSearch}
+          onStatusFilterChange={setProjectStatusFilter}
+          onSortChange={setProjectSort}
+          onSelectProject={(projectId) => loadProject(projectId)}
+          onRenameProject={renameProject}
+          onDuplicateProject={duplicateProject}
+          onArchiveProject={toggleArchiveProject}
+          onDeleteProject={confirmDeleteProject}
+          onClose={() => setOpenDrawer(null)}
+        />
+      ) : null}
+
+      {openDrawer === "history" && selectedProject ? (
+        <HistoryDrawer
+          revisions={revisions}
+          currentRevision={currentRevision}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
+          onRestore={restoreRevision}
+          onClose={() => setOpenDrawer(null)}
+        />
+      ) : null}
+
+      {openDrawer === "export" && selectedProject ? (
+        <ExportDrawer
           project={selectedProject}
-          preview={previewModel}
-          selection={selection}
-          assemblies={assemblies}
           selectedAssembly={selectedAssembly}
-          assemblyPreview={assemblyPreview}
-          assemblyEngineering={assemblyEngineering}
           exportResult={exportResult}
+          onExport={runExport}
+          onClose={() => setOpenDrawer(null)}
+        />
+      ) : null}
+
+      {openDrawer === "tools" ? (
+        <ToolsDrawer
+          tab={toolsTab}
+          onTabChange={setToolsTab}
+          backendOnline={backendOnline}
           evaluationReport={evaluationReport}
           learningStats={learningStats}
-          resolvedDesign={resolvedDesign}
           lessons={lessons}
           patterns={patterns}
           repairStrategies={repairStrategies}
@@ -865,26 +1063,6 @@ export default function App() {
           capabilityAnalytics={capabilityAnalytics}
           capabilities={capabilities}
           capabilitySources={capabilitySources}
-          engineeringReport={engineeringReport}
-          materials={materials}
-          materialId={materialId}
-          process={process}
-          displayUnits={displayUnits}
-          onMaterialChange={changeMaterial}
-          onProcessChange={changeProcess}
-          onDisplayUnitsChange={changeDisplayUnits}
-          onSelectOperation={(operationId) => selectOperation(operationId, "inspector")}
-          onStructuredEdit={submitStructuredEdit}
-          onUpdateDesignParameter={updateDesignParameter}
-          onCreateAssemblyFromProject={createAssemblyFromSelectedProject}
-          onSelectAssembly={loadAssembly}
-          onAddProjectToAssembly={addSelectedProjectToAssembly}
-          onEditAssembly={editAssembly}
-          onRenameAssembly={renameAssembly}
-          onDuplicateAssembly={duplicateAssembly}
-          onArchiveAssembly={toggleArchiveAssembly}
-          onDeleteAssembly={confirmDeleteAssembly}
-          onExport={runExport}
           onDiscoverCapabilities={(sourceId) => runCapabilityAction(() => api.discoverCapabilities(sourceId))}
           onTestCapability={(capabilityId) => runCapabilityAction(() => api.testCapability(capabilityId))}
           onApproveCapability={(capabilityId) => runCapabilityAction(() => api.approveCapability(capabilityId))}
@@ -894,35 +1072,10 @@ export default function App() {
           onDeprecateLesson={(lessonId) => runLearningAction(() => api.deprecateLesson(lessonId))}
           onRevalidatePattern={(patternId) => runLearningAction(() => api.revalidatePattern(patternId))}
           onDeprecatePattern={(patternId) => runLearningAction(() => api.deprecatePattern(patternId))}
+          onClose={() => setOpenDrawer(null)}
         />
-        <RevisionHistory
-          revisions={revisions}
-          currentRevision={currentRevision}
-          onUndo={undo}
-          onRedo={redo}
-        />
-        <PromptConsole
-          prompt={prompt}
-          state={busy ? promptState : promptState}
-          aiConfigured={aiConfigured}
-          backendOnline={backendOnline}
-          selectedProjectId={selectedProjectId}
-          error={promptError}
-          clarification={clarification}
-          onPromptChange={setPrompt}
-          onSubmit={runPrompt}
-          onDismissError={() => {
-            setPromptError(null);
-            setPromptState("ready");
-          }}
-          onChooseClarification={(option) => {
-            setPrompt(option);
-            setClarification(null);
-            setPromptState("ready");
-            focusPrompt();
-          }}
-        />
-      </main>
+      ) : null}
+
       {showShortcuts ? (
         <div className="modal-scrim" onClick={() => setShowShortcuts(false)}>
           <div
@@ -957,6 +1110,7 @@ export default function App() {
           </div>
         </div>
       ) : null}
+
       {renameDialog ? (
         <RenameDialog
           title={renameDialog.title}
@@ -966,6 +1120,7 @@ export default function App() {
           onSubmit={renameDialog.onSubmit}
         />
       ) : null}
+
       {confirmDialog ? (
         <div className="modal-scrim">
           <div className="confirm-modal" role="dialog" aria-modal="true" aria-label={confirmDialog.title}>

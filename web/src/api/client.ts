@@ -199,6 +199,10 @@ export const api = {
     request<RevisionSummary>(`/api/projects/${projectId}/undo`, {
       method: "POST"
     }),
+  restoreRevision: (projectId: string, revisionNumber: number) =>
+    request<RevisionSummary>(`/api/projects/${projectId}/restore/${revisionNumber}`, {
+      method: "POST"
+    }),
   redo: (projectId: string) =>
     request<RevisionSummary>(`/api/projects/${projectId}/redo`, {
       method: "POST"
