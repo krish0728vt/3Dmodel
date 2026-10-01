@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { assemblyDownloadUrl, exportDownloadUrl } from "../api/client";
+import { emptyState, interferenceInfo } from "./uiState";
 import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, PatternRecord, PreviewObject, ProjectDetail, RepairStrategyRecord, ResolvedDesign, RevisionPreview, SelectionState } from "../types/api";
 import type { EngineeringReport, MaterialSpec } from "../types/api";
 import { EngineeringPanel } from "./EngineeringPanel";
@@ -300,7 +301,10 @@ function EvaluationPanel({ report }: { report: EvaluationReport | null }) {
           ) : null}
         </>
       ) : (
-        <div className="muted">No evaluation report found. Run python app.py evaluate smoke.</div>
+        <div className="empty-inline">
+          <strong>{emptyState("evaluation").message}</strong>
+          <small>{emptyState("evaluation").action}</small>
+        </div>
       )}
     </section>
   );
@@ -483,12 +487,27 @@ function AssemblyPanel({
             })}
           </div>
           {engineering?.interferences.length ? (
-            <div className="assembly-warning">
-              {engineering.interferences.map((item) => (
-                <small key={`${item.first_component_id}-${item.second_component_id}`}>
-                  {item.status}: {item.first_component_id} / {item.second_component_id}
-                </small>
-              ))}
+            <div className="interference-list">
+              {engineering.interferences.map((item) => {
+                const info = interferenceInfo(item.status, item.method);
+                return (
+                  <div
+                    className={`interference-row tone-${info.tone}`}
+                    key={`${item.first_component_id}-${item.second_component_id}`}
+                  >
+                    <strong>{info.label}</strong>
+                    <span>
+                      {item.first_component_id} / {item.second_component_id}
+                    </span>
+                    <small>{info.explanation}</small>
+                  </div>
+                );
+              })}
+            </div>
+          ) : engineering ? (
+            <div className="interference-row tone-success">
+              <strong>{interferenceInfo("NO_OVERLAP").label}</strong>
+              <small>{interferenceInfo("NO_OVERLAP").explanation}</small>
             </div>
           ) : null}
         </>

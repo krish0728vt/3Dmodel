@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
+import { X } from "lucide-react";
 
 import { api, stepUrl, stlUrl } from "./api/client";
 import { DesignTree } from "./components/DesignTree";
@@ -6,9 +7,18 @@ import { EmptyWorkspace } from "./components/EmptyWorkspace";
 import { Header } from "./components/Header";
 import { Inspector } from "./components/Inspector";
 import { PromptConsole } from "./components/PromptConsole";
+import { inferCategory, presentError, type PresentedError } from "./components/errorPresentation";
+import type { PromptState } from "./components/promptState";
+import { isTextEntryTarget, viewShortcutFor, shortcutGroups, type ViewShortcut } from "./components/shortcuts";
+import { loadingLabel, workspaceMode } from "./components/uiState";
+
+// Three.js and the STL loader are the bulk of the bundle and are only
+// needed once a project is open, so the viewer loads on demand.
+const CadViewer = lazy(() =>
+  import("./viewer/CadViewer").then((module) => ({ default: module.CadViewer }))
+);
 import { RevisionHistory } from "./components/RevisionHistory";
 import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EngineeringReport, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, MaterialSpec, PatternRecord, PreviewObject, ProjectDetail, ProjectSummary, RepairStrategyRecord, ResolvedDesign, RevisionPreview, RevisionSummary, SelectionState } from "./types/api";
-import { CadViewer } from "./viewer/CadViewer";
 
 type ProjectStatusFilter = "active" | "archived" | "all";
 type ProjectSort = "recently_updated" | "recently_opened" | "name" | "created";
@@ -58,6 +68,21 @@ export default function App() {
   const [prompt, setPrompt] = useState("");
   const [log, setLog] = useState<string[]>(["Workspace ready."]);
   const [busy, setBusy] = useState(false);
+  const [promptState, setPromptState] = useState<PromptState>("ready");
+  const [promptError, setPromptError] = useState<PresentedError | null>(null);
+  const [clarification, setClarification] = useState<{ question: string; options: string[] } | null>(null);
+  const [aiConfigured, setAiConfigured] = useState(true);
+  const [viewCommand, setViewCommand] = useState<{ action: ViewShortcut; nonce: number } | null>(null);
+  // Monotonic token for project/assembly loads. Switching targets quickly can
+  // land a slower earlier response after a newer one; each async step checks it
+  // is still the active request before writing state.
+  const loadTokenRef = useRef(0);
+  const [renameDialog, setRenameDialog] = useState<{
+    title: string;
+    label: string;
+    initial: string;
+    onSubmit: (value: string) => void;
+  } | null>(null);
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState<ConfirmDialog | null>(null);
 
@@ -68,10 +93,60 @@ export default function App() {
   const stlHref = selectedProjectId ? stlUrl(selectedProjectId, currentRevision ?? undefined) : null;
 
   const title = useMemo(() => selectedProject?.name ?? "New Workspace", [selectedProject]);
+  const mode = workspaceMode(selectedProject !== null, selectedAssembly !== null);
 
   useEffect(() => {
     refreshWorkspace();
   }, []);
+
+  // Poll health so the workspace recovers on its own when the backend comes
+  // back, instead of showing OFFLINE until the user reloads. Cheap by design:
+  // /api/health does no geometry work. A full refresh runs only on the
+  // transition back to online, so a healthy session is not re-fetching.
+  useEffect(() => {
+    let cancelled = false;
+    const timer = window.setInterval(async () => {
+      try {
+        await api.health();
+        if (cancelled) {
+          return;
+        }
+        setBackendOnline((wasOnline) => {
+          if (!wasOnline) {
+            refreshWorkspace(selectedProjectId);
+          }
+          return true;
+        });
+      } catch {
+        if (!cancelled) {
+          setBackendOnline(false);
+        }
+      }
+    }, 5000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [selectedProjectId]);
+
+  // Report AI availability from the backend rather than guessing in the client.
+  // The endpoint returns a boolean only; the key itself is never sent.
+  useEffect(() => {
+    let cancelled = false;
+    api
+      .version()
+      .then((payload) => {
+        if (!cancelled) {
+          setAiConfigured(payload.ai_configured);
+        }
+      })
+      .catch(() => {
+        // Backend unreachable; the offline banner already covers this.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [backendOnline]);
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
@@ -83,10 +158,13 @@ export default function App() {
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
-      const isTyping = target?.tagName === "INPUT" || target?.tagName === "TEXTAREA" || target?.tagName === "SELECT";
+      const isTyping = isTextEntryTarget(target);
       if (event.key === "Escape") {
         setShowShortcuts(false);
         setConfirmDialog(null);
+        setRenameDialog(null);
+        setPromptError(null);
+        setClarification(null);
         setSelection(emptySelection());
         return;
       }
@@ -108,6 +186,16 @@ export default function App() {
       if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "z" && event.shiftKey && !isTyping) {
         event.preventDefault();
         redo();
+        return;
+      }
+      // Bare-key view shortcuts, suppressed while typing so a prompt
+      // containing "1" or "f" is never hijacked.
+      if (!isTyping && !event.ctrlKey && !event.metaKey && !event.altKey) {
+        const action = viewShortcutFor(event.key);
+        if (action) {
+          event.preventDefault();
+          setViewCommand({ action, nonce: Date.now() });
+        }
       }
     }
     window.addEventListener("keydown", onKeyDown);
@@ -169,32 +257,44 @@ export default function App() {
   }
 
   async function loadProject(projectId: string, preferredSelectionId = selection.selectedOperationId) {
+    const token = ++loadTokenRef.current;
     const [detail, history, resolved] = await Promise.all([
       api.project(projectId),
       api.history(projectId),
       api.resolvedDesign(projectId).catch(() => null)
     ]);
+    // A newer load started while these were in flight.
+    if (token !== loadTokenRef.current) {
+      return;
+    }
     setSelectedProject(detail);
     setRevisions(history);
     setResolvedDesign(resolved);
     const revision = detail.current_revision_record?.revision_number ?? undefined;
     await Promise.all([
-      loadEngineering(projectId, revision),
-      revision ? loadPreview(projectId, revision, preferredSelectionId) : Promise.resolve()
+      loadEngineering(projectId, revision, materialId, process, displayUnits, token),
+      revision ? loadPreview(projectId, revision, preferredSelectionId, token) : Promise.resolve()
     ]);
   }
 
   async function loadAssembly(assemblyId: string) {
+    const token = ++loadTokenRef.current;
     try {
       const [detail, preview, engineering] = await Promise.all([
         api.assembly(assemblyId),
         api.assemblyPreview(assemblyId),
         api.assemblyEngineering(assemblyId)
       ]);
+      if (token !== loadTokenRef.current) {
+        return;
+      }
       setSelectedAssembly(detail);
       setAssemblyPreview(preview);
       setAssemblyEngineering(engineering);
     } catch (error) {
+      if (token !== loadTokenRef.current) {
+        return;
+      }
       setSelectedAssembly(null);
       setAssemblyPreview(null);
       setAssemblyEngineering(null);
@@ -202,9 +302,17 @@ export default function App() {
     }
   }
 
-  async function loadPreview(projectId: string, revision: number, preferredSelectionId: string | null) {
+  async function loadPreview(
+    projectId: string,
+    revision: number,
+    preferredSelectionId: string | null,
+    token = loadTokenRef.current
+  ) {
     try {
       const nextPreview = await api.preview(projectId, revision);
+      if (token !== loadTokenRef.current) {
+        return;
+      }
       setPreviewModel(nextPreview);
       const remapped = preferredSelectionId ? nextPreview.objects.find((object) => object.operation_id === preferredSelectionId) : null;
       if (remapped) {
@@ -213,19 +321,32 @@ export default function App() {
         setSelection(emptySelection());
       }
     } catch (error) {
+      if (token !== loadTokenRef.current) {
+        return;
+      }
       setPreviewModel(null);
       setSelection(emptySelection());
       setLog((lines) => [`Preview metadata unavailable: ${messageFrom(error)}`, ...lines].slice(0, 6));
     }
   }
 
-  async function loadEngineering(projectId: string, revision?: number, nextMaterial = materialId, nextProcess = process, nextUnits = displayUnits) {
+  async function loadEngineering(
+    projectId: string,
+    revision?: number,
+    nextMaterial = materialId,
+    nextProcess = process,
+    nextUnits = displayUnits,
+    token = loadTokenRef.current
+  ) {
     const report = await api.engineering(projectId, {
       revision,
       material: nextMaterial || undefined,
       process: nextProcess,
       displayUnits: nextUnits
     });
+    if (token !== loadTokenRef.current) {
+      return;
+    }
     setEngineeringReport(report);
   }
 
@@ -251,25 +372,58 @@ export default function App() {
     }
   }
 
+  /** In-app replacement for window.prompt, so renames match the rest of the
+   *  dialog styling instead of using a browser chrome popup. */
+  function askForName(title: string, label: string, initial: string): Promise<string | null> {
+    return new Promise((resolve) => {
+      setRenameDialog({
+        title,
+        label,
+        initial,
+        onSubmit: (value) => {
+          setRenameDialog(null);
+          resolve(value.trim() ? value.trim() : null);
+        }
+      });
+    });
+  }
+
   async function runPrompt() {
     if (!prompt.trim()) {
       return;
     }
     setBusy(true);
+    setPromptError(null);
+    setClarification(null);
+    // The backend reports stages, not percentages, so the console walks named
+    // states rather than inventing a progress bar.
+    setPromptState("interpreting");
     try {
+      setPromptState("validating");
       if (selectedProjectId) {
+        setPromptState("generating");
         const response = await api.edit(selectedProjectId, prompt.trim());
         setLog((lines) => [`REV ${response.revision.revision_number}: ${response.change_summary}`, ...lines].slice(0, 6));
         await refreshWorkspace(selectedProjectId);
       } else {
+        setPromptState("generating");
         const response = await api.generate(prompt.trim());
         const projectId = response.project?.project_id ?? null;
         setLog((lines) => [response.message, ...lines].slice(0, 6));
         await refreshWorkspace(projectId);
       }
+      setPromptState("revision_created");
       setPrompt("");
     } catch (error) {
-      setLog((lines) => [`Request failed: ${messageFrom(error)}`, ...lines].slice(0, 6));
+      const message = messageFrom(error);
+      const parsed = parseClarification(message);
+      if (parsed) {
+        setClarification(parsed);
+        setPromptState("needs_clarification");
+      } else {
+        setPromptError(presentError(inferCategory(message), message));
+        setPromptState("failed");
+      }
     } finally {
       setBusy(false);
     }
@@ -290,7 +444,7 @@ export default function App() {
 
   async function renameProject(projectId: string) {
     const project = projects.find((item) => item.project_id === projectId) ?? selectedProject;
-    const name = window.prompt("Rename project", project?.name ?? "");
+    const name = await askForName("Rename project", "Project name", project?.name ?? "");
     if (!name?.trim()) {
       return;
     }
@@ -354,7 +508,7 @@ export default function App() {
 
   async function renameAssembly(assemblyId: string) {
     const assembly = assemblies.find((item) => item.assembly_id === assemblyId) ?? selectedAssembly?.assembly;
-    const name = window.prompt("Rename assembly", assembly?.name ?? "");
+    const name = await askForName("Rename assembly", "Assembly name", assembly?.name ?? "");
     if (!name?.trim()) {
       return;
     }
@@ -636,6 +790,7 @@ export default function App() {
         title={title}
         revision={currentRevision}
         status={selectedProject?.status ?? null}
+        mode={mode}
         onRefresh={() => refreshWorkspace()}
         stepHref={stepHref}
         stlHref={stlHref}
@@ -670,18 +825,24 @@ export default function App() {
             <small>{currentRevision ? `REV ${currentRevision}` : "No active revision"}</small>
           </div>
           {selectedProject ? (
-            <CadViewer
-              stlUrl={previewUrl}
-              preview={previewModel}
-              selection={selection}
-              displayUnits={displayUnits}
-              onSelectOperation={selectOperation}
-            />
+            <Suspense fallback={<div className="viewer-loading">{loadingLabel("model")}</div>}>
+              <CadViewer
+                stlUrl={previewUrl}
+                preview={previewModel}
+                selection={selection}
+                displayUnits={displayUnits}
+                onSelectOperation={selectOperation}
+                viewCommand={viewCommand}
+              />
+            </Suspense>
           ) : (
             <EmptyWorkspace
               onExample={setPrompt}
-              onNewPart={() => document.querySelector<HTMLTextAreaElement>(".console-body textarea")?.focus()}
+              onNewPart={() => focusPrompt()}
+              onNewAssembly={() => createAssemblyFromSelectedProject()}
               onOpenProjects={() => setProjectStatusFilter("all")}
+              hasProjects={projects.length > 0}
+              aiConfigured={aiConfigured}
             />
           )}
         </section>
@@ -742,43 +903,157 @@ export default function App() {
         />
         <PromptConsole
           prompt={prompt}
-          disabled={busy || !backendOnline}
+          state={busy ? promptState : promptState}
+          aiConfigured={aiConfigured}
+          backendOnline={backendOnline}
           selectedProjectId={selectedProjectId}
-          log={log}
+          error={promptError}
+          clarification={clarification}
           onPromptChange={setPrompt}
           onSubmit={runPrompt}
-          onExample={setPrompt}
+          onDismissError={() => {
+            setPromptError(null);
+            setPromptState("ready");
+          }}
+          onChooseClarification={(option) => {
+            setPrompt(option);
+            setClarification(null);
+            setPromptState("ready");
+            focusPrompt();
+          }}
         />
       </main>
       {showShortcuts ? (
         <div className="modal-scrim" onClick={() => setShowShortcuts(false)}>
-          <div className="shortcut-modal" onClick={(event) => event.stopPropagation()}>
+          <div
+            className="shortcut-modal"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Keyboard shortcuts"
+          >
             <div className="section-heading-row">
-              <h3>Shortcuts</h3>
-              <button type="button" className="icon-button" onClick={() => setShowShortcuts(false)}>x</button>
+              <h3>Keyboard shortcuts</h3>
+              <button
+                type="button"
+                className="icon-button"
+                onClick={() => setShowShortcuts(false)}
+                aria-label="Close shortcuts"
+                autoFocus
+              >
+                <X size={14} />
+              </button>
             </div>
-            <dl>
-              <Detail label="Ctrl+K" value="Focus design prompt" />
-              <Detail label="Ctrl+Z" value="Undo revision" />
-              <Detail label="Ctrl+Shift+Z" value="Redo revision" />
-              <Detail label="Esc" value="Clear selection or close overlays" />
-              <Detail label="?" value="Show shortcuts" />
-            </dl>
+            {shortcutGroups().map((group) => (
+              <div key={group.group} className="shortcut-group">
+                <h4>{group.group}</h4>
+                <dl>
+                  {group.items.map((shortcut) => (
+                    <Detail key={shortcut.keys} label={shortcut.keys} value={shortcut.description} />
+                  ))}
+                </dl>
+              </div>
+            ))}
           </div>
         </div>
+      ) : null}
+      {renameDialog ? (
+        <RenameDialog
+          title={renameDialog.title}
+          label={renameDialog.label}
+          initial={renameDialog.initial}
+          onCancel={() => setRenameDialog(null)}
+          onSubmit={renameDialog.onSubmit}
+        />
       ) : null}
       {confirmDialog ? (
         <div className="modal-scrim">
-          <div className="confirm-modal">
+          <div className="confirm-modal" role="dialog" aria-modal="true" aria-label={confirmDialog.title}>
             <h3>{confirmDialog.title}</h3>
             <p>{confirmDialog.message}</p>
             <div className="modal-actions">
-              <button type="button" className="tool-button" onClick={() => setConfirmDialog(null)}>Cancel</button>
-              <button type="button" className="tool-button danger" onClick={confirmDialog.onConfirm}>{confirmDialog.confirmLabel}</button>
+              <button type="button" className="tool-button" onClick={() => setConfirmDialog(null)} autoFocus>
+                Cancel
+              </button>
+              <button type="button" className="tool-button danger" onClick={confirmDialog.onConfirm}>
+                {confirmDialog.confirmLabel}
+              </button>
             </div>
           </div>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function focusPrompt() {
+  document.querySelector<HTMLTextAreaElement>(".console-body textarea")?.focus();
+}
+
+/** Recognizes the backend's ambiguity response so it can be shown as a
+ *  question with choices rather than as a generic error. */
+function parseClarification(message: string): { question: string; options: string[] } | null {
+  const lowered = message.toLowerCase();
+  if (!lowered.includes("ambiguous") && !lowered.includes("which one")) {
+    return null;
+  }
+  // Candidate identifiers are quoted or comma-listed by the parser.
+  const quoted = [...message.matchAll(/'([A-Za-z0-9_]+)'/g)].map((match) => match[1]);
+  const options = [...new Set(quoted)];
+  if (options.length < 2) {
+    return null;
+  }
+  return {
+    question: message.replace(/\s+/g, " ").trim(),
+    options
+  };
+}
+
+function RenameDialog({
+  title,
+  label,
+  initial,
+  onCancel,
+  onSubmit
+}: {
+  title: string;
+  label: string;
+  initial: string;
+  onCancel: () => void;
+  onSubmit: (value: string) => void;
+}) {
+  const [value, setValue] = useState(initial);
+  return (
+    <div className="modal-scrim">
+      <div className="confirm-modal" role="dialog" aria-modal="true" aria-label={title}>
+        <h3>{title}</h3>
+        <label className="dialog-field">
+          <span>{label}</span>
+          <input
+            value={value}
+            onChange={(event) => setValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                onSubmit(value);
+              }
+            }}
+            autoFocus
+          />
+        </label>
+        <div className="modal-actions">
+          <button type="button" className="tool-button" onClick={onCancel}>
+            Cancel
+          </button>
+          <button
+            type="button"
+            className="tool-button primary"
+            onClick={() => onSubmit(value)}
+            disabled={value.trim().length === 0}
+          >
+            Save
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

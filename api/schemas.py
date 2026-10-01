@@ -9,11 +9,20 @@ from assemblies.models import AssemblyComponent
 
 
 class HealthResponse(BaseModel):
+    """Lightweight liveness payload.
+
+    Deliberately cheap: `cad_engine_ready` reflects whether the CAD module
+    imported at startup, not a fresh geometry call, so polling health never
+    runs real kernel work. Use `app.py doctor` for deep diagnostics.
+    """
+
     model_config = ConfigDict(extra="forbid")
 
     status: Literal["online"]
     service: str
     route_count: int
+    version: str
+    cad_engine_ready: bool
 
 
 class VersionResponse(BaseModel):

@@ -25,7 +25,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--only",
         action="append",
-        choices=["lint", "workflows", "deployment", "python", "evaluation", "frontend", "security"],
+        choices=["lint", "workflows", "deployment", "python", "evaluation", "frontend", "security", "docs"],
         help="Run only the selected group. May be repeated.",
     )
     parser.add_argument("--continue-on-error", action="store_true")
@@ -33,7 +33,16 @@ def main(argv: list[str] | None = None) -> int:
 
     selected = set(
         args.only
-        or ["lint", "workflows", "deployment", "python", "evaluation", "frontend", "security"]
+        or [
+            "lint",
+            "workflows",
+            "deployment",
+            "python",
+            "evaluation",
+            "frontend",
+            "security",
+            "docs",
+        ]
     )
     checks = _checks(selected)
     failures: list[str] = []
@@ -89,6 +98,9 @@ def _checks(selected: set[str]) -> list[Check]:
         checks.append(Check("Frontend production build", [npm, "run", "build"], WEB))
     if "security" in selected:
         checks.append(Check("Security scan", [python, "scripts/security_check.py"]))
+        checks.append(Check("Deployment safety", [python, "scripts/deployment_safety.py"]))
+    if "docs" in selected:
+        checks.append(Check("Documentation links", [python, "scripts/check_docs.py"]))
     return checks
 
 

@@ -33,7 +33,24 @@ SECRET_PATTERNS = [
     re.compile(r"\bghp_[A-Za-z0-9_]{20,}\b"),
     re.compile(r"\bsk-[A-Za-z0-9_-]{20,}\b"),
 ]
-FRONTEND_FORBIDDEN = ["OPENAI_API_KEY", "Authorization:", "Bearer "]
+# The frontend must never carry a secret. A bare mention of a variable name in
+# user-facing help text is legitimate and required ("Configure OPENAI_API_KEY in
+# .env"), so these patterns match the shapes that would actually embed or read a
+# secret in the bundle, not any occurrence of the word.
+FRONTEND_SECRET_PATTERNS = [
+    (
+        re.compile(r"OPENAI_API_KEY\s*[=:]\s*['\"`]?\S"),
+        "assigns a value to OPENAI_API_KEY",
+    ),
+    (
+        re.compile(r"(?:process|import\.meta)\.env\.[A-Za-z_]*(?:API_KEY|SECRET|TOKEN|PASSWORD)"),
+        "reads a secret from the build environment",
+    ),
+    (
+        re.compile(r"""Authorization\s*:\s*['\"`]\s*(?:Bearer|Basic)\s+\S"""),
+        "hardcodes an Authorization header value",
+    ),
+]
 SECRET_FILE_SUFFIXES = (".pem", ".key", ".p12", ".pfx", ".keystore", ".jks")
 SECRET_FILE_NAMES = {"id_rsa", "id_dsa", "id_ecdsa", "id_ed25519", ".npmrc", ".pypirc"}
 
@@ -156,9 +173,11 @@ def _scan_frontend_secrets(path: Path) -> list[str]:
         text = path.read_text(encoding="utf-8", errors="ignore")
     except OSError:
         return findings
-    for marker in FRONTEND_FORBIDDEN:
-        if marker in text:
-            findings.append(f"{_rel(path)} contains frontend secret marker {marker!r}")
+    for pattern, description in FRONTEND_SECRET_PATTERNS:
+        match = pattern.search(text)
+        if match:
+            line = text[: match.start()].count("\n") + 1
+            findings.append(f"{_rel(path)}:{line} {description}")
     for pattern in SECRET_PATTERNS:
         if pattern.search(text):
             findings.append(f"{_rel(path)} contains frontend private-key or token-like pattern")

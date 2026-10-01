@@ -13,5 +13,22 @@ export default defineConfig({
     proxy: {
       "/api": apiProxyTarget
     }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Three.js is ~500 kB on its own and cannot be split usefully. It is
+          // isolated here so it caches independently of application code and
+          // so the viewer chunk reflects only our own code.
+          three: ["three"]
+        }
+      }
+    },
+    // The `three` chunk is an irreducible vendor floor; it is lazy-loaded and
+    // never part of the initial download. The limit sits just above it so the
+    // warning still fires for a genuinely new regression instead of being
+    // permanently noisy.
+    chunkSizeWarningLimit: 560
   }
 });

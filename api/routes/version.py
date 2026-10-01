@@ -9,7 +9,7 @@ from config import openai_key_configured
 from shah_version import APP_VERSION, SCHEMA_VERSION, build_commit
 
 
-router = APIRouter(prefix="/api", tags=["version"])
+router = APIRouter(prefix="/api", tags=["system"])
 
 
 @router.get("/version", response_model=VersionResponse)

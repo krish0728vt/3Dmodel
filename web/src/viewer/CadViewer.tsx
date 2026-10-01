@@ -6,6 +6,7 @@ import { STLLoader } from "three/examples/jsm/loaders/STLLoader.js";
 
 import type { PreviewBoundingBox, RevisionPreview, SelectionState } from "../types/api";
 import { formatLength, trimNumber, type Measurement } from "./previewTypes";
+import { withShortcut, type ViewShortcut } from "../components/shortcuts";
 
 type CadViewerProps = {
   stlUrl: string | null;
@@ -13,12 +14,23 @@ type CadViewerProps = {
   selection: SelectionState;
   displayUnits: "mm" | "in";
   onSelectOperation: (operationId: string, source: SelectionState["source"]) => void;
+  /** Keyboard-driven view request. The nonce makes a repeat press of the same
+   *  key register, since the action alone would not change. */
+  viewCommand?: { action: ViewShortcut; nonce: number } | null;
 };
 
 type ViewerMode = "solid" | "wireframe" | "solid_edges";
 type ViewName = "iso" | "top" | "bottom" | "front" | "back" | "left" | "right";
 
-export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOperation }: CadViewerProps) {
+// Only the views that have a keyboard binding carry a hint.
+const VIEW_KEYS: Partial<Record<ViewName, string>> = {
+  iso: "0",
+  front: "1",
+  right: "2",
+  top: "3"
+};
+
+export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOperation, viewCommand }: CadViewerProps) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const meshRef = useRef<THREE.Mesh | null>(null);
   const controlsRef = useRef<OrbitControls | null>(null);
@@ -119,7 +131,15 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
       clearGroup(overlayGroup);
       clearGroup(sketchGroup);
       clearGroup(measurementGroup);
+      if (bboxRef.current) {
+        scene.remove(bboxRef.current);
+        clearObject(bboxRef.current);
+        bboxRef.current = null;
+      }
       renderer.dispose();
+      // Browsers cap live WebGL contexts; release ours explicitly so switching
+      // projects many times in one session cannot exhaust them.
+      renderer.forceContextLoss();
       host.removeChild(renderer.domElement);
       meshRef.current = null;
       sceneRef.current = null;
@@ -251,6 +271,25 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
     }
   }, [measureEnabled]);
 
+  // Apply a keyboard view request. Keyed on the nonce so pressing the same key
+  // twice still re-applies the view.
+  useEffect(() => {
+    if (!viewCommand) {
+      return;
+    }
+    if (viewCommand.action === "fit") {
+      resetCamera();
+      return;
+    }
+    const views: Record<Exclude<ViewShortcut, "fit">, ViewName> = {
+      iso: "iso",
+      front: "front",
+      right: "right",
+      top: "top"
+    };
+    setView(views[viewCommand.action]);
+  }, [viewCommand?.nonce]);
+
   function resetCamera() {
     if (cameraRef.current && controlsRef.current) {
       const box = activeModelBox(preview, null, meshRef.current);
@@ -378,7 +417,8 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
     if (!scene) return;
     if (bboxRef.current) {
       scene.remove(bboxRef.current);
-      bboxRef.current.geometry.dispose();
+      // Box3Helper owns both a geometry and a LineBasicMaterial.
+      clearObject(bboxRef.current);
       bboxRef.current = null;
     }
     if (!bboxVisible) return;
@@ -408,34 +448,46 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
   return (
     <section className="viewer-shell">
       <div className="viewer-toolbar">
-        <span>{viewerStatus}</span>
-        <button type="button" className="tool-button compact" onClick={() => setViewerMode("solid")} title="Solid mode" aria-pressed={viewerMode === "solid"}>
-          <View size={15} /> Solid
-        </button>
-        <button type="button" className="tool-button compact" onClick={() => setViewerMode("wireframe")} title="Wireframe mode" aria-pressed={viewerMode === "wireframe"}>
-          <RotateCcw size={15} /> Wire
-        </button>
-        <button type="button" className="tool-button compact" onClick={() => setViewerMode("solid_edges")} title="Solid with semantic overlays" aria-pressed={viewerMode === "solid_edges"}>
-          <SquareDashed size={15} /> Edges
-        </button>
-        <button type="button" className="icon-button" onClick={resetCamera} title="Fit model">
-          <Maximize2 size={16} />
-        </button>
-        <button type="button" className="icon-button" onClick={focusSelection} title="Focus selection">
-          <ScanSearch size={16} />
-        </button>
-        <button type="button" className="icon-button" onClick={() => setBboxVisible((value) => !value)} title="Bounding box" aria-pressed={bboxVisible}>
-          <BoxSelect size={16} />
-        </button>
-        <button type="button" className="icon-button" onClick={() => setGridVisible((value) => !value)} title="Grid" aria-pressed={gridVisible}>
-          <Grid3X3 size={16} />
-        </button>
-        <button type="button" className="icon-button" onClick={() => setAxesVisible((value) => !value)} title="Axes" aria-pressed={axesVisible}>
-          {axesVisible ? <Eye size={16} /> : <EyeOff size={16} />}
-        </button>
-        <button type="button" className="icon-button" onClick={() => setMeasureEnabled((value) => !value)} title="Measure point to point" aria-pressed={measureEnabled}>
-          <Ruler size={16} />
-        </button>
+        <span className="viewer-status">{viewerStatus}</span>
+
+        <div className="toolbar-group" role="group" aria-label="View">
+          <span className="toolbar-group-label">VIEW</span>
+          <button type="button" className="icon-button" onClick={resetCamera} title={withShortcut("Fit model", "F")} aria-label="Fit model">
+            <Maximize2 size={16} />
+          </button>
+          <button type="button" className="icon-button" onClick={focusSelection} title="Focus the selected feature" aria-label="Focus selection">
+            <ScanSearch size={16} />
+          </button>
+        </div>
+
+        <div className="toolbar-group" role="group" aria-label="Display">
+          <span className="toolbar-group-label">DISPLAY</span>
+          <button type="button" className="tool-button compact" onClick={() => setViewerMode("solid")} title="Shaded solid" aria-pressed={viewerMode === "solid"}>
+            <View size={15} /> Solid
+          </button>
+          <button type="button" className="tool-button compact" onClick={() => setViewerMode("wireframe")} title="Wireframe only" aria-pressed={viewerMode === "wireframe"}>
+            <RotateCcw size={15} /> Wire
+          </button>
+          <button type="button" className="tool-button compact" onClick={() => setViewerMode("solid_edges")} title="Solid with semantic feature overlays" aria-pressed={viewerMode === "solid_edges"}>
+            <SquareDashed size={15} /> Edges
+          </button>
+          <button type="button" className="icon-button" onClick={() => setBboxVisible((value) => !value)} title="Toggle bounding box" aria-label="Toggle bounding box" aria-pressed={bboxVisible}>
+            <BoxSelect size={16} />
+          </button>
+          <button type="button" className="icon-button" onClick={() => setGridVisible((value) => !value)} title="Toggle ground grid" aria-label="Toggle grid" aria-pressed={gridVisible}>
+            <Grid3X3 size={16} />
+          </button>
+          <button type="button" className="icon-button" onClick={() => setAxesVisible((value) => !value)} title="Toggle axes" aria-label="Toggle axes" aria-pressed={axesVisible}>
+            {axesVisible ? <Eye size={16} /> : <EyeOff size={16} />}
+          </button>
+        </div>
+
+        <div className="toolbar-group" role="group" aria-label="Tools">
+          <span className="toolbar-group-label">TOOLS</span>
+          <button type="button" className="icon-button" onClick={() => setMeasureEnabled((value) => !value)} title="Measure distance between two points" aria-label="Measure distance" aria-pressed={measureEnabled}>
+            <Ruler size={16} />
+          </button>
+        </div>
       </div>
       <div
         className={measureEnabled ? "viewer-host measuring" : "viewer-host"}
@@ -451,7 +503,12 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
         </div>
         <div className="view-shortcuts" aria-label="View shortcuts">
           {(["iso", "top", "bottom", "front", "back", "left", "right"] as ViewName[]).map((view) => (
-            <button type="button" key={view} onClick={() => setView(view)} title={`${view} view`}>
+            <button
+              type="button"
+              key={view}
+              onClick={() => setView(view)}
+              title={withShortcut(`${view.charAt(0).toUpperCase()}${view.slice(1)} view`, VIEW_KEYS[view])}
+            >
               {view.toUpperCase()}
             </button>
           ))}
@@ -474,8 +531,31 @@ export function CadViewer({ stlUrl, preview, selection, displayUnits, onSelectOp
         ) : null}
         {measureEnabled || measurement ? (
           <div className="measurement-readout">
-            <span>{measurement ? `Preview distance: ${formatLength(measurement.distanceMm, displayUnits)}` : "Measure: click point A, then point B"}</span>
-            <button type="button" onClick={clearMeasurement}>Clear</button>
+            {measurement ? (
+              <dl className="measurement-values">
+                <div className="feature-row">
+                  <dt>Distance</dt>
+                  <dd>{formatLength(measurement.distanceMm, displayUnits)}</dd>
+                </div>
+                <div className="feature-row">
+                  <dt>{"\u0394X"}</dt>
+                  <dd>{formatLength(Math.abs(measurement.end[0] - measurement.start[0]), displayUnits)}</dd>
+                </div>
+                <div className="feature-row">
+                  <dt>{"\u0394Y"}</dt>
+                  <dd>{formatLength(Math.abs(measurement.end[1] - measurement.start[1]), displayUnits)}</dd>
+                </div>
+                <div className="feature-row">
+                  <dt>{"\u0394Z"}</dt>
+                  <dd>{formatLength(Math.abs(measurement.end[2] - measurement.start[2]), displayUnits)}</dd>
+                </div>
+              </dl>
+            ) : (
+              <span>Select the first point, then the second.</span>
+            )}
+            <button type="button" className="tool-button compact" onClick={clearMeasurement}>
+              Clear measurement
+            </button>
           </div>
         ) : null}
       </div>

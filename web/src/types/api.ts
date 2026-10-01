@@ -2,6 +2,8 @@ export type HealthResponse = {
   status: "online";
   service: string;
   route_count: number;
+  version: string;
+  cad_engine_ready: boolean;
 };
 
 export type VersionResponse = {

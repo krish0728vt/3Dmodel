@@ -333,10 +333,26 @@ def _run_assembly(case: BenchmarkCase, work_dir: Path, stages: list[StageResult]
     assembly_store = AssemblyStore(isolated / "assemblies.db")
     component_records: list[AssemblyComponent] = []
     for index, component in enumerate(case.assembly_fixture.components, start=1):
-        model = DESIGN_ADAPTER.validate_python(component["spec"])
+        # A component whose spec is invalid must be reported as a failed case,
+        # not allowed to abort the whole evaluation run.
+        try:
+            model = DESIGN_ADAPTER.validate_python(component["spec"])
+        except Exception as exc:  # noqa: BLE001 - any validation problem is a case failure
+            fail(
+                FailureCategory.CAD_VALIDATION,
+                f"Component {component.get('name', index)!r} has an invalid spec: {exc}",
+            )
+            return
         project = project_store.create_project(name=component["name"], source_prompt=case.prompt, model_type=model_type_for(model))
         step_path = isolated / f"{project.project_id}.step"
-        generate_step(model, step_path)
+        try:
+            generate_step(model, step_path)
+        except Exception as exc:  # noqa: BLE001 - geometry failure is a case failure
+            fail(
+                FailureCategory.CAD_GENERATION,
+                f"Component {component.get('name', index)!r} geometry failed: {exc}",
+            )
+            return
         project_store.add_revision(
             project_id=project.project_id,
             parent_revision_id=None,

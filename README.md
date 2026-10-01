@@ -2,9 +2,19 @@
 
 [![CI](https://github.com/krish0728vt/3Dmodel/actions/workflows/ci.yml/badge.svg)](https://github.com/krish0728vt/3Dmodel/actions/workflows/ci.yml)
 
-AI-assisted mechanical design workspace for safe prompt-to-STEP generation, revisioned CAD projects, parametric design intent, engineering checks, capability-gated extensions, and lightweight assemblies.
+**v1.0.0-rc.1** - a local, AI-assisted parametric CAD workspace for mechanical parts.
 
-The application is intentionally conservative: AI can propose structured CAD intent, but geometry is produced through typed schemas, Pydantic validation, deterministic Python/CadQuery execution, revision history, and explicit capability gates.
+Describe a part in plain language or enter dimensions directly. The request becomes
+a typed, validated specification, and geometry is produced by a deterministic
+Python/CadQuery pipeline with revision history, design intent, engineering checks,
+assemblies, and exports.
+
+Nothing the AI returns is executed as code. It can only fill in a schema the
+application already understands, so every solid comes from Python this project
+ships. An API key is optional: without one, every deterministic feature still works.
+
+See [Release Candidate](docs/release-candidate.md) for what is tested and what is
+intentionally unsupported, and [CHANGELOG](CHANGELOG.md) for what changed.
 
 ## Status
 
@@ -57,6 +67,7 @@ Detailed notes live in focused docs:
 - [Parametrics](docs/parametrics.md)
 - [Learning Core](docs/learning-core.md)
 - [Capabilities](docs/capabilities.md)
+- [Release Candidate](docs/release-candidate.md)
 - [Deployment](docs/deployment.md)
 - [Development](docs/development.md)
 - [Workflows And Recipes](docs/workflows.md)
@@ -132,6 +143,13 @@ Individual pieces:
 .\.venv311\Scripts\python -m pytest
 .\.venv311\Scripts\python app.py evaluate smoke
 cd web; npm.cmd run typecheck; npm.cmd test; npm.cmd run build
+```
+
+Before a release, run the full gate, which adds the complete benchmark and the
+deployment safety scan:
+
+```powershell
+.\.venv311\Scripts\python scripts/release_check.py
 ```
 
 See [Development](docs/development.md) for CI behavior, markers, dependencies,
@@ -310,7 +328,7 @@ Each component has:
 - grounded state
 - optional metadata
 
-The current milestone performs deterministic transform management, preview bounding boxes, manifest export, known-mass aggregation, center-of-mass rollup when possible, and coarse interference detection using world-space bounding boxes.
+Assemblies perform deterministic transform management, preview bounding boxes, manifest export, known-mass aggregation, center-of-mass rollup where possible, and interference detection from world-space bounding boxes. The UI states which method was used and never presents a bounding-box overlap as a precise collision.
 
 See [Assemblies](docs/assemblies.md).
 
@@ -388,13 +406,18 @@ The project keeps AI and external integrations inside explicit boundaries:
 
 ## Known Limitations
 
-- Assembly interference detection is currently coarse and based on transformed bounding boxes, not precise BREP collision.
-- Combined assembly STEP/STL export is early and best suited for simple visible solid components.
-- Imported STL components can be tracked and previewed as sources, but precise engineering metrics depend on loadable CAD geometry.
-- Natural-language assembly editing is intentionally limited to simple deterministic commands.
-- Parametric relationships cover common design intent but are not a full constraint solver.
-- Viewer selection maps semantic operation outputs, not every low-level CAD face or edge.
-- The AI parser supports bounded prompt-to-spec generation and may need explicit structured edits for complex designs.
+- Assembly interference is a transformed bounding-box check, not precise BREP collision. The UI labels it as such.
+- Parametric relationships cover common design intent; there is no general constraint solver and no mate solver.
+- Selection is semantic, at the operation level, rather than native BREP face and edge selection.
+- Viewer measurements are taken against the preview mesh, so they are approximate.
+- No GLB or OBJ export; no dependable local exporter exists for them.
+- Combined assembly STEP/STL export suits simple visible solid components.
+- Backup is automated; restore is manual by design.
+- Local-first and single-user: no authentication, authorization, or rate limiting.
+- Natural-language quality depends on the configured provider and model. No tested behavior relies on it.
+
+Full detail, including what is deliberately out of scope, is in
+[Release Candidate](docs/release-candidate.md).
 
 ## Development Guidelines
 
@@ -410,17 +433,6 @@ The project keeps AI and external integrations inside explicit boundaries:
 Worked prompt-to-STEP examples, parametric and assembly edit walkthroughs, and the
 recipes for adding a template part, an operation, or an assembly feature live in
 [Workflows And Extension Recipes](docs/workflows.md).
-
-## Manual Verification Checklist
-
-Before handing off a milestone:
-
-- Run `python scripts/check_all.py` and confirm every stage passes.
-- Confirm security scans are clean or explain expected policy-only matches.
-- Verify README line count moved in the intended direction.
-- Check `git status --short`.
-- Confirm CI is green on `main` after pushing.
-- Do not commit or push unless explicitly asked.
 
 ## Branding
 

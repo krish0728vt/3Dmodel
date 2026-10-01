@@ -1,4 +1,5 @@
 import { Archive, Copy, Edit3, Trash2 } from "lucide-react";
+import { emptyState } from "./uiState";
 
 import type { DesignParameter, ParametricRelationship, PreviewObject, ProjectDetail, ProjectSummary } from "../types/api";
 import { operationDisplayName, operationKind, templateDetails } from "../utils/modelFormatting";
@@ -46,6 +47,9 @@ export function DesignTree({
   const relationships = Array.isArray(model?.relationships) ? (model.relationships as ParametricRelationship[]) : [];
   const templateObject = operations.length === 0 ? previewObjects.find((object) => object.operation_id === "model") : null;
 
+  // A filtered-out list and a genuinely empty workspace need different advice.
+  const emptyStateInfo = emptyState(search.trim() ? "search_results" : "projects");
+
   return (
     <aside className="panel tree-panel">
       <div className="panel-title">Design Tree</div>
@@ -67,7 +71,10 @@ export function DesignTree({
       </div>
       <div className="project-list">
         {projects.length === 0 ? (
-          <div className="empty-inline">No projects match this view.</div>
+          <div className="empty-inline">
+            <strong>{emptyStateInfo.message}</strong>
+            <small>{emptyStateInfo.action}</small>
+          </div>
         ) : null}
         {projects.map((project) => (
           <div key={project.project_id} className={selectedProject?.project_id === project.project_id ? "project-card active" : "project-card"}>
