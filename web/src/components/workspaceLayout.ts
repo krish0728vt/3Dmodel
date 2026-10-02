@@ -178,3 +178,21 @@ export function promptKeyAction(event: {
   }
   return event.shiftKey ? "newline" : "submit";
 }
+
+
+// ---------------------------------------------------------------------------
+// Assembly component accordion
+// ---------------------------------------------------------------------------
+
+/**
+ * Which component should be expanded after a click.
+ *
+ * Exactly one at a time: a fully expanded component list was the single
+ * biggest source of vertical clutter in the inspector.
+ */
+export function nextExpandedComponent(
+  current: string | null,
+  clicked: string
+): string | null {
+  return current === clicked ? null : clicked;
+}

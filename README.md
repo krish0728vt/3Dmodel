@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/krish0728vt/3Dmodel/actions/workflows/ci.yml/badge.svg)](https://github.com/krish0728vt/3Dmodel/actions/workflows/ci.yml)
 
-**v1.0.0-rc.2** - a local, AI-assisted parametric CAD workspace for mechanical parts.
+**v1.0.0-rc.3** - a local, AI-assisted parametric CAD workspace for mechanical parts.
 
 Describe a part in plain language or enter dimensions directly. The request becomes
 a typed, validated specification, and geometry is produced by a deterministic

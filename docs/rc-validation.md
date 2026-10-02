@@ -8,17 +8,17 @@
 | Starting commit | `6e4a7e3` |
 | Starting tag | `v1.0.0-rc.1` |
 | Version under test | 1.0.0-rc.1 |
-| Candidate now | **v1.0.0-rc.2** |
-| Release blockers | 1 found, 1 fixed |
-| Decision | **RC2 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC2** |
+| Candidate now | **v1.0.0-rc.3** |
+| Release blockers | 2 found, 2 fixed |
+| Decision | **RC3 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC3** |
 
 RC1 was tagged without a validation pass having been run; the first part of this
 document is that pass. Every functional, deterministic and safety gate passed.
 
-The manual visual review was then **performed by the maintainer** and found a
-release-quality usability defect in the CAD workspace. That is recorded below
-and was fixed, producing **v1.0.0-rc.2**. `v1.0.0-rc.1` and commit `6e4a7e3`
-were left untouched.
+Two rounds of manual visual review by the maintainer then each found a
+release-quality defect, recorded below. The first produced **rc.2**
+(structural), the second **rc.3** (visual density). Every earlier tag and
+commit was left untouched.
 
 ## Environment
 
@@ -336,41 +336,114 @@ four corner holes was generated through `POST /api/generate` with a structured
 spec, and project load, history, preview, STEP download and revision restore all
 returned 200.
 
-## Visual Review - rc.2 NOT YET PERFORMED
+## Visual Review - PERFORMED (rc.2)
 
-The redesign has not itself been through a browser-based review. No browser
-automation is available here (no Playwright, Puppeteer, Selenium, chromedriver
-or browser binary), and installing one would change the dependency set during a
-release-validation pass.
+The second manual review found the rc.2 structure correct but the presentation
+still wrong. The prompt was reachable and the page no longer scrolled, yet the
+workspace still read as an engineering debug interface.
 
-What is verified for rc.2: the new markup and CSS are present in the served
-bundle, the layout arithmetic above, the full workflow over the API, and 101
-frontend tests covering prompt gating, Enter versus Shift+Enter, tab filtering
-and drawer exclusivity.
+### Finding: workspace visually too dense to scan - HIGH
+
+Observed in rc.2:
+
+- Too many controls in the top header.
+- Dense viewer toolbar.
+- Cramped left design tree.
+- Right inspector showing too much at once.
+- Assembly controls still visually crowded.
+- Prompt area a stack of separate elements, with warning and status boxes
+  competing with the input.
+- Spacing between sections too small; tabs and content compressed.
+- Too many borders and boxes; buttons packed together.
+- The viewer surrounded by chrome rather than feeling like the workspace.
+- Primary and secondary actions carrying the same visual weight.
+
+Severity **HIGH** for a v1.0: nothing is broken and no data is at risk, but the
+product does not present as finished.
+
+### Fix: rc.3 visual refinement
+
+| Area | rc.2 | rc.3 |
+| --- | --- | --- |
+| Header | status, detail toggle, Open, History, Export, Tools, refresh, info | logo, name + mode, Open / Export / Tools, status dot |
+| Detail level | header toggle | Tools drawer preference |
+| History | header button | left rail footer |
+| Surfaces | five shades, nested | three: `#0b0f12`, `#11161b`, `#171d22` |
+| Spacing | 4-8 px between major controls | 18 px panel, 24 px section, 16 px field group |
+| Borders | a box around most things | hairline separators; strong border means selection, focus or danger |
+| Feature rows | bordered items | borderless, selection is tint plus accent edge |
+| Viewer controls | a toolbar panel above the canvas | floating strips inside the canvas, rest behind More |
+| Command bar | four stacked layers | one row; 68 px total |
+| AI notice | full-width warning panel | one thin line plus Setup |
+| Status | its own row | a dot beside the input |
+| Examples | button beside Send | text link |
+| Assembly stats | four bordered micro-cards | two-column stat rows |
+| Assembly actions | five equal buttons | one menu, Delete destructive |
+| Components | all expanded | summary rows, one expanded at a time |
+| Collapsed rail | empty dark panel | 44 px icon strip |
+
+21 dead CSS rule blocks from the rc.2 layout were removed; the stylesheet is
+23.7 kB against 33.4 kB at rc.2, which is the clearest single measure that this
+pass removed boxes rather than adding them.
+
+### Measured outcome
+
+| Resolution | Rails | Viewer | Share | Work height |
+| --- | --- | --- | --- | --- |
+| 1920x1080 | 236 / 336 | 1348 px | **70%** | 952 px |
+| 1440x900 | 220 / 312 | 908 px | **63%** | 772 px |
+| 1366x768 | 220 / 312 | 834 px | **61%** | 640 px |
+
+Fixed chrome is 128 px (60 px header plus 68 px command bar). Below 1500 px the
+rails narrow rather than overflow. 42 of 42 assertions against the served
+bundle passed.
+
+### Simple and Advanced
+
+Simple, the default, shows the header, design tree features, viewer, a
+Properties/Engineering/Assembly inspector and the command bar. Advanced adds
+parameters, relationships, component identifiers, source and bounding boxes.
+Learning Core, Evaluation, Capabilities and System live in Tools at both
+levels. Nothing was removed.
+
+## Visual Review - rc.3 NOT YET PERFORMED
+
+As with rc.2, the refinement has not itself been seen in a browser. No browser
+automation is available in this environment and adding one would change the
+dependency set mid-validation.
+
+Verified instead: 42 of 42 assertions against the served CSS and JS, the layout
+arithmetic above, the full workflow over the API, and 143 frontend tests of
+which the new layout-structure suite asserts the no-scroll and spacing
+invariants directly against `workspace.css`.
 
 What a reviewer should confirm at 1920x1080, 1440x900 and 1366x768:
 
+- the workspace reads as calm, with the model dominant
 - no browser-level scrollbar during ordinary editing
-- header, viewer, prompt input, design tree and inspector all visible at once
-- drawers open over the workspace without shifting it
-- collapsing each rail enlarges the viewer
-- the disabled SEND state and its notice read clearly
-- tab switching in the inspector, and Simple versus Advanced
-- the assembly component card at a realistic component count
+- header, viewer, command bar, tree and inspector all visible at once
+- section spacing and alignment look deliberate, not tight
+- the floating viewer controls do not obscure geometry
+- the one-line AI notice and disabled Send read clearly
+- expanding one assembly component collapses the previous one
+- collapsed rails show a usable icon strip
+- primary and secondary actions are visually distinguishable
 
 ## Issues
 
 | Issue | Severity | Reproducible | Fixed | Release blocking |
 | --- | ---: | ---: | ---: | ---: |
 | **CAD workspace too crowded; prompt input below the fold; page-level scrollbar** | **HIGH** | Yes | **Yes (rc.2)** | Was blocking; resolved |
-| rc.2 redesign not yet visually reviewed | - (evidence gap, not a defect) | n/a | No | **Gates promotion** |
+| **Workspace visually too dense to scan; chrome competing with the model** | **HIGH** | Yes | **Yes (rc.3)** | Was blocking; resolved |
+| rc.3 refinement not yet visually reviewed | - (evidence gap, not a defect) | n/a | No | **Gates promotion** |
 | `docs/release-candidate.md` claimed 273 Python and 73 frontend tests; actual counts are 312 and 71 | MEDIUM (misleading docs) | Yes | **Yes** | No |
 | `unknown part type` surfaces a raw pydantic `union_tag_invalid` string with a `422:` prefix embedded in the message | LOW | Yes | No | No |
 | No LICENSE configured | — (documented) | n/a | No | No |
 
 The automated and functional passes found nothing of BLOCKER or HIGH severity.
-The manual visual review found one HIGH usability defect, which was fixed in
-rc.2. One MEDIUM documentation inaccuracy was also found and corrected.
+Two rounds of manual visual review each found one HIGH defect: a structural one
+fixed in rc.2, and a visual-density one fixed in rc.3. One MEDIUM documentation
+inaccuracy was also found and corrected.
 
 ### The documentation inaccuracy
 
@@ -398,7 +471,7 @@ the README limitations.
 
 ## Decision
 
-**RC2 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC2**
+**RC3 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC3**
 
 Every functional, deterministic and safety gate passes, on evidence rather than
 assumption: 90/90 real-world design checks, 50/50 workflow checks, 83/83
@@ -406,10 +479,12 @@ export/lifecycle/capability/learning checks, 37/37 API checks, 27/27 fresh
 environment and backup checks, and 13/13 automated release stages with 0
 benchmark regressions.
 
-The manual visual review of rc.1 found a HIGH usability defect, which is fixed
-in rc.2. Because the visible product experience changed materially, another
-validation cycle is appropriate rather than promoting straight to v1.0.0.
+Two manual visual reviews each found a HIGH defect. rc.2 fixed the structure;
+rc.3 fixed the visual density. Because the visible product experience changed
+materially again, another validation cycle is appropriate rather than promoting
+straight to v1.0.0.
 
-All gates were re-run against the redesign: 312 Python tests, 101 frontend tests
-(up from 71), 93 benchmark cases with 0 regressions, 13/13 release stages, npm
-audit clean. The outstanding item is a browser-based review of rc.2 itself.
+All gates were re-run against the refinement: 312 Python tests, 143 frontend
+tests (up from 101), 93 benchmark cases with 0 regressions, 13/13 release
+stages, npm audit clean. The outstanding item is a browser-based review of rc.3
+itself.

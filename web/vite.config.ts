@@ -30,5 +30,11 @@ export default defineConfig({
     // warning still fires for a genuinely new regression instead of being
     // permanently noisy.
     chunkSizeWarningLimit: 560
+  },
+  test: {
+    // The layout-structure suite reads workspace.css through `?raw` to assert
+    // the no-scroll and spacing invariants. Vitest stubs CSS imports to an
+    // empty string unless CSS handling is enabled.
+    css: true
   }
 });

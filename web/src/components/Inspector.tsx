@@ -1,7 +1,9 @@
+import { MoreHorizontal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import { assemblyDownloadUrl, exportDownloadUrl } from "../api/client";
 import { emptyState, interferenceInfo } from "./uiState";
+import { nextExpandedComponent } from "./workspaceLayout";
 import type { DetailLevel, InspectorTab, TabDefinition } from "./workspaceLayout";
 import type { AssemblyComponent, AssemblyComponentPreview, AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, PatternRecord, PreviewObject, ProjectDetail, RepairStrategyRecord, ResolvedDesign, RevisionPreview, SelectionState } from "../types/api";
 import type { EngineeringReport, MaterialSpec } from "../types/api";
@@ -411,6 +413,9 @@ export function AssemblyPanel({
 }: AssemblyPanelProps) {
   const current = selectedAssembly?.current_revision;
   const selectedAssemblyId = selectedAssembly?.assembly.assembly_id ?? "";
+  // One expanded component at a time; a fully expanded list was the single
+  // biggest source of vertical clutter in the inspector.
+  const [expandedComponentId, setExpandedComponentId] = useState<string | null>(null);
 
 
   return (
@@ -441,74 +446,114 @@ export function AssemblyPanel({
       )}
       {selectedAssembly && current ? (
         <>
-          <div className="assembly-summary">
-            <Metric label="Revision" value={String(current.revision_number)} />
-            <Metric label="Parts" value={String(current.components.length)} />
-            <Metric label="Mass" value={engineering?.known_mass_g ? `${engineering.known_mass_g.toFixed(1)} g` : "unknown"} />
-            <Metric label="Issues" value={String(engineering?.interferences.length ?? 0)} />
-          </div>
-          <div className="assembly-actions">
-            <a className="tool-button compact" href={assemblyDownloadUrl(selectedAssembly.assembly.assembly_id)}>
-              Manifest
-            </a>
-            <button type="button" className="tool-button compact" onClick={() => onRenameAssembly(selectedAssembly.assembly.assembly_id)}>
-              Rename
-            </button>
-            <button type="button" className="tool-button compact" onClick={() => onDuplicateAssembly(selectedAssembly.assembly.assembly_id)}>
-              Duplicate
-            </button>
-            <button type="button" className="tool-button compact" onClick={() => onArchiveAssembly(selectedAssembly.assembly.assembly_id)}>
-              {selectedAssembly.assembly.status === "archived" ? "Unarchive" : "Archive"}
-            </button>
-            <button type="button" className="tool-button compact danger" onClick={() => onDeleteAssembly(selectedAssembly.assembly.assembly_id)}>
-              Delete
-            </button>
-          </div>
-          <div className="assembly-component-list">
-            {current.components.map((component) => (
-              <ComponentCard
-                key={component.component_id}
-                component={component}
-                componentPreview={preview?.components.find(
-                  (item) => item.component_id === component.component_id
-                )}
-                detailLevel={detailLevel}
-                onApplyTransform={(transform, label) =>
-                  onEditAssembly(
-                    selectedAssemblyId,
-                    {
-                      edit_type: "set_transform",
-                      component_id: component.component_id,
-                      transform
-                    },
-                    label
-                  )
-                }
-                onToggleVisibility={() =>
-                  onEditAssembly(
-                    selectedAssemblyId,
-                    {
-                      edit_type: "set_visibility",
-                      component_id: component.component_id,
-                      visible: !component.visible
-                    },
-                    `${component.visible ? "Hide" : "Show"} ${component.name}`
-                  )
-                }
-                onToggleGrounded={() =>
-                  onEditAssembly(
-                    selectedAssemblyId,
-                    {
-                      edit_type: "set_grounded",
-                      component_id: component.component_id,
-                      grounded: !component.grounded
-                    },
-                    `${component.grounded ? "Release" : "Ground"} ${component.name}`
-                  )
-                }
+          <section className="section">
+            <h4 className="section-label">Overview</h4>
+            <dl className="stat-rows">
+              <div className="stat-row">
+                <dt>Revision</dt>
+                <dd>{current.revision_number}</dd>
+              </div>
+              <div className="stat-row">
+                <dt>Parts</dt>
+                <dd>{current.components.length}</dd>
+              </div>
+              <div className="stat-row">
+                <dt>Mass</dt>
+                <dd>
+                  {engineering?.known_mass_g
+                    ? `${engineering.known_mass_g.toFixed(1)} g`
+                    : "Unknown"}
+                </dd>
+              </div>
+              <div className="stat-row">
+                <dt>Issues</dt>
+                <dd>{engineering?.interferences.length ?? 0}</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section className="section">
+            <div className="section-head">
+              <h4 className="section-label">Components</h4>
+              <AssemblyActionsMenu
+                assemblyId={selectedAssembly.assembly.assembly_id}
+                archived={selectedAssembly.assembly.status === "archived"}
+                onRename={onRenameAssembly}
+                onDuplicate={onDuplicateAssembly}
+                onArchive={onArchiveAssembly}
+                onDelete={onDeleteAssembly}
               />
-            ))}
-          </div>
+            </div>
+            <div className="component-rows">
+              {current.components.map((component) => {
+                const expanded = expandedComponentId === component.component_id;
+                return (
+                  <div className="component-entry" key={component.component_id}>
+                    <button
+                      type="button"
+                      className={expanded ? "component-summary open" : "component-summary"}
+                      aria-expanded={expanded}
+                      onClick={() =>
+                        setExpandedComponentId(
+                          nextExpandedComponent(expandedComponentId, component.component_id)
+                        )
+                      }
+                    >
+                      <span className="component-name">{component.name}</span>
+                      <span className="component-state">
+                        {component.visible ? "Visible" : "Hidden"} ·{" "}
+                        {component.grounded ? "Grounded" : "Free"}
+                      </span>
+                    </button>
+
+                    {expanded ? (
+                      <ComponentEditor
+                        component={component}
+                        componentPreview={preview?.components.find(
+                          (item) => item.component_id === component.component_id
+                        )}
+                        detailLevel={detailLevel}
+                        onApplyTransform={(transform, label) =>
+                          onEditAssembly(
+                            selectedAssemblyId,
+                            {
+                              edit_type: "set_transform",
+                              component_id: component.component_id,
+                              transform
+                            },
+                            label
+                          )
+                        }
+                        onToggleVisibility={() =>
+                          onEditAssembly(
+                            selectedAssemblyId,
+                            {
+                              edit_type: "set_visibility",
+                              component_id: component.component_id,
+                              visible: !component.visible
+                            },
+                            `${component.visible ? "Hide" : "Show"} ${component.name}`
+                          )
+                        }
+                        onToggleGrounded={() =>
+                          onEditAssembly(
+                            selectedAssemblyId,
+                            {
+                              edit_type: "set_grounded",
+                              component_id: component.component_id,
+                              grounded: !component.grounded
+                            },
+                            `${component.grounded ? "Release" : "Ground"} ${component.name}`
+                          )
+                        }
+                      />
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
           {engineering?.interferences.length ? (
             <div className="interference-list">
               {engineering.interferences.map((item) => {
@@ -1101,7 +1146,7 @@ function numericFields(model: Record<string, unknown> | null): Array<[string, nu
     .map(([key, value]) => [key, value as number]);
 }
 
-type ComponentCardProps = {
+type ComponentEditorProps = {
   component: AssemblyComponent;
   componentPreview: AssemblyComponentPreview | undefined;
   detailLevel: DetailLevel;
@@ -1118,14 +1163,14 @@ type ComponentCardProps = {
  * position and rotation fields with an explicit Apply; bounding box and source
  * move behind the advanced detail level.
  */
-function ComponentCard({
+function ComponentEditor({
   component,
   componentPreview,
   detailLevel,
   onApplyTransform,
   onToggleVisibility,
   onToggleGrounded
-}: ComponentCardProps) {
+}: ComponentEditorProps) {
   const transform = component.transform;
   const [draft, setDraft] = useState({
     x: transform.translation_x_mm,
@@ -1206,7 +1251,7 @@ function ComponentCard({
         <div className="component-toggles">
           <button
             type="button"
-            className={component.visible ? "chip active" : "chip"}
+            className={component.visible ? "toggle on" : "toggle"}
             aria-pressed={component.visible}
             onClick={onToggleVisibility}
             title={component.visible ? "Hide this component" : "Show this component"}
@@ -1215,7 +1260,7 @@ function ComponentCard({
           </button>
           <button
             type="button"
-            className={component.grounded ? "chip active" : "chip"}
+            className={component.grounded ? "toggle on" : "toggle"}
             aria-pressed={component.grounded}
             onClick={onToggleGrounded}
             title={component.grounded ? "Release this component" : "Ground this component"}
@@ -1245,12 +1290,12 @@ function ComponentCard({
 
       <button
         type="button"
-        className={dirty ? "tool-button primary compact" : "tool-button compact"}
+        className="primary-action"
         onClick={apply}
         disabled={!dirty}
         title={dirty ? "Apply this transform" : "No changes to apply"}
       >
-        Apply
+        Apply changes
       </button>
 
       {detailLevel === "advanced" ? (
@@ -1269,6 +1314,81 @@ function ComponentCard({
             />
           </dl>
         </details>
+      ) : null}
+    </div>
+  );
+}
+
+type AssemblyActionsMenuProps = {
+  assemblyId: string;
+  archived: boolean;
+  onRename: (assemblyId: string) => void;
+  onDuplicate: (assemblyId: string) => void;
+  onArchive: (assemblyId: string) => void;
+  onDelete: (assemblyId: string) => void;
+};
+
+/**
+ * Assembly actions behind one control.
+ *
+ * Rename, Duplicate, Manifest, Archive and Delete used to sit as five buttons
+ * in the inspector, giving a destructive action the same visual weight as a
+ * rename.
+ */
+function AssemblyActionsMenu({
+  assemblyId,
+  archived,
+  onRename,
+  onDuplicate,
+  onArchive,
+  onDelete
+}: AssemblyActionsMenuProps) {
+  const [open, setOpen] = useState(false);
+
+  function run(action: (id: string) => void) {
+    setOpen(false);
+    action(assemblyId);
+  }
+
+  return (
+    <div className="actions-menu">
+      <button
+        type="button"
+        className="icon-only"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-label="Assembly actions"
+        title="Assembly actions"
+        onClick={() => setOpen((value) => !value)}
+      >
+        <MoreHorizontal size={15} />
+      </button>
+      {open ? (
+        <>
+          <div className="menu-dismiss" onClick={() => setOpen(false)} />
+          <div className="float-menu actions-menu-list" role="menu">
+            <button type="button" className="menu-item" role="menuitem" onClick={() => run(onRename)}>
+              Rename
+            </button>
+            <button type="button" className="menu-item" role="menuitem" onClick={() => run(onDuplicate)}>
+              Duplicate
+            </button>
+            <a className="menu-item" role="menuitem" href={assemblyDownloadUrl(assemblyId)} onClick={() => setOpen(false)}>
+              Manifest
+            </a>
+            <button type="button" className="menu-item" role="menuitem" onClick={() => run(onArchive)}>
+              {archived ? "Unarchive" : "Archive"}
+            </button>
+            <button
+              type="button"
+              className="menu-item destructive"
+              role="menuitem"
+              onClick={() => run(onDelete)}
+            >
+              Delete
+            </button>
+          </div>
+        </>
       ) : null}
     </div>
   );

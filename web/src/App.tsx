@@ -1,8 +1,15 @@
 import { Suspense, lazy, useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, PanelLeft, PanelRight, X } from "lucide-react";
+import {
+  FolderOpen,
+  History,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+  X
+} from "lucide-react";
 
 import { api, stepUrl, stlUrl } from "./api/client";
-import { DesignTree } from "./components/DesignTree";
+import { DesignRail } from "./components/DesignRail";
 import { EmptyWorkspace } from "./components/EmptyWorkspace";
 import { Header } from "./components/Header";
 import { Inspector } from "./components/Inspector";
@@ -826,48 +833,55 @@ export default function App() {
         title={title}
         revision={currentRevision}
         mode={mode}
-        detailLevel={detailLevel}
-        onDetailLevelChange={setDetailLevel}
         onOpenProjects={() => setOpenDrawer((current) => toggleDrawer(current, "projects"))}
-        onOpenHistory={() => setOpenDrawer((current) => toggleDrawer(current, "history"))}
         onOpenExport={() => setOpenDrawer((current) => toggleDrawer(current, "export"))}
         onOpenTools={() => setOpenDrawer((current) => toggleDrawer(current, "tools"))}
-        onRefresh={() => refreshWorkspace()}
       />
 
       <main className={`workspace-main${treeCollapsed ? " tree-collapsed" : ""}${inspectorCollapsed ? " inspector-collapsed" : ""}`}>
-        <aside className="tree-panel" aria-label="Design tree">
-          <div className="panel-head">
-            <span className="panel-title">Design Tree</span>
-            <button
-              type="button"
-              className="icon-button"
-              onClick={() => setTreeCollapsed(true)}
-              title="Collapse the design tree"
-              aria-label="Collapse design tree"
-            >
-              <ChevronLeft size={15} />
-            </button>
-          </div>
-          <DesignTree
-            selectedProject={selectedProject}
-            selectedOperationId={selection.selectedOperationId}
-            previewObjects={previewModel?.objects ?? []}
-            onSelectOperation={(operationId) => selectOperation(operationId, "design_tree")}
-            detailLevel={detailLevel}
-          />
-        </aside>
+        <DesignRail
+          selectedProject={selectedProject}
+          selectedOperationId={selection.selectedOperationId}
+          previewObjects={previewModel?.objects ?? []}
+          onSelectOperation={(operationId) => selectOperation(operationId, "design_tree")}
+          onCollapse={() => setTreeCollapsed(true)}
+          onOpenProjects={() => setOpenDrawer("projects")}
+          onOpenHistory={() => setOpenDrawer("history")}
+          hasProject={selectedProject !== null}
+          detailLevel={detailLevel}
+        />
 
         {treeCollapsed ? (
-          <button
-            type="button"
-            className="rail-expand rail-left"
-            onClick={() => setTreeCollapsed(false)}
-            title="Show the design tree"
-            aria-label="Show design tree"
-          >
-            <PanelLeft size={16} />
-          </button>
+          <div className="rail-strip rail-strip-left">
+            <button
+              type="button"
+              className="icon-only"
+              onClick={() => setTreeCollapsed(false)}
+              title="Show the design tree"
+              aria-label="Show design tree"
+            >
+              <PanelLeftOpen size={16} />
+            </button>
+            <button
+              type="button"
+              className="icon-only"
+              onClick={() => setOpenDrawer("projects")}
+              title="Projects"
+              aria-label="Projects"
+            >
+              <FolderOpen size={15} />
+            </button>
+            <button
+              type="button"
+              className="icon-only"
+              onClick={() => setOpenDrawer("history")}
+              disabled={selectedProject === null}
+              title="Revision history"
+              aria-label="Revision history"
+            >
+              <History size={15} />
+            </button>
+          </div>
         ) : null}
 
         <section className="stage">
@@ -895,29 +909,31 @@ export default function App() {
         </section>
 
         {inspectorCollapsed ? (
-          <button
-            type="button"
-            className="rail-expand rail-right"
-            onClick={() => setInspectorCollapsed(false)}
-            title="Show the inspector"
-            aria-label="Show inspector"
-          >
-            <PanelRight size={16} />
-          </button>
-        ) : null}
-
-        <div className="inspector-wrap">
-          <div className="panel-head">
+          <div className="rail-strip rail-strip-right">
             <button
               type="button"
-              className="icon-button"
+              className="icon-only"
+              onClick={() => setInspectorCollapsed(false)}
+              title="Show the inspector"
+              aria-label="Show inspector"
+            >
+              <PanelRightOpen size={16} />
+            </button>
+          </div>
+        ) : null}
+
+        <div className="rail rail-right">
+          <div className="rail-head">
+            <span className="panel-label">Inspector</span>
+            <button
+              type="button"
+              className="icon-only"
               onClick={() => setInspectorCollapsed(true)}
               title="Collapse the inspector"
               aria-label="Collapse inspector"
             >
-              <ChevronRight size={15} />
+              <PanelRightClose size={15} />
             </button>
-            <span className="panel-title">Inspector</span>
           </div>
           <Inspector
             tabs={tabs}
@@ -1051,6 +1067,8 @@ export default function App() {
 
       {openDrawer === "tools" ? (
         <ToolsDrawer
+          detailLevel={detailLevel}
+          onDetailLevelChange={setDetailLevel}
           tab={toolsTab}
           onTabChange={setToolsTab}
           backendOnline={backendOnline}

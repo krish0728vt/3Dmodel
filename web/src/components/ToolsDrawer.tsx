@@ -12,10 +12,13 @@ import type {
 import { Drawer } from "./Drawer";
 import { CapabilityManager, EvaluationPanel, LearningDashboard } from "./Inspector";
 import { SystemPanel } from "./SystemInfo";
+import type { DetailLevel } from "./workspaceLayout";
 
 type ToolsTab = "evaluation" | "learning" | "capabilities" | "system";
 
 type ToolsDrawerProps = {
+  detailLevel: DetailLevel;
+  onDetailLevelChange: (level: DetailLevel) => void;
   tab: ToolsTab;
   onTabChange: (tab: ToolsTab) => void;
   backendOnline: boolean;
@@ -55,6 +58,8 @@ const TABS: { id: ToolsTab; label: string }[] = [
  * alongside the part you were editing; they now live here, behind one button.
  */
 export function ToolsDrawer({
+  detailLevel,
+  onDetailLevelChange,
   tab,
   onTabChange,
   backendOnline,
@@ -80,6 +85,27 @@ export function ToolsDrawer({
 }: ToolsDrawerProps) {
   return (
     <Drawer title="Tools" side="right" onClose={onClose}>
+      <section className="section">
+        <h4 className="section-label">Detail level</h4>
+        <p className="section-note">
+          Simple keeps the workspace to the essentials. Advanced adds parameters,
+          relationships and internal identifiers.
+        </p>
+        <div className="segmented" role="group" aria-label="Detail level">
+          {(["simple", "advanced"] as DetailLevel[]).map((level) => (
+            <button
+              type="button"
+              key={level}
+              className={detailLevel === level ? "segment active" : "segment"}
+              aria-pressed={detailLevel === level}
+              onClick={() => onDetailLevelChange(level)}
+            >
+              {level === "simple" ? "Simple" : "Advanced"}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <div className="inspector-tabs" role="tablist" aria-label="Tool sections">
         {TABS.map((entry) => (
           <button

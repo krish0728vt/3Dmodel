@@ -1,5 +1,63 @@
 # Changelog
 
+## v1.0.0-rc.3
+
+Visual refinement. The manual review of rc.2 confirmed the structure was right
+but the workspace still read as an engineering debug interface: too many
+controls visible at once, too many borders, and too little breathing room. This
+pass trades boxes for whitespace. No functionality changed.
+
+### Improved
+
+- **Header reduced to identity, context and three actions.** Open, Export and
+  Tools, plus a status dot. History moved to the left rail footer, the detail
+  toggle into Tools, and the refresh and info icons are gone. 52 px to 60 px
+  tall but far sparser.
+- **Three surface levels only** (`#0b0f12`, `#11161b`, `#171d22`). Nesting a
+  fourth shade was what produced the card-within-card look.
+- **Named spacing scale.** Panel padding 18 px, section gap 24 px, field group
+  16 px, field 8 px, button group 10 px. The old layout leaned on 4 and 8 px
+  between major controls, which is what made it feel packed.
+- **Borders replaced by whitespace and tint.** Hairline separators only at real
+  panel boundaries; a strong border now means selection, focus or danger.
+  Feature rows carry no border of their own -- selection is a background tint
+  plus an accent edge.
+- **Viewer controls float inside the canvas** rather than forming another
+  panel: standard views upper-left, display and tools upper-right, with
+  wireframe, overlays, axes, bounding box, the remaining view directions and
+  focus-selection behind More.
+- **Command bar is one row** of status dot, input and Send. The AI notice is a
+  single thin line (`AI assistant unavailable — configure API key` plus Setup),
+  Examples is a text link, and at most one notice line ever shows. Total height
+  68 px, down from a stack of four layers.
+- **Inspector stat rows replace micro-cards.** Revision, Parts, Mass and Issues
+  were four separate bordered boxes; they are now a two-column list.
+- **Assembly actions behind one menu.** Rename, Duplicate, Manifest, Archive
+  and Delete were five buttons of equal weight; Delete is now explicitly
+  destructive inside a menu.
+- **Components collapse to a summary row** (`Base` / `Visible · Free`) and
+  expand one at a time, which was the single biggest source of vertical
+  clutter.
+- **Collapsed rails become a narrow icon strip** instead of an empty dark
+  panel, and narrow to 220/312 px below 1500 px wide rather than overflowing.
+- Viewer share of window width: 70% at 1920, 63% at 1440, 61% at 1366.
+- Removed 21 dead CSS rule blocks left by the rc.2 layout. The stylesheet is
+  23.7 kB, down from 33.4 kB at rc.2.
+
+### Fixed
+
+- Frontend tests grew from 101 to 143. The new suite asserts the layout
+  invariants structurally: html/body locked to the viewport, the shell as a
+  100vh three-row grid, `min-height: 0` on every flexible region, scrolling
+  confined to the rails and drawers, a three-action header, the spacing tokens,
+  a square-only border radius, and one-at-a-time component expansion.
+- Vitest now processes CSS so those assertions read the real stylesheet.
+
+### Known Limitations
+
+Unchanged from rc.1. The rc.3 refinement has not itself been through a
+browser-based visual review; see `docs/rc-validation.md`.
+
 ## v1.0.0-rc.2
 
 Workspace simplification. The manual visual review of rc.1 found the CAD
