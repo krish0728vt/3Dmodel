@@ -109,3 +109,8 @@ class LocalConfig(BaseModel):
     open_browser: bool = True
     startup_timeout: int = 30
     mode: LaunchMode = LaunchMode.PRODUCTION
+    ai_provider: Literal["openai", "ollama", "none"] | None = None
+    openai_model: str | None = None
+    ollama_url: str | None = None
+    ollama_model: str | None = None
+    ai_timeout_seconds: float | None = None

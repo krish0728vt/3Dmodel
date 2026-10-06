@@ -5,7 +5,7 @@ import sys
 from fastapi import APIRouter
 
 from api.schemas import VersionResponse
-from config import openai_key_configured
+from ai.providers.registry import provider_status
 from shah_version import APP_VERSION, SCHEMA_VERSION, build_commit
 
 
@@ -19,13 +19,18 @@ def version() -> VersionResponse:
     Deliberately reports only presence of an API key, never its value, and no
     other environment contents.
     """
+    ai = provider_status()
     return VersionResponse(
         app_version=APP_VERSION,
         schema_version=SCHEMA_VERSION,
         build=build_commit(),
         python_version=f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         cad_engine=_cad_engine(),
-        ai_configured=openai_key_configured(),
+        ai_configured=ai.ready,
+        ai_provider=ai.provider,
+        ai_provider_label=ai.label,
+        ai_model=ai.model,
+        ai_status=ai.state,
     )
 
 

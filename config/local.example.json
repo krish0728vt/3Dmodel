@@ -5,5 +5,9 @@
   "frontend_port": 5173,
   "open_browser": true,
   "startup_timeout": 30,
-  "mode": "production"
+  "mode": "production",
+  "ai_provider": "ollama",
+  "ollama_url": "http://127.0.0.1:11434",
+  "ollama_model": "qwen2.5-coder:7b",
+  "ai_timeout_seconds": 120
 }

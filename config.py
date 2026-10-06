@@ -1,8 +1,11 @@
-from __future__ import annotations
-
+import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Literal
+
+
+_ROOT = Path(__file__).resolve().parent
 
 
 def _env_bool(name: str, default: bool) -> bool:
@@ -20,6 +23,48 @@ def _env_int(name: str, default: int) -> int:
         return int(value)
     except ValueError:
         return default
+
+
+def _env_float(name: str, default: float) -> float:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except ValueError:
+        return default
+
+
+def _local_config() -> dict[str, object]:
+    path = _ROOT / "config" / "local.json"
+    if not path.exists():
+        return {}
+    try:
+        raw = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+    if not isinstance(raw, dict):
+        return {}
+    return {key: value for key, value in raw.items() if not key.startswith("_")}
+
+
+def _local_str(settings: dict[str, object], name: str) -> str | None:
+    value = settings.get(name)
+    if isinstance(value, str) and value.strip():
+        return value.strip()
+    return None
+
+
+def _local_float(settings: dict[str, object], name: str) -> float | None:
+    value = settings.get(name)
+    if isinstance(value, int | float):
+        return float(value)
+    if isinstance(value, str):
+        try:
+            return float(value)
+        except ValueError:
+            return None
+    return None
 
 
 @dataclass(frozen=True)
@@ -48,6 +93,27 @@ class ShahCadConfig:
     small_print_hole_mm: float = float(os.getenv("SHAH_SMALL_PRINT_HOLE_MM", "2.0"))
     cnc_deep_hole_ratio: float = float(os.getenv("SHAH_CNC_DEEP_HOLE_RATIO", "10.0"))
     min_cnc_feature_mm: float = float(os.getenv("SHAH_MIN_CNC_FEATURE_MM", "0.8"))
+
+
+AiProviderName = Literal["openai", "ollama", "none"]
+
+
+@dataclass(frozen=True)
+class AIProviderConfig:
+    provider: AiProviderName
+    provider_source: Literal["local_config", "environment", "fallback"]
+    openai_model: str
+    ollama_url: str
+    ollama_model: str
+    timeout_seconds: float
+
+    @property
+    def model_name(self) -> str | None:
+        if self.provider == "openai":
+            return self.openai_model
+        if self.provider == "ollama":
+            return self.ollama_model
+        return None
 
 
 CONFIG = ShahCadConfig()
@@ -81,3 +147,64 @@ def openai_key_configured() -> bool:
         pass
     value = (os.getenv("OPENAI_API_KEY") or "").strip()
     return value.lower() not in _PLACEHOLDER_KEYS
+
+
+def ai_provider_config() -> AIProviderConfig:
+    """Resolve AI provider settings without exposing secrets.
+
+    Machine-local `config/local.json` wins over environment variables for
+    non-secret provider settings. `OPENAI_API_KEY` is still read only from
+    `.env`/the environment and never from local JSON.
+    """
+    try:
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        pass
+
+    local = _local_config()
+    provider_raw = _local_str(local, "ai_provider")
+    provider_source: Literal["local_config", "environment", "fallback"] = "local_config"
+    if provider_raw is None:
+        provider_raw = os.getenv("SHAH_AI_PROVIDER")
+        provider_source = "environment"
+    if provider_raw is None:
+        provider_raw = "openai" if openai_key_configured() else "none"
+        provider_source = "fallback"
+
+    provider = provider_raw.strip().lower()
+    if provider in {"local", "local_ai"}:
+        provider = "ollama"
+    if provider in {"disabled", "manual", "off"}:
+        provider = "none"
+    if provider not in {"openai", "ollama", "none"}:
+        provider = "none"
+
+    openai_model = (
+        _local_str(local, "openai_model")
+        or os.getenv("OPENAI_MODEL")
+        or "gpt-5-mini"
+    )
+    ollama_url = (
+        _local_str(local, "ollama_url")
+        or os.getenv("SHAH_OLLAMA_URL")
+        or "http://127.0.0.1:11434"
+    )
+    ollama_model = (
+        _local_str(local, "ollama_model")
+        or os.getenv("SHAH_OLLAMA_MODEL")
+        or "qwen2.5-coder:7b"
+    )
+    timeout = (
+        _local_float(local, "ai_timeout_seconds")
+        or _env_float("SHAH_AI_TIMEOUT_SECONDS", 120.0)
+    )
+    return AIProviderConfig(
+        provider=provider,  # type: ignore[arg-type]
+        provider_source=provider_source,
+        openai_model=openai_model,
+        ollama_url=ollama_url,
+        ollama_model=ollama_model,
+        timeout_seconds=max(1.0, timeout),
+    )

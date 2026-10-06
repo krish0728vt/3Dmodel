@@ -2,6 +2,7 @@ import type {
   CapabilityAnalytics,
   CapabilityRecord,
   DiscoverySource,
+  AIProviderStatus,
   EvaluationReport,
   FailureAnalytics,
   LearningStats,
@@ -22,6 +23,8 @@ type ToolsDrawerProps = {
   tab: ToolsTab;
   onTabChange: (tab: ToolsTab) => void;
   backendOnline: boolean;
+  aiStatus: AIProviderStatus;
+  onRefreshAIStatus: () => Promise<void>;
   evaluationReport: EvaluationReport | null;
   learningStats: LearningStats | null;
   lessons: LessonRecord[];
@@ -63,6 +66,8 @@ export function ToolsDrawer({
   tab,
   onTabChange,
   backendOnline,
+  aiStatus,
+  onRefreshAIStatus,
   evaluationReport,
   learningStats,
   lessons,
@@ -151,7 +156,7 @@ export function ToolsDrawer({
           />
         ) : null}
 
-        {tab === "system" ? <SystemPanel backendOnline={backendOnline} /> : null}
+        {tab === "system" ? <SystemPanel backendOnline={backendOnline} aiStatus={aiStatus} onRefreshAIStatus={onRefreshAIStatus} /> : null}
       </div>
     </Drawer>
   );

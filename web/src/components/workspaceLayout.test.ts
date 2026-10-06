@@ -147,10 +147,9 @@ describe("promptGate with AI not configured", () => {
     expect(promptGate(unconfigured).sendEnabled).toBe(false);
   });
 
-  it("explains why, naming the variable to set", () => {
-    const reason = promptGate(unconfigured).reason ?? "";
-    expect(reason).toContain("OPENAI_API_KEY");
-    expect(reason.toLowerCase()).toContain("not configured");
+  it("explains why using the provider-specific reason when present", () => {
+    const reason = promptGate({ ...unconfigured, unavailableReason: "Ollama is not responding." }).reason ?? "";
+    expect(reason).toContain("Ollama");
   });
 
   it("still allows typing, so the box is not dead", () => {

@@ -1,47 +1,22 @@
 from __future__ import annotations
 
-import json
-import os
 from typing import Any
 
-from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, TypeAdapter, ValidationError
+from pydantic import TypeAdapter
 
-from ai.parser import DEFAULT_MODEL, AIConnectionError, MissingApiKeyError, MalformedAIResponseError
+from ai.parser import AIConnectionError, MalformedAIResponseError, MissingApiKeyError
+from ai.providers.errors import (
+    AIProviderError,
+    AIProviderUnavailableError,
+    MissingApiKeyError as ProviderMissingApiKeyError,
+    MalformedAIResponseError as ProviderMalformedAIResponseError,
+)
+from ai.providers.models import EditParseResponse
+from ai.providers.registry import active_provider
 from projects.models import EditInstruction
 
 
 EDIT_ADAPTER = TypeAdapter(EditInstruction)
-
-
-class EditParseResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-
-    status: str
-    message: str
-    edit: EditInstruction | None = None
-
-
-SYSTEM_PROMPT = """
-You are SHAH CAD's structured edit interpreter.
-
-Return only a typed edit instruction matching the provided schema.
-Never return Python, CadQuery code, JSON Patch, shell commands, or prose-only edits.
-
-If a request is ambiguous, return status "ambiguous" and no edit.
-If a request requires an unsupported capability, return status "unsupported" and no edit.
-Use operation IDs when editing operation plans.
-If the current spec has design parameters, prefer set_design_parameter for
-governing/driving dimensions such as plate_width, hole_edge_offset, pcb_width,
-clearance, or boss_diameter. Do not rewrite dependent coordinates manually when
-a driving parameter controls them.
-Milestone 8 operation plans may include structured sketches and advanced
-features such as cut_extrude, loft, sweep, shell, countersink_hole,
-counterbore_hole, boss, rib, and repeated hole patterns. Use set_parameter or
-modify_operation edits to change fields such as thickness_mm, distance_mm,
-angle_deg, countersink_diameter_mm, and nested sketch entity dimensions. Never
-return raw CadQuery selectors or executable code.
-""".strip()
 
 
 class EditParserError(RuntimeError):
@@ -96,58 +71,26 @@ def _request_edit_parse(
     client: Any | None,
     model: str | None,
 ) -> EditParseResponse:
-    load_dotenv()
-    selected_model = model or os.getenv("OPENAI_MODEL", DEFAULT_MODEL)
     if client is None:
-        if not os.getenv("OPENAI_API_KEY"):
-            raise MissingApiKeyError(
-                "OPENAI_API_KEY is not set. Use typed project edits or configure natural-language editing."
-            )
-        try:
-            from openai import OpenAI
-        except ImportError as exc:
-            raise MissingApiKeyError("The openai package is not installed.") from exc
-        client = OpenAI()
+        provider = active_provider()
+    else:
+        from ai.providers.openai_provider import OpenAIProvider
+        from config import ai_provider_config
 
-    payload = {
-        "instruction": instruction,
-        "current_revision_number": current_revision_number,
-        "current_spec": current_spec.model_dump(mode="json") if hasattr(current_spec, "model_dump") else current_spec,
-        "relevant_lessons": relevant_lessons[:5],
-        "enabled_capabilities": enabled_capabilities,
-    }
+        provider = OpenAIProvider(ai_provider_config(), client=client)
     try:
-        response = client.responses.parse(
-            model=selected_model,
-            input=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": json.dumps(payload)},
-            ],
-            text_format=EditParseResponse,
+        return provider.parse_edit_prompt(
+            instruction=instruction,
+            current_spec=current_spec,
+            relevant_lessons=relevant_lessons,
+            enabled_capabilities=enabled_capabilities,
+            current_revision_number=current_revision_number,
         )
-    except Exception as exc:
-        raise AIConnectionError(f"OpenAI edit parser request failed: {exc}") from exc
-    return _extract_response(response)
-
-
-def _extract_response(response: Any) -> EditParseResponse:
-    parsed = getattr(response, "output_parsed", None)
-    if parsed is not None:
-        return _coerce(parsed)
-    output_text = getattr(response, "output_text", None)
-    if output_text:
-        return _coerce(output_text)
-    raise MalformedAIResponseError("Edit parser response did not contain structured data.")
-
-
-def _coerce(value: Any) -> EditParseResponse:
-    try:
-        if isinstance(value, EditParseResponse):
-            return value
-        if isinstance(value, str):
-            return EditParseResponse.model_validate_json(value)
-        if isinstance(value, dict):
-            return EditParseResponse.model_validate(value)
-        return EditParseResponse.model_validate(json.loads(json.dumps(value)))
-    except (TypeError, ValueError, ValidationError) as exc:
-        raise MalformedAIResponseError(f"Malformed edit parser response: {exc}") from exc
+    except ProviderMissingApiKeyError as exc:
+        raise MissingApiKeyError(str(exc)) from exc
+    except ProviderMalformedAIResponseError as exc:
+        raise MalformedAIResponseError(str(exc)) from exc
+    except AIProviderUnavailableError as exc:
+        raise AIConnectionError(str(exc)) from exc
+    except AIProviderError as exc:
+        raise EditParserError(str(exc)) from exc

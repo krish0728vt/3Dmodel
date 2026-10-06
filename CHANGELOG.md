@@ -1,5 +1,36 @@
 # Changelog
 
+## v1.0.0-rc.4
+
+Local AI provider support. SHAH can now parse natural-language CAD requests
+through Ollama on localhost, OpenAI with an API key, or disabled/manual mode
+without changing the deterministic CAD engine.
+
+### Added
+
+- **AI provider abstraction** for OpenAI, Ollama, and disabled/manual mode.
+- **Ollama provider** using the local HTTP API at
+  `http://127.0.0.1:11434` by default, with configurable model and timeout.
+- **Strict structured JSON validation** for local model responses, including a
+  bounded repair retry before provider errors are surfaced.
+- **Provider status APIs**: `/api/ai/status`, `/api/ai/providers`,
+  `/api/ai/test`, and `/api/ai/ollama/models`.
+- **Provider-aware UI status** in the prompt bar and System panel, including
+  ready, offline, model-missing, timeout, OpenAI missing-key, and disabled
+  states.
+- **Doctor and CLI checks** through `python app.py doctor` and
+  `python app.py ai status|models|test`.
+- **Local AI setup documentation** in `docs/local-ai.md`.
+- **Learning Core categories** for provider outage, timeout, invalid JSON, and
+  schema-validation failures.
+
+### Changed
+
+- `.env.example` now defaults to local AI settings and keeps
+  `OPENAI_API_KEY=` blank because OpenAI is optional.
+- `/api/health` remains core app health only; AI readiness is reported through
+  the separate AI status routes.
+
 ## v1.0.0-rc.3
 
 Visual refinement. The manual review of rc.2 confirmed the structure was right

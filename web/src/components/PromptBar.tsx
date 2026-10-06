@@ -5,6 +5,7 @@ import { EXAMPLE_PROMPTS } from "./EmptyWorkspace";
 import type { PresentedError } from "./errorPresentation";
 import { promptStateInfo, type PromptState } from "./promptState";
 import { promptGate, promptKeyAction } from "./workspaceLayout";
+import type { AIProviderStatus } from "../types/api";
 
 type Clarification = {
   question: string;
@@ -15,6 +16,7 @@ type PromptBarProps = {
   prompt: string;
   state: PromptState;
   aiConfigured: boolean;
+  aiStatus: AIProviderStatus;
   backendOnline: boolean;
   selectedProjectId: string | null;
   error: PresentedError | null;
@@ -38,6 +40,7 @@ export function PromptBar({
   prompt,
   state,
   aiConfigured,
+  aiStatus,
   backendOnline,
   selectedProjectId,
   error,
@@ -51,7 +54,7 @@ export function PromptBar({
   const [showExamples, setShowExamples] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const info = promptStateInfo(state);
-  const gate = promptGate({ aiConfigured, backendOnline, busy: info.busy, text: prompt });
+  const gate = promptGate({ aiConfigured, backendOnline, busy: info.busy, text: prompt, unavailableReason: aiStatus.message });
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (promptKeyAction(event) === "submit") {
@@ -85,17 +88,9 @@ export function PromptBar({
             ))}
           </span>
         </div>
-      ) : !aiConfigured ? (
-        <div className="command-line warn" role="status">
-          <AlertTriangle size={13} aria-hidden="true" />
-          <span className="command-line-text">
-            AI assistant unavailable &mdash; configure API key
-          </span>
-          <button type="button" className="link-action" onClick={onSetupHelp}>
-            Setup
-          </button>
-        </div>
-      ) : null}
+      ) : (
+        <AIProviderLine aiStatus={aiStatus} onSetupHelp={onSetupHelp} />
+      )}
 
       {showExamples ? (
         <div className="command-examples">
@@ -161,6 +156,49 @@ export function PromptBar({
         </button>
       </div>
     </section>
+  );
+}
+
+function AIProviderLine({ aiStatus, onSetupHelp }: { aiStatus: AIProviderStatus; onSetupHelp: () => void }) {
+  if (aiStatus.ready) {
+    if (aiStatus.provider === "ollama") {
+      return (
+        <div className="command-line success" role="status">
+          <span className="command-line-text">
+            <strong>LOCAL AI</strong> Ollama &middot; {aiStatus.model ?? "model"} &middot; Ready
+          </span>
+        </div>
+      );
+    }
+    if (aiStatus.provider === "openai") {
+      return (
+        <div className="command-line success" role="status">
+          <span className="command-line-text">
+            <strong>OPENAI</strong> {aiStatus.model ?? "configured"} &middot; Ready
+          </span>
+        </div>
+      );
+    }
+    return null;
+  }
+
+  const label =
+    aiStatus.provider === "ollama"
+      ? "LOCAL AI UNAVAILABLE"
+      : aiStatus.provider === "openai"
+        ? "OPENAI NOT CONFIGURED"
+        : "AI DISABLED";
+  const endpoint = aiStatus.provider === "ollama" && aiStatus.endpoint ? ` at ${aiStatus.endpoint}` : "";
+  return (
+    <div className="command-line warn" role="status">
+      <AlertTriangle size={13} aria-hidden="true" />
+      <span className="command-line-text">
+        <strong>{label}</strong> {aiStatus.message || `Provider unavailable${endpoint}.`}
+      </span>
+      <button type="button" className="link-action" onClick={onSetupHelp}>
+        Setup help
+      </button>
+    </div>
   );
 }
 

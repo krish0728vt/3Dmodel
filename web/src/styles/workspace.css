@@ -1383,6 +1383,10 @@ input {
   color: var(--accent-text);
 }
 
+.command-line.success {
+  color: var(--success-text);
+}
+
 .command-line.error {
   color: var(--danger-text);
 }

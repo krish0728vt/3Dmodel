@@ -156,19 +156,33 @@ Secrets live in `.env` only, never in JSON config. `setup` copies
 OPENAI_API_KEY=
 ```
 
-The key is **optional**. A blank value, or a leftover placeholder such as
-`your_api_key_here`, counts as not configured -- so the app never claims AI is
-available and then fails on the first request. Without a key the app starts
-normally and reports:
+Local AI settings are non-secret and may live in `.env` or `config/local.json`:
+
+```env
+SHAH_AI_PROVIDER=ollama
+SHAH_OLLAMA_URL=http://127.0.0.1:11434
+SHAH_OLLAMA_MODEL=qwen2.5-coder:7b
+SHAH_AI_TIMEOUT_SECONDS=120
+```
+
+`python app.py doctor` reports the selected AI provider separately from core app
+health. Ollama warnings do not stop deterministic CAD features.
+
+The OpenAI key is **optional**. A blank value, or a leftover placeholder such as
+`your_api_key_here`, counts as not configured. Local AI through Ollama does not
+need a key, and disabled/manual mode keeps deterministic CAD available. If the
+selected provider is unavailable, the app starts normally and reports that AI
+prompting is unavailable:
 
 ```
 AI NOT CONFIGURED - natural-language prompts are unavailable.
   Manual CAD, projects, assemblies, exports, and evaluation work normally.
 ```
 
-Only natural-language prompt parsing needs it. Manual CAD, operation plans,
-projects, revisions, parametrics, engineering checks, assemblies, exports, and
-the evaluation suite are all deterministic and work without a key.
+Only natural-language prompt parsing needs a ready provider. Manual CAD,
+operation plans, projects, revisions, parametrics, engineering checks,
+assemblies, exports, and the evaluation suite are all deterministic and work
+without AI.
 
 ### Machine settings
 
@@ -181,7 +195,11 @@ Copy `config/local.example.json` to `config/local.json` to change defaults:
   "frontend_port": 5173,
   "open_browser": true,
   "startup_timeout": 30,
-  "mode": "production"
+  "mode": "production",
+  "ai_provider": "ollama",
+  "ollama_url": "http://127.0.0.1:11434",
+  "ollama_model": "qwen2.5-coder:7b",
+  "ai_timeout_seconds": 120
 }
 ```
 
@@ -197,8 +215,8 @@ reported and ignored rather than blocking startup.
 `doctor` never changes system state. It reports Python and its executable, the
 virtualenv, a real CadQuery/OpenCascade geometry call, Pydantic, FastAPI,
 uvicorn, the OpenAI package, Node, npm, frontend dependencies and build state,
-writable `outputs/` `data/` `runtime/`, database readability, `.env`, the API
-key, MCP config, and port availability.
+writable `outputs/` `data/` `runtime/`, database readability, `.env`, selected
+AI provider status, MCP config, and port availability.
 
 Each check reports PASS, WARN, or FAIL. Exit codes are scriptable: **0** when
 ready (warnings included), **nonzero** only on a real failure. `--json` emits the
@@ -208,9 +226,8 @@ whole report as JSON.
 [PASS] Python: 3.11.9
 [PASS] CadQuery: 2.8.0 (OpenCascade geometry verified)
 [PASS] Node.js: 24.14.0
-[WARN] OPENAI_API_KEY: not configured - natural-language prompt parsing is unavailable
-       Optional. Add OPENAI_API_KEY to .env to enable AI parsing. Manual CAD,
-       projects, assemblies, exports, and evaluation work without it.
+[WARN] AI Provider: Ollama server unavailable
+       Start Ollama and verify it responds at http://127.0.0.1:11434.
 
 Core deterministic CAD remains available.
 

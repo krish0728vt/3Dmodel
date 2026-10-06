@@ -138,7 +138,10 @@ touches a developer database. The evaluation runner wipes `outputs/evaluation/wo
 every run and uses a per-run isolated `projects.db`, so the smoke suite is
 self-contained. No test depends on an absolute user-specific path.
 
-CI does not require `OPENAI_API_KEY`, a live MCP server, a browser, GUI access, or live external capability services. Any future test requiring live network/API access must be marked with the `live` pytest marker and kept out of default CI.
+CI does not require `OPENAI_API_KEY`, Ollama, a downloaded local model, a live
+MCP server, a browser, GUI access, or live external capability services. Any
+future test requiring live network/API access must be marked with the `live`
+pytest marker and kept out of default CI.
 
 Recommended branch protection:
 

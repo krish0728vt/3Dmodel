@@ -8,9 +8,9 @@
 | Starting commit | `6e4a7e3` |
 | Starting tag | `v1.0.0-rc.1` |
 | Version under test | 1.0.0-rc.1 |
-| Candidate now | **v1.0.0-rc.3** |
+| Candidate now | **v1.0.0-rc.4** |
 | Release blockers | 2 found, 2 fixed |
-| Decision | **RC3 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC3** |
+| Decision | **RC4 PRODUCED - DO NOT PROMOTE TO v1.0.0 UNTIL LOCAL AI SUPPORT AND THE UI RECEIVE FINAL REVIEW** |
 
 RC1 was tagged without a validation pass having been run; the first part of this
 document is that pass. Every functional, deterministic and safety gate passed.
@@ -429,6 +429,14 @@ What a reviewer should confirm at 1920x1080, 1440x900 and 1366x768:
 - collapsed rails show a usable icon strip
 - primary and secondary actions are visually distinguishable
 
+## RC4 Feature Note
+
+Local AI/Ollama support was added before final v1.0 promotion because
+OpenAI-only prompting imposed a paid API-key dependency. OpenAI remains
+available and optional, manual deterministic CAD still works with AI disabled,
+and Ollama is selected intentionally through configuration rather than by silent
+fallback.
+
 ## Issues
 
 | Issue | Severity | Reproducible | Fixed | Release blocking |
@@ -471,7 +479,7 @@ the README limitations.
 
 ## Decision
 
-**RC3 PRODUCED - READY FOR v1.0.0 AFTER DOCUMENTED MANUAL VISUAL CHECK OF RC3**
+**RC4 PRODUCED - DO NOT PROMOTE TO v1.0.0 UNTIL LOCAL AI SUPPORT AND THE UI RECEIVE FINAL REVIEW**
 
 Every functional, deterministic and safety gate passes, on evidence rather than
 assumption: 90/90 real-world design checks, 50/50 workflow checks, 83/83
@@ -484,7 +492,8 @@ rc.3 fixed the visual density. Because the visible product experience changed
 materially again, another validation cycle is appropriate rather than promoting
 straight to v1.0.0.
 
-All gates were re-run against the refinement: 312 Python tests, 143 frontend
-tests (up from 101), 93 benchmark cases with 0 regressions, 13/13 release
-stages, npm audit clean. The outstanding item is a browser-based review of rc.3
-itself.
+The rc.4 automated gate passed: 335 Python tests, 146 frontend tests, 93
+benchmark cases with 85 pass, 0 fail, 4 unsupported and 0 regressions, 13/13
+release stages, and npm audit clean. rc.4 adds local AI/Ollama provider support
+before final promotion; it still requires a browser-based review of the updated
+provider UI before v1.0.0.

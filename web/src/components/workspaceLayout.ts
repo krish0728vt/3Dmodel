@@ -128,8 +128,9 @@ export function promptGate(options: {
   backendOnline: boolean;
   busy: boolean;
   text: string;
+  unavailableReason?: string | null;
 }): PromptGate {
-  const { aiConfigured, backendOnline, busy, text } = options;
+  const { aiConfigured, backendOnline, busy, text, unavailableReason } = options;
 
   if (!backendOnline) {
     return {
@@ -142,8 +143,7 @@ export function promptGate(options: {
     return {
       inputEnabled: true,
       sendEnabled: false,
-      reason:
-        "AI assistant not configured. Set OPENAI_API_KEY in .env to enable natural-language design."
+      reason: unavailableReason || "AI assistant is unavailable. Configure a provider to enable natural-language design."
     };
   }
   if (busy) {

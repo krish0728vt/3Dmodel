@@ -46,6 +46,10 @@ class FailureCategory(str, Enum):
     CAPABILITY = "capability"
     EXPORT_FAILURE = "export_failure"
     PARSER_FAILURE = "parser_failure"
+    AI_PROVIDER_UNAVAILABLE = "ai_provider_unavailable"
+    AI_TIMEOUT = "ai_timeout"
+    AI_INVALID_JSON = "ai_invalid_json"
+    AI_SCHEMA_FAILURE = "ai_schema_failure"
     CAD_KERNEL_FAILURE = "cad_kernel_failure"
     UNKNOWN_FAILURE = "unknown_failure"
 

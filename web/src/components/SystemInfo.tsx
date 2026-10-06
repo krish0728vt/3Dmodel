@@ -2,7 +2,7 @@ import { Info, X } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { api } from "../api/client";
-import type { VersionResponse } from "../types/api";
+import type { AIProviderStatus, VersionResponse } from "../types/api";
 
 /** Rows rendered by the About panel. Pure so it can be tested directly. */
 export type SystemInfoRow = {
@@ -19,7 +19,8 @@ export type SystemInfoRow = {
 export function systemInfoRows(
   version: VersionResponse | null,
   backendOnline: boolean,
-  frontendBuild: string
+  frontendBuild: string,
+  aiStatus?: AIProviderStatus | null
 ): SystemInfoRow[] {
   const rows: SystemInfoRow[] = [
     { label: "Version", value: version?.app_version ?? "unknown" },
@@ -31,8 +32,16 @@ export function systemInfoRows(
     { label: "Python", value: version?.python_version ?? "unknown" },
     { label: "Frontend build", value: frontendBuild },
     {
-      label: "AI parsing",
-      value: aiStatusLabel(version)
+      label: "AI provider",
+      value: aiStatus ? aiStatus.label : aiStatusLabel(version)
+    },
+    {
+      label: "AI model",
+      value: aiStatus?.model ?? version?.ai_model ?? "none"
+    },
+    {
+      label: "AI status",
+      value: aiStatus ? providerStateLabel(aiStatus) : aiStatusLabel(version)
     }
   ];
   return rows;
@@ -44,6 +53,28 @@ export function aiStatusLabel(version: VersionResponse | null): string {
     return "unknown";
   }
   return version.ai_configured ? "CONFIGURED" : "AI NOT CONFIGURED";
+}
+
+export function providerStateLabel(status: AIProviderStatus): string {
+  if (status.ready) {
+    return "READY";
+  }
+  if (status.provider === "none") {
+    return "AI DISABLED";
+  }
+  if (status.state === "server_unavailable") {
+    return "OLLAMA NOT RUNNING";
+  }
+  if (status.state === "model_unavailable") {
+    return "MODEL NOT AVAILABLE";
+  }
+  if (status.state === "missing_config") {
+    return "NOT CONFIGURED";
+  }
+  if (status.state === "timeout") {
+    return "LOCAL AI TIMED OUT";
+  }
+  return status.state.replaceAll("_", " ").toUpperCase();
 }
 
 type SystemInfoProps = {
@@ -127,8 +158,17 @@ export function SystemInfo({ backendOnline }: SystemInfoProps) {
  * Shares `systemInfoRows` with the header popup so the two can never disagree,
  * and like the popup it reports only whether AI is configured, never a key.
  */
-export function SystemPanel({ backendOnline }: { backendOnline: boolean }) {
+export function SystemPanel({
+  backendOnline,
+  aiStatus,
+  onRefreshAIStatus
+}: {
+  backendOnline: boolean;
+  aiStatus: AIProviderStatus;
+  onRefreshAIStatus: () => Promise<void>;
+}) {
   const [version, setVersion] = useState<VersionResponse | null>(null);
+  const [testing, setTesting] = useState(false);
 
   useEffect(() => {
     if (!backendOnline) {
@@ -152,7 +192,16 @@ export function SystemPanel({ backendOnline }: { backendOnline: boolean }) {
     };
   }, [backendOnline]);
 
-  const rows = systemInfoRows(version, backendOnline, import.meta.env.MODE ?? "unknown");
+  const rows = systemInfoRows(version, backendOnline, import.meta.env.MODE ?? "unknown", aiStatus);
+
+  async function testConnection() {
+    setTesting(true);
+    try {
+      await onRefreshAIStatus();
+    } finally {
+      setTesting(false);
+    }
+  }
 
   return (
     <section>
@@ -165,9 +214,19 @@ export function SystemPanel({ backendOnline }: { backendOnline: boolean }) {
           </div>
         ))}
       </dl>
+      <section className="system-info-note">
+        <strong>AI provider settings</strong>
+        <span>
+          Provider: {aiStatus.label}. Model: {aiStatus.model ?? "none"}.
+          {aiStatus.endpoint ? ` Endpoint: ${aiStatus.endpoint}.` : ""}
+        </span>
+        <button type="button" className="tool-button compact" onClick={testConnection} disabled={!backendOnline || testing}>
+          {testing ? "Testing..." : "Test AI connection"}
+        </button>
+      </section>
       {version !== null && !version.ai_configured ? (
         <p className="system-info-note">
-          Manual CAD, projects, assemblies, exports, and evaluation work without an API key.
+          Manual CAD, projects, assemblies, exports, and evaluation work without an AI provider.
         </p>
       ) : null}
     </section>

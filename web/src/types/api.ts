@@ -13,6 +13,35 @@ export type VersionResponse = {
   python_version: string;
   cad_engine: string;
   ai_configured: boolean;
+  ai_provider: "openai" | "ollama" | "none";
+  ai_provider_label: string;
+  ai_model: string | null;
+  ai_status: string;
+};
+
+export type AIProviderStatus = {
+  provider: "openai" | "ollama" | "none";
+  label: string;
+  state:
+    | "ready"
+    | "disabled"
+    | "missing_config"
+    | "server_unavailable"
+    | "model_unavailable"
+    | "timeout"
+    | "invalid_config";
+  ready: boolean;
+  model: string | null;
+  endpoint: string | null;
+  configured: boolean;
+  message: string;
+  available_models: string[];
+  nonlocal_endpoint_warning: boolean;
+};
+
+export type AIProviderSummary = {
+  providers: AIProviderStatus[];
+  active: AIProviderStatus;
 };
 
 export type ProjectSummary = {

@@ -1,14 +1,15 @@
-# v1.0.0-rc.1 Release Candidate
+# v1.0.0-rc.4 Release Candidate
 
 Written for someone evaluating whether this is fit to use, not for someone who
 followed its development.
 
 ## Validation status
 
-Validated on 2026-10-01 against commit `6e4a7e3`. Every functional,
-deterministic and safety gate passed with no code change required, so no rc.2
-was produced. The one outstanding item is a manual visual review, which the
-validation environment could not perform.
+The original rc.1 validation ran on 2026-10-01 against commit `6e4a7e3`. Later
+release candidates fixed workspace structure, visual density, and now add
+local AI/Ollama provider support before final v1.0.0 promotion. The outstanding
+item is a final manual UI review, which the validation environment could not
+perform.
 
 Full record, including the issue table and what a visual reviewer should check:
 [RC Validation](rc-validation.md).
@@ -43,8 +44,8 @@ MCP server, no browser.
 
 | Suite | Scope |
 | --- | --- |
-| Python tests | 312 tests across parsing, schemas, geometry, validation, projects, revisions, parametrics, engineering, assemblies, exports, capabilities, learning, the API, and local deployment |
-| Frontend tests | 71 Vitest tests over the pure presentation logic: prompt lifecycle, error mapping, loading and empty states, mode, interference wording, shortcuts, formatting, unit conversion |
+| Python tests | Parsing, schemas, geometry, validation, projects, revisions, parametrics, engineering, assemblies, exports, capabilities, learning, AI providers, the API, and local deployment |
+| Frontend tests | Vitest coverage over presentation logic, prompt lifecycle, provider status, error mapping, loading and empty states, mode, interference wording, shortcuts, formatting, and unit conversion |
 | Benchmark | 93 cases over 18 categories; a 28-case smoke subset runs in about 18 seconds |
 | Regression gate | Every benchmark case is compared against a committed baseline; a pass becoming a failure fails the build |
 | CI | Python tests, frontend tests and build, evaluation smoke, and security checks on every push and pull request |
@@ -112,7 +113,7 @@ These are decisions, not gaps waiting on a bug fix:
 | Node.js | Current LTS, 20 or newer. |
 | Display | 1440x900 or larger. |
 | Disk | A few hundred MB for dependencies, plus project geometry. |
-| Network | Only for installation, and for natural-language prompts if you enable them. |
+| Network | Only for installation, OpenAI prompting if selected, or local loopback calls to Ollama. |
 
 Setup:
 
@@ -123,8 +124,9 @@ cd 3Dmodel
 .\scripts\start.ps1
 ```
 
-An `OPENAI_API_KEY` is optional. Without one, the app starts and reports
-`AI NOT CONFIGURED`; every deterministic feature above still works.
+AI prompting is configurable. Local AI via Ollama does not need an API key;
+OpenAI uses `OPENAI_API_KEY`; disabled/manual mode keeps every deterministic
+feature available without AI. See [local-ai.md](local-ai.md).
 
 ## Security posture
 

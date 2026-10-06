@@ -37,7 +37,7 @@ import { loadingLabel, workspaceMode } from "./components/uiState";
 const CadViewer = lazy(() =>
   import("./viewer/CadViewer").then((module) => ({ default: module.CadViewer }))
 );
-import type { AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EngineeringReport, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, MaterialSpec, PatternRecord, PreviewObject, ProjectDetail, ProjectSummary, RepairStrategyRecord, ResolvedDesign, RevisionPreview, RevisionSummary, SelectionState } from "./types/api";
+import type { AIProviderStatus, AssemblyDetail, AssemblyEngineeringSummary, AssemblyPreview, AssemblyRecord, CapabilityAnalytics, CapabilityRecord, DiscoverySource, EngineeringReport, EvaluationReport, ExportBatchResult, ExportFormat, FailureAnalytics, LearningStats, LessonRecord, MaterialSpec, PatternRecord, PreviewObject, ProjectDetail, ProjectSummary, RepairStrategyRecord, ResolvedDesign, RevisionPreview, RevisionSummary, SelectionState } from "./types/api";
 
 type ProjectStatusFilter = "active" | "archived" | "all";
 type ProjectSort = "recently_updated" | "recently_opened" | "name" | "created";
@@ -91,6 +91,18 @@ export default function App() {
   const [promptError, setPromptError] = useState<PresentedError | null>(null);
   const [clarification, setClarification] = useState<{ question: string; options: string[] } | null>(null);
   const [aiConfigured, setAiConfigured] = useState(true);
+  const [aiStatus, setAiStatus] = useState<AIProviderStatus>({
+    provider: "none",
+    label: "AI Disabled",
+    state: "disabled",
+    ready: false,
+    model: null,
+    endpoint: null,
+    configured: true,
+    message: "AI provider status has not loaded yet.",
+    available_models: [],
+    nonlocal_endpoint_warning: false
+  });
   const [viewCommand, setViewCommand] = useState<{ action: ViewShortcut; nonce: number } | null>(null);
   // Monotonic token for project/assembly loads. Switching targets quickly can
   // land a slower earlier response after a newer one; each async step checks it
@@ -163,10 +175,11 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     api
-      .version()
+      .aiStatus()
       .then((payload) => {
         if (!cancelled) {
-          setAiConfigured(payload.ai_configured);
+          setAiStatus(payload);
+          setAiConfigured(payload.ready);
         }
       })
       .catch(() => {
@@ -236,7 +249,7 @@ export default function App() {
     try {
       await api.health();
       setBackendOnline(true);
-      const [projectList, assemblyList, stats, lessonList, patternList, repairStrategyList, failureList, capabilityMetricList, capabilityList, sourceList, materialList, evaluation] = await Promise.all([
+      const [projectList, assemblyList, stats, lessonList, patternList, repairStrategyList, failureList, capabilityMetricList, capabilityList, sourceList, materialList, evaluation, ai] = await Promise.all([
         api.projects({ search: projectSearch, status: projectStatusFilter, sort: projectSort }),
         api.assemblies(),
         api.learningStats(),
@@ -248,7 +261,8 @@ export default function App() {
         api.capabilities(),
         api.capabilitySources(),
         api.materials(),
-        api.evaluationLatest().catch(() => ({ available: false, report: null }))
+        api.evaluationLatest().catch(() => ({ available: false, report: null })),
+        api.aiStatus()
       ]);
       setProjects(projectList);
       setAssemblies(assemblyList);
@@ -262,6 +276,8 @@ export default function App() {
       setCapabilitySources(sourceList);
       setMaterials(materialList);
       setEvaluationReport(evaluation.report);
+      setAiStatus(ai);
+      setAiConfigured(ai.ready);
       const nextProjectId = projectList.some((project) => project.project_id === projectId) ? projectId : projectList[0]?.project_id ?? null;
       if (nextProjectId) {
         await loadProject(nextProjectId, preferredSelectionId);
@@ -995,6 +1011,7 @@ export default function App() {
         prompt={prompt}
         state={promptState}
         aiConfigured={aiConfigured}
+        aiStatus={aiStatus}
         backendOnline={backendOnline}
         selectedProjectId={selectedProjectId}
         error={promptError}
@@ -1072,6 +1089,12 @@ export default function App() {
           tab={toolsTab}
           onTabChange={setToolsTab}
           backendOnline={backendOnline}
+          aiStatus={aiStatus}
+          onRefreshAIStatus={async () => {
+            const next = await api.testAIProvider();
+            setAiStatus(next);
+            setAiConfigured(next.ready);
+          }}
           evaluationReport={evaluationReport}
           learningStats={learningStats}
           lessons={lessons}

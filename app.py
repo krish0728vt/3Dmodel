@@ -506,7 +506,7 @@ def _advanced_operation_mode() -> int:
 
 
 _DEPLOYMENT_COMMANDS = frozenset(
-    {"serve", "setup", "doctor", "stop", "status", "version", "build", "clean", "backup"}
+    {"serve", "setup", "doctor", "stop", "status", "version", "build", "clean", "backup", "ai"}
 )
 
 
@@ -623,6 +623,43 @@ def _deployment_cli(argv: list[str]) -> int:
 
     if command == "backup":
         return launcher.backup()
+
+    if command == "ai":
+        from ai.providers.registry import provider_status, provider_summary
+
+        subcommand = rest[0] if rest else "status"
+        if subcommand == "status":
+            status = provider_status()
+            print(f"Provider: {status.label}")
+            print(f"State: {status.state}")
+            print(f"Ready: {'yes' if status.ready else 'no'}")
+            if status.model:
+                print(f"Model: {status.model}")
+            if status.endpoint:
+                print(f"Endpoint: {status.endpoint}")
+            print(status.message)
+            return 0 if status.ready or status.provider == "none" else 1
+        if subcommand == "models":
+            summary = provider_summary()
+            ollama = next((item for item in summary.providers if item.provider == "ollama"), None)
+            if ollama is None:
+                print("Ollama provider status unavailable.")
+                return 1
+            print(f"Endpoint: {ollama.endpoint}")
+            print(f"Configured model: {ollama.model}")
+            if not ollama.available_models:
+                print(ollama.message)
+                return 1 if ollama.state not in {"ready", "disabled"} else 0
+            for model_name in ollama.available_models:
+                marker = "*" if model_name == ollama.model else " "
+                print(f"{marker} {model_name}")
+            return 0
+        if subcommand == "test":
+            status = provider_status()
+            print(status.model_dump_json(indent=2))
+            return 0 if status.ready else 1
+        print("Usage: python app.py ai [status|models|test]")
+        return 1
 
     return 1
 

@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/krish0728vt/3Dmodel/actions/workflows/ci.yml/badge.svg)](https://github.com/krish0728vt/3Dmodel/actions/workflows/ci.yml)
 
-**v1.0.0-rc.3** - a local, AI-assisted parametric CAD workspace for mechanical parts.
+**v1.0.0-rc.4** - a local, AI-assisted parametric CAD workspace for mechanical parts.
 
 Describe a part in plain language or enter dimensions directly. The request becomes
 a typed, validated specification, and geometry is produced by a deterministic
@@ -119,9 +119,16 @@ Diagnostics, stop, and status:
 .\scripts\status.ps1
 ```
 
-An `OPENAI_API_KEY` in `.env` is optional and only enables natural-language
-prompts. Manual CAD, projects, assemblies, exports, and evaluation work without
-one.
+Natural-language prompting is optional. Use local AI through Ollama, OpenAI with
+`OPENAI_API_KEY`, or disabled/manual mode; manual CAD, projects, assemblies,
+exports, and evaluation work without AI.
+
+## AI Providers
+
+SHAH supports local AI through Ollama, OpenAI with an optional API key, or
+disabled/manual mode. Local AI uses `SHAH_AI_PROVIDER=ollama`,
+`SHAH_OLLAMA_URL`, and `SHAH_OLLAMA_MODEL`; OpenAI uses `OPENAI_API_KEY`.
+See [Local AI With Ollama](docs/local-ai.md) for setup and model notes.
 
 See [Deployment](docs/deployment.md) for ports, logs, backup, troubleshooting,
 and the packaging decisions.

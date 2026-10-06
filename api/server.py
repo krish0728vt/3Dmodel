@@ -6,7 +6,7 @@ from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from api.routes import assemblies, capabilities, editing, engineering, evaluation, exports, generation, health, learning, parametrics, preview, projects, revisions, version
+from api.routes import ai_status, assemblies, capabilities, editing, engineering, evaluation, exports, generation, health, learning, parametrics, preview, projects, revisions, version
 from api.static_frontend import dist_is_built, mount_frontend
 from shah_version import APP_VERSION
 
@@ -32,6 +32,7 @@ def create_app(static_dir: Path | None = None) -> FastAPI:
         allow_headers=["*"],
     )
     app.include_router(health.router)
+    app.include_router(ai_status.router)
     app.include_router(version.router)
     app.include_router(generation.router)
     app.include_router(assemblies.router)

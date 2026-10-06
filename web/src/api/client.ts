@@ -4,6 +4,8 @@ import type {
   AssemblyEngineeringSummary,
   AssemblyPreview,
   AssemblyRecord,
+  AIProviderStatus,
+  AIProviderSummary,
   CapabilityRecord,
   CapabilityAnalytics,
   DiscoverySource,
@@ -46,6 +48,9 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 
 export const api = {
   health: () => request<HealthResponse>("/api/health"),
+  aiStatus: () => request<AIProviderStatus>("/api/ai/status"),
+  aiProviders: () => request<AIProviderSummary>("/api/ai/providers"),
+  testAIProvider: () => request<AIProviderStatus>("/api/ai/test", { method: "POST" }),
   version: () => request<VersionResponse>("/api/version"),
   evaluationLatest: () => request<{ available: boolean; message?: string; report: EvaluationReport | null }>("/api/evaluation/latest"),
   evaluationCases: () => request<unknown[]>("/api/evaluation/cases"),

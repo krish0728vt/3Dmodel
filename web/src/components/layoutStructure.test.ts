@@ -214,11 +214,12 @@ describe("command bar", () => {
 
   it("renders at most one notice line above the input", () => {
     // error, else clarification, else the AI notice -- never stacked.
-    expect(promptBar).toMatch(/error \?[\s\S]*: clarification \?[\s\S]*: !aiConfigured \?/);
+    expect(promptBar).toMatch(/error \?[\s\S]*: clarification \?[\s\S]*: \(/);
+    expect(promptBar).toContain("AIProviderLine");
   });
 
   it("presents the AI notice as one compact line", () => {
-    expect(promptBar).toContain("AI assistant unavailable");
+    expect(promptBar).toContain("AIProviderLine");
     expect(promptBar).toContain('className="command-line warn"');
     // A single flex line, not a bordered panel.
     const block = rule(".command-line");
@@ -226,10 +227,23 @@ describe("command bar", () => {
     expect(block).not.toContain("border:1px");
   });
 
+  it("has explicit provider labels for local AI, OpenAI and disabled mode", () => {
+    expect(promptBar).toContain("LOCAL AI");
+    expect(promptBar).toContain("LOCAL AI UNAVAILABLE");
+    expect(promptBar).toContain("OPENAI");
+    expect(promptBar).toContain("OPENAI NOT CONFIGURED");
+    expect(promptBar).toContain("AI DISABLED");
+  });
+
+  it("keeps setup help available for unavailable providers", () => {
+    expect(promptBar).toContain("Setup help");
+    expect(promptBar).toContain("onSetupHelp");
+  });
+
   it("keeps the input present whether or not AI is configured", () => {
     // The textarea is outside every conditional branch.
     const inputIndex = promptBar.indexOf('id="design-prompt"');
-    const noticeIndex = promptBar.indexOf("AI assistant unavailable");
+    const noticeIndex = promptBar.indexOf("AIProviderLine");
     expect(inputIndex).toBeGreaterThan(noticeIndex);
     expect(promptBar).not.toContain("aiConfigured ? (\n        <textarea");
   });

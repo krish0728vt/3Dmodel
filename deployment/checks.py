@@ -14,7 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-from config import openai_key_configured
+from ai.providers.registry import provider_status
+from config import ai_provider_config, openai_key_configured
 from deployment import paths
 from deployment.models import CheckResult, CheckStatus, DoctorReport
 from deployment.ports import is_port_available
@@ -253,6 +254,41 @@ def check_openai_key() -> CheckResult:
     )
 
 
+def check_ai_provider() -> CheckResult:
+    """Report selected AI provider without making core health depend on it."""
+    status = provider_status()
+    if status.provider == "none":
+        return _warn(
+            "AI Provider",
+            "disabled",
+            "Natural-language prompting is disabled. Manual deterministic CAD remains available.",
+        )
+    if status.ready:
+        detail = status.label
+        if status.model:
+            detail += f" ({status.model})"
+        return _ok("AI Provider", detail)
+    if status.provider == "ollama":
+        if status.state == "server_unavailable":
+            return _warn(
+                "AI Provider",
+                "Ollama server unavailable",
+                f"Start Ollama and verify it responds at {status.endpoint}.",
+            )
+        if status.state == "model_unavailable":
+            return _warn(
+                "AI Provider",
+                f"Ollama model missing: {status.model}",
+                f"Pull a local model: ollama pull {status.model}",
+            )
+        return _warn("AI Provider", status.message, "See docs/local-ai.md for local AI setup.")
+    return _warn(
+        "AI Provider",
+        status.message,
+        "Add OPENAI_API_KEY to .env, select Ollama, or choose disabled/manual mode.",
+    )
+
+
 def check_env_file() -> CheckResult:
     if paths.ENV_PATH.exists():
         return _ok(".env", paths.relative(paths.ENV_PATH))
@@ -310,9 +346,11 @@ def run_doctor(
         check_writable("runtime/", paths.RUNTIME_DIR),
         check_databases(),
         check_env_file(),
-        check_openai_key(),
+        check_ai_provider(),
         check_mcp_config(),
     ]
+    if ai_provider_config().provider == "openai":
+        results.insert(-1, check_openai_key())
     if include_ports:
         results.append(check_port("Backend", backend_port, host))
         results.append(check_port("Frontend", frontend_port, host))

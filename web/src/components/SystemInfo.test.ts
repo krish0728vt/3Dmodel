@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { aiStatusLabel, systemInfoRows } from "./SystemInfo";
-import type { VersionResponse } from "../types/api";
+import { aiStatusLabel, providerStateLabel, systemInfoRows } from "./SystemInfo";
+import type { AIProviderStatus, VersionResponse } from "../types/api";
 
 const version: VersionResponse = {
   app_version: "0.19.0",
@@ -9,7 +9,24 @@ const version: VersionResponse = {
   build: "4e90c94",
   python_version: "3.11.9",
   cad_engine: "CadQuery 2.8.0",
-  ai_configured: true
+  ai_configured: true,
+  ai_provider: "ollama",
+  ai_provider_label: "Local AI / Ollama",
+  ai_model: "qwen2.5-coder:7b",
+  ai_status: "ready"
+};
+
+const ollamaReady: AIProviderStatus = {
+  provider: "ollama",
+  label: "Local AI / Ollama",
+  state: "ready",
+  ready: true,
+  model: "qwen2.5-coder:7b",
+  endpoint: "http://127.0.0.1:11434",
+  configured: true,
+  message: "Ready",
+  available_models: ["qwen2.5-coder:7b"],
+  nonlocal_endpoint_warning: false
 };
 
 function rowValue(rows: ReturnType<typeof systemInfoRows>, label: string): string | undefined {
@@ -67,11 +84,18 @@ describe("systemInfoRows", () => {
   });
 
   it("surfaces the AI status as its own row", () => {
-    const configured = systemInfoRows(version, true, "production");
-    expect(rowValue(configured, "AI parsing")).toBe("CONFIGURED");
+    const configured = systemInfoRows(version, true, "production", ollamaReady);
+    expect(rowValue(configured, "AI provider")).toBe("Local AI / Ollama");
+    expect(rowValue(configured, "AI model")).toBe("qwen2.5-coder:7b");
+    expect(rowValue(configured, "AI status")).toBe("READY");
 
     const unconfigured = systemInfoRows({ ...version, ai_configured: false }, true, "production");
-    expect(rowValue(unconfigured, "AI parsing")).toBe("AI NOT CONFIGURED");
+    expect(rowValue(unconfigured, "AI status")).toBe("AI NOT CONFIGURED");
+  });
+
+  it("summarizes provider-specific unavailable states", () => {
+    expect(providerStateLabel({ ...ollamaReady, ready: false, state: "server_unavailable" })).toBe("OLLAMA NOT RUNNING");
+    expect(providerStateLabel({ ...ollamaReady, ready: false, state: "model_unavailable" })).toBe("MODEL NOT AVAILABLE");
   });
 
   it("never renders an undefined or null value", () => {
@@ -98,7 +122,9 @@ describe("systemInfoRows", () => {
       "Schema",
       "Python",
       "Frontend build",
-      "AI parsing"
+      "AI provider",
+      "AI model",
+      "AI status"
     ]);
   });
 });

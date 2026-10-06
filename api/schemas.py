@@ -36,6 +36,10 @@ class VersionResponse(BaseModel):
     python_version: str
     cad_engine: str
     ai_configured: bool
+    ai_provider: str = "none"
+    ai_provider_label: str = "AI Disabled"
+    ai_model: str | None = None
+    ai_status: str = "disabled"
 
 
 class GenerateRequest(BaseModel):

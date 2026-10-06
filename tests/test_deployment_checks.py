@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+from ai.providers.models import AIProviderStatus
 from deployment import checks
 from deployment.models import CheckStatus, DoctorReport
 
@@ -289,6 +290,45 @@ def test_doctor_warns_for_a_placeholder_key(monkeypatch):
     monkeypatch.setattr("dotenv.load_dotenv", lambda *_a, **_k: False)
     monkeypatch.setenv("OPENAI_API_KEY", "your_api_key_here")
     assert checks.check_openai_key().status is CheckStatus.WARN
+
+
+def test_ai_provider_check_reports_ollama_model_status(monkeypatch):
+    monkeypatch.setattr(
+        checks,
+        "provider_status",
+        lambda: AIProviderStatus(
+            provider="ollama",
+            label="Local AI / Ollama",
+            state="model_unavailable",
+            ready=False,
+            configured=True,
+            model="qwen2.5-coder:7b",
+            endpoint="http://127.0.0.1:11434",
+            message="Model is not installed.",
+        ),
+    )
+
+    result = checks.check_ai_provider()
+
+    assert result.status is CheckStatus.WARN
+    assert result.detail == "Ollama model missing: qwen2.5-coder:7b"
+    assert result.remedy and "ollama pull qwen2.5-coder:7b" in result.remedy
+
+
+def test_doctor_only_checks_openai_key_when_openai_selected(monkeypatch, tmp_path):
+    monkeypatch.setattr("dotenv.load_dotenv", lambda *_a, **_k: False)
+    monkeypatch.setenv("SHAH_AI_PROVIDER", "ollama")
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    monkeypatch.setattr(checks, "check_ai_provider", lambda: checks._warn("AI Provider", "Ollama offline"))
+    monkeypatch.setattr(checks.paths, "DATA_DIR", tmp_path / "data")
+    monkeypatch.setattr(checks.paths, "OUTPUTS_DIR", tmp_path / "outputs")
+    monkeypatch.setattr(checks.paths, "RUNTIME_DIR", tmp_path / "runtime")
+    monkeypatch.setattr(checks.paths, "DATABASE_FILES", ())
+
+    names = [result.name for result in checks.run_doctor(include_ports=False, include_frontend=False).results]
+
+    assert "AI Provider" in names
+    assert "OPENAI_API_KEY" not in names
 
 
 def test_env_example_ships_a_blank_key():

@@ -3,6 +3,7 @@ from __future__ import annotations
 from pydantic import ValidationError
 
 from ai.parser import PromptParserError, UnsupportedPartError
+from ai.providers.errors import AIProviderTimeoutError, AIProviderUnavailableError, MalformedAIResponseError
 from assemblies.validation import AssemblyValidationError
 from cad.operation_executor import OperationExecutionError
 from cad.operation_validator import OperationValidationError
@@ -22,6 +23,14 @@ def classify_failure(exc: BaseException) -> FailureCategory:
         return FailureCategory.SCHEMA_ERROR
     if isinstance(exc, UnsupportedPartError):
         return FailureCategory.UNSUPPORTED_PART
+    if isinstance(exc, AIProviderTimeoutError):
+        return FailureCategory.AI_TIMEOUT
+    if isinstance(exc, MalformedAIResponseError):
+        if "validation" in message or "schema" in message:
+            return FailureCategory.AI_SCHEMA_FAILURE
+        return FailureCategory.AI_INVALID_JSON
+    if isinstance(exc, AIProviderUnavailableError):
+        return FailureCategory.AI_PROVIDER_UNAVAILABLE
     if isinstance(exc, PromptParserError):
         return FailureCategory.PARSER_FAILURE
     if isinstance(exc, ParametricResolutionError):
