@@ -2,7 +2,7 @@
 # against; Dependabot proposes upgrades and CI gates them.
 cadquery>=2.8
 fastapi>=0.141
-openai>=2.0
+openai>=3.19.2
 pydantic>=2.13
 python-dotenv>=1.2
 uvicorn>=0.54
