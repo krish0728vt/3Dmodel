@@ -21,7 +21,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install system CAD dependencies
         run: |
           sudo apt-get update
@@ -59,7 +59,7 @@ jobs:
         working-directory: web
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
@@ -83,7 +83,7 @@ jobs:
       PYTHONUNBUFFERED: "1"
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Install system CAD dependencies
         run: |
           sudo apt-get update
@@ -117,7 +117,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
